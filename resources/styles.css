@@ -1,0 +1,22 @@
+.email-field {
+    -fx-padding: 8;
+    -fx-border-color: orange;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+
+.login-btn {
+    -fx-background-color: linear-gradient(to right, #00c6ff, #ffcc70);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 20px;
+    -fx-padding: 5 30;
+    -fx-background-radius: 20;
+    -fx-background-insets: 0;
+    -fx-pref-width: 250px;
+    -fx-pref-height: 30px;
+    -fx-border-color: #ffffff;     
+    -fx-border-width: 8px;        
+    -fx-border-radius: 12;
+    -fx-border-insets: 0;
+}

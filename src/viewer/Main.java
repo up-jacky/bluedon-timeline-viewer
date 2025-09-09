@@ -25,10 +25,17 @@ public class Main extends Application {
 
     public void showHomePage(String username) {
         HomePage homePage = new HomePage(this, username);
+        Scene homeScene = homePage.getView();  // already a Scene
+        primaryStage.setScene(homeScene);
+        primaryStage.setTitle("Bluedon Timeline - Home");
+    }
+    
+    /* public void showHomePage(String username) {
+        HomePage homePage = new HomePage(this, username);
         Scene homeScene = new Scene(homePage.getView(),1000, 600);
         primaryStage.setTitle("Bluedon Timeline Viewer - Home");
         primaryStage.setScene(homeScene);
-    }
+    } */
 
     public static void main(String[] args) {
         launch(args);

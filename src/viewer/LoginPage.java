@@ -1,5 +1,6 @@
-package bluedon.timeline.viewer;
+package viewer;
 
+import application.Main;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;

@@ -34,7 +34,6 @@ public class HomePage extends BorderPane {
         setLeft(buildSidebar());
         setCenter(buildPostsArea());
 
-        // Load posts from CSV in resources
         loadPostsFromCSV("/posts.csv");
 
         refreshPosts();

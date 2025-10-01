@@ -1,4 +1,5 @@
 # made this lang because I code on powershell HAHAHAHA for compile + running without IDE 
+
 $JAVA_FX = "$env:USERPROFILE\openjfx-17.0.16_windows-x64_bin-sdk\javafx-sdk-17.0.16"
 $SRC = "src"
 $BIN = "bin"

@@ -44,7 +44,7 @@
 }
 
 .sidebar .button.active {
-    -fx-background-color: #4caf50; /* green when active */
+    -fx-background-color: #4caf50;
 }
 
 .post-card {
@@ -75,7 +75,7 @@
 
 
 .avatar {
-    -fx-fill: lightgray;   /* Default placeholder color */
-    -fx-stroke: #ddd;      /* Optional subtle border */
+    -fx-fill: lightgray;   
+    -fx-stroke: #ddd;     
     -fx-stroke-width: 1;
 }

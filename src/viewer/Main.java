@@ -27,7 +27,7 @@ public class Main extends Application {
         HomePage homePage = new HomePage(this, username);
         Scene homeScene = homePage.getView();  // already a Scene
         primaryStage.setScene(homeScene);
-        primaryStage.setTitle("Bluedon Timeline - Home");
+        primaryStage.setTitle("Bluedon");
     }
     
     /* public void showHomePage(String username) {

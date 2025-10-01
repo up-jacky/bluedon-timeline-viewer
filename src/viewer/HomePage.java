@@ -59,7 +59,7 @@ public class HomePage extends BorderPane {
         logo.setFitWidth(150);
         logo.setPreserveRatio(true);
 
-        Button blueskyBtn = new Button("Bluesky Emails");
+        Button blueskyBtn = new Button("Bluesky Posts");
         blueskyBtn.getStyleClass().add("active");
         blueskyBtn.setOnAction(e -> {
             showBluesky = !showBluesky;
@@ -71,7 +71,7 @@ public class HomePage extends BorderPane {
             refreshPosts();
         });
 
-        Button mastodonBtn = new Button("Mastodon Emails");
+        Button mastodonBtn = new Button("Mastodon Posts");
         mastodonBtn.getStyleClass().add("active");
         mastodonBtn.setOnAction(e -> {
             showMastodon = !showMastodon;

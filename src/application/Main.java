@@ -1,8 +1,10 @@
-package bluedon.timeline.viewer;
+package application;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import viewer.HomePage;
+import viewer.LoginPage;
 
 public class Main extends Application {
 

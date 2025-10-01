@@ -13,11 +13,10 @@ import javafx.scene.layout.VBox;
 
 public class LoginPage {
 
-    private VBox layout;
+    private final VBox layout;
 
     public LoginPage(Main app) {
-
-        Image logo = new Image("file:resources/bluedon.png");
+        Image logo = new Image(getClass().getResource("/bluedon.png").toExternalForm());
         ImageView logoView = new ImageView(logo);
         logoView.setFitHeight(100);
         logoView.setPreserveRatio(true);
@@ -27,7 +26,16 @@ public class LoginPage {
         blueskyField.setPromptText("Enter Bluesky Email");
         blueskyField.getStyleClass().add("email-field");
 
-        VBox blueskyBox = new VBox(5, blueskyLabel, blueskyField);
+        Button blueskyLoginBtn = new Button("LOG IN");
+        blueskyLoginBtn.getStyleClass().add("login-btn");
+        blueskyLoginBtn.setOnAction(e -> {
+            String email = blueskyField.getText().trim();
+            if (!email.isEmpty()) {
+                app.showHomePage("BLUESKY", email);
+            }
+        });
+
+        VBox blueskyBox = new VBox(10, blueskyLabel, blueskyField, blueskyLoginBtn);
         blueskyBox.setAlignment(Pos.CENTER);
         blueskyBox.getStyleClass().add("input-box");
 
@@ -36,24 +44,30 @@ public class LoginPage {
         mastodonField.setPromptText("Enter Mastodon Email");
         mastodonField.getStyleClass().add("email-field");
 
-        VBox mastodonBox = new VBox(5, mastodonLabel, mastodonField);
+        Button mastodonLoginBtn = new Button("LOG IN");
+        mastodonLoginBtn.getStyleClass().add("login-btn");
+        mastodonLoginBtn.setOnAction(e -> {
+            String email = mastodonField.getText().trim();
+            if (!email.isEmpty()) {
+                app.showHomePage("MASTODON", email);
+            }
+        });
+
+        VBox mastodonBox = new VBox(10, mastodonLabel, mastodonField, mastodonLoginBtn);
         mastodonBox.setAlignment(Pos.CENTER);
         mastodonBox.getStyleClass().add("input-box");
 
-        HBox emailsBox = new HBox(30, blueskyBox, mastodonBox);
-        emailsBox.setAlignment(Pos.CENTER);
+        HBox accountsBox = new HBox(40, blueskyBox, mastodonBox);
+        accountsBox.setAlignment(Pos.CENTER);
 
-        Button loginBtn = new Button("LOG IN");
-        loginBtn.getStyleClass().add("login-btn");
-        loginBtn.setOnAction(e -> app.showHomePage(blueskyField.getText()));
-
-        layout = new VBox(40, logoView, emailsBox, loginBtn);
+        layout = new VBox(50, logoView, accountsBox);
         layout.setAlignment(Pos.CENTER);
         layout.setPadding(new Insets(40));
-        layout.getStyleClass().add("login-root"); 
+        layout.getStyleClass().add("login-root");
     }
 
     public VBox getView() {
         return layout;
     }
 }
+

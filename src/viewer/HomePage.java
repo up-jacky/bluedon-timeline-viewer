@@ -2,9 +2,7 @@ package viewer;
 
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
 import java.io.BufferedReader;
@@ -21,23 +19,44 @@ import javafx.scene.image.ImageView;
 public class HomePage extends BorderPane {
 
     private final Main app;
-    private final String username;
+    private final String accountType;
+    private final String email;
 
     private boolean showBluesky = true;
     private boolean showMastodon = true;
+    private boolean blueskyLoggedIn = false;
+    private boolean mastodonLoggedIn = false;
+
+    private String blueskyUser;
+    private String mastodonUser;
 
     private VBox postsBox = new VBox(15);
     private List<Post> allPosts = new ArrayList<>();
 
-    public HomePage(Main app, String username) {
+    private Button blueskyLoginBtn;
+    private Button mastodonLoginBtn;
+    private Button blueskyFilterBtn;
+    private Button mastodonFilterBtn;
+    private Label blueskyUserLabel;
+    private Label mastodonUserLabel;
+
+    public HomePage(Main app, String accountType, String email) {
         this.app = app;
-        this.username = username;
+        this.accountType = accountType;
+        this.email = email;
+
+        if ("Bluesky".equalsIgnoreCase(accountType)) {
+            blueskyLoggedIn = true;
+            blueskyUser = email;
+        } else if ("Mastodon".equalsIgnoreCase(accountType)) {
+            mastodonLoggedIn = true;
+            mastodonUser = email;
+        }
 
         setLeft(buildSidebar());
         setCenter(buildPostsArea());
 
         loadPostsFromCSV("/posts.csv");
-
         refreshPosts();
     }
 
@@ -46,73 +65,160 @@ public class HomePage extends BorderPane {
         sidebar.getStyleClass().add("sidebar");
         sidebar.setPrefWidth(250);
 
-        /* Image logo = new Image("file:resources/bluedon.png");
-        ImageView logoView = new ImageView(logo);
-        logoView.setFitHeight(100);
-        logoView.setPreserveRatio(true); 
-        Label logo = new Label("Bluedon");
-        logo.getStyleClass().add("logo");*/
-
         ImageView logo = new ImageView(
             new Image(getClass().getResource("/bluedon.png").toExternalForm())
         );
-
         logo.setFitWidth(150);
         logo.setPreserveRatio(true);
 
-        Button blueskyBtn = new Button("Bluesky Posts");
-        blueskyBtn.getStyleClass().add("active");
-        blueskyBtn.setOnAction(e -> {
+        blueskyFilterBtn = new Button("Bluesky Posts");
+        blueskyFilterBtn.getStyleClass().add("active");
+        blueskyFilterBtn.setOnAction(e -> {
             showBluesky = !showBluesky;
-            if (showBluesky) {
-                blueskyBtn.getStyleClass().add("active");
-            } else {
-                blueskyBtn.getStyleClass().remove("active");
-            }
+            updateFilterButtonStyle(blueskyFilterBtn, showBluesky);
             refreshPosts();
         });
 
-        Button mastodonBtn = new Button("Mastodon Posts");
-        mastodonBtn.getStyleClass().add("active");
-        mastodonBtn.setOnAction(e -> {
+        mastodonFilterBtn = new Button("Mastodon Posts");
+        mastodonFilterBtn.getStyleClass().add("active");
+        mastodonFilterBtn.setOnAction(e -> {
             showMastodon = !showMastodon;
-            if (showMastodon) {
-                mastodonBtn.getStyleClass().add("active");
-            } else {
-                mastodonBtn.getStyleClass().remove("active");
-            }
+            updateFilterButtonStyle(mastodonFilterBtn, showMastodon);
             refreshPosts();
         });
-        
+
+        blueskyLoginBtn = new Button();
+        mastodonLoginBtn = new Button();
+        blueskyUserLabel = new Label();
+        mastodonUserLabel = new Label();
+
+        updateLoginButtons();
 
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
-        Button logoutBtn = new Button("Log Out All Accounts");
-        logoutBtn.setOnAction(e -> app.showLoginPage());
+        Button refreshBtn = new Button("Refresh Posts");
+        refreshBtn.setOnAction(e -> refreshPosts());
 
-        sidebar.getChildren().addAll(logo, blueskyBtn, mastodonBtn, spacer, logoutBtn);
+        Button logoutAllBtn = new Button("Log Out All Accounts");
+        logoutAllBtn.setOnAction(e -> {
+            blueskyLoggedIn = false;
+            mastodonLoggedIn = false;
+            blueskyUser = null;
+            mastodonUser = null;
+            updateLoginButtons();
+            refreshPosts();
+        });
+
+        sidebar.getChildren().addAll(
+            logo,
+            blueskyFilterBtn, blueskyLoginBtn, blueskyUserLabel,
+            mastodonFilterBtn, mastodonLoginBtn, mastodonUserLabel,
+            spacer,
+            refreshBtn,
+            logoutAllBtn
+        );
+
         return sidebar;
     }
 
+    private void updateFilterButtonStyle(Button btn, boolean active) {
+        if (active) {
+            if (!btn.getStyleClass().contains("active")) {
+                btn.getStyleClass().add("active");
+            }
+        } else {
+            btn.getStyleClass().remove("active");
+        }
+    }
+
+    private void updateLoginButtons() {
+        if (blueskyLoggedIn) {
+            blueskyLoginBtn.setText("Log Out Bluesky");
+            blueskyLoginBtn.setOnAction(e -> {
+                blueskyLoggedIn = false;
+                blueskyUser = null;
+                updateLoginButtons();
+                refreshPosts();
+            });
+            blueskyUserLabel.setText("Logged in as @" + blueskyUser);
+        } else {
+            blueskyLoginBtn.setText("Log In Bluesky");
+            blueskyLoginBtn.setOnAction(e -> {
+                String user = showLoginDialog("Bluesky");
+                if (user != null) {
+                    blueskyLoggedIn = true;
+                    blueskyUser = user;
+                    updateLoginButtons();
+                    refreshPosts();
+                }
+            });
+            blueskyUserLabel.setText("");
+        }
+
+        if (mastodonLoggedIn) {
+            mastodonLoginBtn.setText("Log Out Mastodon");
+            mastodonLoginBtn.setOnAction(e -> {
+                mastodonLoggedIn = false;
+                mastodonUser = null;
+                updateLoginButtons();
+                refreshPosts();
+            });
+            mastodonUserLabel.setText("Logged in as @" + mastodonUser);
+        } else {
+            mastodonLoginBtn.setText("Log In Mastodon");
+            mastodonLoginBtn.setOnAction(e -> {
+                String user = showLoginDialog("Mastodon");
+                if (user != null) {
+                    mastodonLoggedIn = true;
+                    mastodonUser = user;
+                    updateLoginButtons();
+                    refreshPosts();
+                }
+            });
+            mastodonUserLabel.setText("");
+        }
+    }
+
+    private String showLoginDialog(String serviceName) {
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Log In to " + serviceName);
+
+        Label userLabel = new Label("Username:");
+        TextField userField = new TextField();
+        Label passLabel = new Label("Password:");
+        PasswordField passField = new PasswordField();
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20));
+        grid.add(userLabel, 0, 0);
+        grid.add(userField, 1, 0);
+        grid.add(passLabel, 0, 1);
+        grid.add(passField, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        ButtonType loginButtonType = new ButtonType("Log In", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
+
+        dialog.setResultConverter(button -> {
+            if (button == loginButtonType) {
+                return userField.getText().isBlank() ? null : userField.getText();
+            }
+            return null;
+        });
+
+        return dialog.showAndWait().orElse(null);
+    }
+
     private ScrollPane buildPostsArea() {
-      refreshPosts();
         postsBox.setPadding(new Insets(20));
         ScrollPane scrollPane = new ScrollPane(postsBox);
         scrollPane.setFitToWidth(true);
         return scrollPane;
     }
-
-    /* private void refreshPosts() {
-        postsBox.getChildren().clear();
-
-        for (Post post : allPosts) {
-            if ((post.type == AccountType.BLUESKY && showBluesky) ||
-                (post.type == AccountType.MASTODON && showMastodon)) {
-                postsBox.getChildren().add(createPostCard(post));
-            }
-        }
-    } */   
 
     private void refreshPosts() {
         postsBox.getChildren().clear();
@@ -121,10 +227,10 @@ public class HomePage extends BorderPane {
             boolean show = false;
 
             if (post.type == AccountType.BLUESKY && showBluesky) {
-                show = true;
+                show = blueskyLoggedIn;
             }
             if (post.type == AccountType.MASTODON && showMastodon) {
-                show = true;
+                show = mastodonLoggedIn;
             }
 
             if (show) {
@@ -168,7 +274,7 @@ public class HomePage extends BorderPane {
              BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
 
             String line;
-            reader.readLine(); 
+            reader.readLine();
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",", 4);
                 if (parts.length == 4) {

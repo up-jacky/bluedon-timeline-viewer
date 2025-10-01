@@ -10,7 +10,7 @@
 }
 
 .login-btn {
-    -fx-background-color: linear-gradient(to right, #00c6ff, #ffcc70);
+    -fx-background-color: linear-gradient(to right, #279af1, #8645F6);
     -fx-text-fill: white;
     -fx-font-weight: bold;
     -fx-font-size: 20px;
@@ -34,7 +34,7 @@
 /*.logo {
     -fx-font-size: 28px;
     -fx-font-weight: bold;
-    -fx-text-fill: linear-gradient(#007BFF, #FF7F50);
+    -fx-text-fill: linear-gradient(#279af1, #8645f6);
 }*/
 
 .sidebar .button {
@@ -66,11 +66,11 @@
 }
 
 .bluesky-marker {
-    -fx-fill: deepskyblue;
+    -fx-fill: #279af1;
 }
 
 .mastodon-marker {
-    -fx-fill: orange;
+    -fx-fill: #8645f6;
 }
 
 

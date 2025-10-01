@@ -23,23 +23,17 @@ public class Main extends Application {
         Scene loginScene = new Scene(loginPage.getView(), 1000, 600);
         loginScene.getStylesheets().add("file:resources/styles.css");
         primaryStage.setScene(loginScene);
+        primaryStage.setTitle("Bluedon Login");
     }
 
-    public void showHomePage(String username) {
-        HomePage homePage = new HomePage(this, username);
-        Scene homeScene = homePage.getView();  // already a Scene
+    public void showHomePage(String accountType, String email) {
+        HomePage homePage = new HomePage(this, accountType, email);
+        Scene homeScene = homePage.getView();
         primaryStage.setScene(homeScene);
-        primaryStage.setTitle("Bluedon");
     }
-    
-    /* public void showHomePage(String username) {
-        HomePage homePage = new HomePage(this, username);
-        Scene homeScene = new Scene(homePage.getView(),1000, 600);
-        primaryStage.setTitle("Bluedon Timeline Viewer - Home");
-        primaryStage.setScene(homeScene);
-    } */
 
     public static void main(String[] args) {
         launch(args);
     }
 }
+

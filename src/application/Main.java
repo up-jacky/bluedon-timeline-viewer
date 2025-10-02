@@ -35,6 +35,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import oauthServices.*;
+import oauthServices.DPoPUtil.JWKGenerator;
 import viewer.HomePage;
 import viewer.LoginPage;
 
@@ -160,14 +161,19 @@ public class Main extends Application {
     KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
     kpg.initialize(256);
     KeyPair dpopKeyPair = kpg.generateKeyPair();
-    ECPublicKey pubKey = (ECPublicKey)dpopKeyPair.getPublic();
-    ECPrivateKey privKey = (ECPrivateKey)dpopKeyPair.getPrivate();
-    ECKey privateECKey = new ECKey.Builder(Curve.P_256, pubKey)
-                            .privateKey(privKey)
-                            .build();
-    ECKey publicJWK = privateECKey.toPublicJWK();
+    //JWKGenerator.main(new String[]{}); //generate jwk for the metajson
+    // try {
+    // ECPublicKey pubKey = (ECPublicKey)dpopKeyPair.getPublic();
+    // ECPrivateKey privKey = (ECPrivateKey)dpopKeyPair.getPrivate();
+    // ECKey privateECKey = new ECKey.Builder(Curve.P_256, pubKey)
+    //                         .privateKey(privKey)
+    //                         .build();
+    // ECKey publicJWK = privateECKey.toPublicJWK();
 
-    System.out.println("DPoP keypair generated");
+    // System.out.println("DPoP keypair generated");
+    // }catch (Exception var4) {
+    //         throw new RuntimeException("DPoP init failed", var4);
+    //      }
 
 
     AuthSession session = new AuthSession(codeVerifier);
@@ -190,7 +196,7 @@ public class Main extends Application {
     // 5. Send PAR request with DPoP
     Map<String, String> headers = new HashMap<>();
     headers.put("Content-Type", "application/x-www-form-urlencoded");
-    headers.put("DPoP", DPoPUtil.buildDPoP("POST", parEndpoint, null, publicJWK));
+    headers.put("DPoP", DPoPUtil.buildDPoP("POST", parEndpoint, null, dpopKeyPair));
     System.out.println("Header: " + headers);
     
 
@@ -205,7 +211,7 @@ public class Main extends Application {
         if (newNonce != null && !newNonce.isEmpty()) {
             System.out.println("Retried 401 with Nonce");
             session.dpopNonce = newNonce;
-            headers.put("DPoP", DPoPUtil.buildDPoP("POST", parEndpoint, session.dpopNonce, publicJWK));
+            headers.put("DPoP", DPoPUtil.buildDPoP("POST", parEndpoint, session.dpopNonce, dpopKeyPair));
             parResponse = HttpUtil.postFormWithResponse(parEndpoint, headers, parBody);
         }
     }
@@ -242,7 +248,7 @@ public class Main extends Application {
 
     headers.clear();
     headers.put("Content-Type", "application/x-www-form-urlencoded");
-    headers.put("DPoP", DPoPUtil.buildDPoP("POST", parEndpoint, session.dpopNonce, publicJWK));
+    headers.put("DPoP", DPoPUtil.buildDPoP("POST", parEndpoint, session.dpopNonce, dpopKeyPair));
 
 
     HttpResponse<String> tokenResponse = HttpUtil.postFormWithResponse(tokenEndpoint, headers, tokenBody);

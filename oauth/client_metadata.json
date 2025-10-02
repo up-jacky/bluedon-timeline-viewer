@@ -12,8 +12,8 @@
       {
         "kty": "EC",
         "crv": "P-256",
-        "x": "base64url(x-coordinate)",
-        "y": "base64url(y-coordinate)"
+        "x": "TMLFFvGeABQtnPfncbr8gNSSEu7a15bY6SYOu4Ek84w",
+        "y": "V50R6y8ZQfZXRkzg8L6IhiVnJ1ixWc5eyKHeF10wLQY"
       }
     ]
   }

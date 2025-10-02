@@ -79,3 +79,12 @@
     -fx-stroke: #ddd;     
     -fx-stroke-width: 1;
 }
+
+.error-box {
+    -fx-padding: 10;
+}
+
+.error-message {
+    -fx-text-fill: red;
+    -fx-font-size: 12px;
+}

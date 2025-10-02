@@ -19,8 +19,6 @@ import javafx.scene.image.ImageView;
 public class HomePage extends BorderPane {
 
     private final Main app;
-    private final String accountType;
-    private final String email;
 
     private boolean showBluesky = true;
     private boolean showMastodon = true;
@@ -31,6 +29,7 @@ public class HomePage extends BorderPane {
     private String mastodonUser;
 
     private VBox postsBox = new VBox(15);
+    private VBox errorBox = new VBox(5);
     private List<Post> allPosts = new ArrayList<>();
 
     private Button blueskyLoginBtn;
@@ -40,17 +39,19 @@ public class HomePage extends BorderPane {
     private Label blueskyUserLabel;
     private Label mastodonUserLabel;
 
-    public HomePage(Main app, String accountType, String email) {
+    /**
+     * Updated constructor: accepts Bluesky and Mastodon emails.
+     */
+    public HomePage(Main app, String blueskyEmail, String mastodonEmail) {
         this.app = app;
-        this.accountType = accountType;
-        this.email = email;
 
-        if ("Bluesky".equalsIgnoreCase(accountType)) {
+        if (blueskyEmail != null && !blueskyEmail.isBlank()) {
             blueskyLoggedIn = true;
-            blueskyUser = email;
-        } else if ("Mastodon".equalsIgnoreCase(accountType)) {
+            blueskyUser = blueskyEmail;
+        }
+        if (mastodonEmail != null && !mastodonEmail.isBlank()) {
             mastodonLoggedIn = true;
-            mastodonUser = email;
+            mastodonUser = mastodonEmail;
         }
 
         setLeft(buildSidebar());
@@ -97,17 +98,14 @@ public class HomePage extends BorderPane {
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
+        errorBox.getStyleClass().add("error-box");
+
         Button refreshBtn = new Button("Refresh Posts");
         refreshBtn.setOnAction(e -> refreshPosts());
 
         Button logoutAllBtn = new Button("Log Out All Accounts");
         logoutAllBtn.setOnAction(e -> {
-            blueskyLoggedIn = false;
-            mastodonLoggedIn = false;
-            blueskyUser = null;
-            mastodonUser = null;
-            updateLoginButtons();
-            refreshPosts();
+            app.showLoginPage();  
         });
 
         sidebar.getChildren().addAll(
@@ -115,11 +113,18 @@ public class HomePage extends BorderPane {
             blueskyFilterBtn, blueskyLoginBtn, blueskyUserLabel,
             mastodonFilterBtn, mastodonLoginBtn, mastodonUserLabel,
             spacer,
+            errorBox,
             refreshBtn,
             logoutAllBtn
         );
 
         return sidebar;
+    }
+
+    private void addErrorMessage(String msg) {
+        Label errorLabel = new Label(msg);
+        errorLabel.getStyleClass().add("error-message");
+        errorBox.getChildren().add(errorLabel);
     }
 
     private void updateFilterButtonStyle(Button btn, boolean active) {
@@ -151,6 +156,8 @@ public class HomePage extends BorderPane {
                     blueskyUser = user;
                     updateLoginButtons();
                     refreshPosts();
+                } else {
+                    addErrorMessage("Input cannot be empty.");
                 }
             });
             blueskyUserLabel.setText("");
@@ -174,6 +181,8 @@ public class HomePage extends BorderPane {
                     mastodonUser = user;
                     updateLoginButtons();
                     refreshPosts();
+                } else {
+                    addErrorMessage("Input cannot be empty.");
                 }
             });
             mastodonUserLabel.setText("");
@@ -222,6 +231,7 @@ public class HomePage extends BorderPane {
 
     private void refreshPosts() {
         postsBox.getChildren().clear();
+        errorBox.getChildren().clear();
 
         for (Post post : allPosts) {
             boolean show = false;
@@ -274,7 +284,7 @@ public class HomePage extends BorderPane {
              BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
 
             String line;
-            reader.readLine();
+            reader.readLine(); // skip header
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",", 4);
                 if (parts.length == 4) {
@@ -286,6 +296,7 @@ public class HomePage extends BorderPane {
                 }
             }
         } catch (IOException | NullPointerException e) {
+            addErrorMessage("Error loading CSV: " + e.getMessage());
             System.err.println("Error loading CSV: " + e.getMessage());
         }
     }

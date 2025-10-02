@@ -26,14 +26,14 @@ public class Main extends Application {
         primaryStage.setTitle("Bluedon Login");
     }
 
-    public void showHomePage(String accountType, String email) {
-        HomePage homePage = new HomePage(this, accountType, email);
+    public void showHomePage(String blueskyEmail, String mastodonEmail) {
+        HomePage homePage = new HomePage(this, blueskyEmail, mastodonEmail);
         Scene homeScene = homePage.getView();
         primaryStage.setScene(homeScene);
+        primaryStage.setTitle("Bluedon Home");
     }
 
     public static void main(String[] args) {
         launch(args);
     }
 }
-

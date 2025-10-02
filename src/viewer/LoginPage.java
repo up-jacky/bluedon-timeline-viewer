@@ -26,32 +26,38 @@ public class LoginPage {
         blueskyField.setPromptText("Enter Bluesky Email");
         blueskyField.getStyleClass().add("email-field");
 
+        Label mastodonLabel = new Label("Mastodon Email");
+        TextField mastodonField = new TextField();
+        mastodonField.setPromptText("Enter Mastodon Email");
+        mastodonField.getStyleClass().add("email-field");
+
         Button blueskyLoginBtn = new Button("LOG IN");
         blueskyLoginBtn.getStyleClass().add("login-btn");
         blueskyLoginBtn.setOnAction(e -> {
-            String email = blueskyField.getText().trim();
-            if (!email.isEmpty()) {
-                app.showHomePage("BLUESKY", email);
+            String blueskyEmail = blueskyField.getText().trim();
+            String mastodonEmail = mastodonField.getText().trim();
+
+            if (!blueskyEmail.isEmpty() || !mastodonEmail.isEmpty()) {
+                app.showHomePage(blueskyEmail.isEmpty() ? null : blueskyEmail,
+                                 mastodonEmail.isEmpty() ? null : mastodonEmail);
+            }
+        });
+
+        Button mastodonLoginBtn = new Button("LOG IN");
+        mastodonLoginBtn.getStyleClass().add("login-btn");
+        mastodonLoginBtn.setOnAction(e -> {
+            String blueskyEmail = blueskyField.getText().trim();
+            String mastodonEmail = mastodonField.getText().trim();
+
+            if (!blueskyEmail.isEmpty() || !mastodonEmail.isEmpty()) {
+                app.showHomePage(blueskyEmail.isEmpty() ? null : blueskyEmail,
+                                 mastodonEmail.isEmpty() ? null : mastodonEmail);
             }
         });
 
         VBox blueskyBox = new VBox(10, blueskyLabel, blueskyField, blueskyLoginBtn);
         blueskyBox.setAlignment(Pos.CENTER);
         blueskyBox.getStyleClass().add("input-box");
-
-        Label mastodonLabel = new Label("Mastodon Email");
-        TextField mastodonField = new TextField();
-        mastodonField.setPromptText("Enter Mastodon Email");
-        mastodonField.getStyleClass().add("email-field");
-
-        Button mastodonLoginBtn = new Button("LOG IN");
-        mastodonLoginBtn.getStyleClass().add("login-btn");
-        mastodonLoginBtn.setOnAction(e -> {
-            String email = mastodonField.getText().trim();
-            if (!email.isEmpty()) {
-                app.showHomePage("MASTODON", email);
-            }
-        });
 
         VBox mastodonBox = new VBox(10, mastodonLabel, mastodonField, mastodonLoginBtn);
         mastodonBox.setAlignment(Pos.CENTER);

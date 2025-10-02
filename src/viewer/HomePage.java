@@ -38,9 +38,6 @@ public class HomePage extends BorderPane {
     private Label blueskyUserLabel;
     private Label mastodonUserLabel;
 
-    /**
-     * Updated constructor: accepts Bluesky and Mastodon emails.
-     */
     public HomePage(Main app, String blueskyEmail, String mastodonEmail) {
         this.app = app;
 
@@ -209,7 +206,7 @@ public class HomePage extends BorderPane {
         dialog.getDialogPane().setContent(grid);
 
         ButtonType loginButtonType = new ButtonType("Log In", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
+        dialog.getDialogPane().getButtonTypes().addAll(loginButtonType);
 
         dialog.setResultConverter(button -> {
             if (button == loginButtonType) {

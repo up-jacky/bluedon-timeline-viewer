@@ -45,6 +45,9 @@ import javafx.scene.web.WebEngine;
 import javafx.stage.Stage;
 
 import java.security.Signature;
+import java.security.interfaces.ECKey;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
@@ -144,6 +147,11 @@ public class Main extends Application {
     String authEndpoint = (String) meta.get("authorization_endpoint");
     String tokenEndpoint = (String) meta.get("token_endpoint");
 
+    System.out.println("PAR endpoint: " + parEndpoint);
+    System.out.println("Auth endpoint: " + authEndpoint);
+    System.out.println("Token endpoint: " + tokenEndpoint);
+
+
     // 2. Generate PKCE
     codeVerifier = PkceUtil.generateCodeVerifier();
     String codeChallenge = PkceUtil.generateCodeChallenge(codeVerifier);
@@ -151,7 +159,16 @@ public class Main extends Application {
     // 3. Generate DPoP key pair (EC P-256)
     KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
     kpg.initialize(256);
-    dpopKeyPair = kpg.generateKeyPair();
+    KeyPair dpopKeyPair = kpg.generateKeyPair();
+    ECPublicKey pubKey = (ECPublicKey)dpopKeyPair.getPublic();
+    ECPrivateKey privKey = (ECPrivateKey)dpopKeyPair.getPrivate();
+    ECKey privateECKey = new ECKey.Builder(Curve.P_256, pubKey)
+                            .privateKey(privKey)
+                            .build();
+    ECKey publicJWK = privateECKey.toPublicJWK();
+
+    System.out.println("DPoP keypair generated");
+
 
     AuthSession session = new AuthSession(codeVerifier);
 
@@ -166,25 +183,33 @@ public class Main extends Application {
         urlenc(state),
         urlenc(codeChallenge)
     );
+    System.out.println("PAR Body: " + parBody);
+    System.out.println("PAR endpoint: " + parEndpoint);
+
 
     // 5. Send PAR request with DPoP
     Map<String, String> headers = new HashMap<>();
     headers.put("Content-Type", "application/x-www-form-urlencoded");
-    headers.put("DPoP", DPoPUtil.buildDPoP("POST", parEndpoint, null));
+    headers.put("DPoP", DPoPUtil.buildDPoP("POST", parEndpoint, null, publicJWK));
+    System.out.println("Header: " + headers);
+    
 
     HttpResponse<String> parResponse = HttpUtil.postFormWithResponse(parEndpoint, headers, parBody);
+    System.out.println("ParResponse Statuscode: " + parResponse.statusCode());
 
     // 6. Retry if server requires a DPoP nonce
     if ((parResponse.statusCode() == 401 || parResponse.statusCode() == 400)
             && parResponse.body().contains("\"use_dpop_nonce\"")) {
         String newNonce = HttpUtil.extractDpopNonce(parResponse);
+        System.out.println("Retried 401");
         if (newNonce != null && !newNonce.isEmpty()) {
+            System.out.println("Retried 401 with Nonce");
             session.dpopNonce = newNonce;
-            headers.put("DPoP", DPoPUtil.buildDPoP("POST", parEndpoint, session.dpopNonce));
+            headers.put("DPoP", DPoPUtil.buildDPoP("POST", parEndpoint, session.dpopNonce, publicJWK));
             parResponse = HttpUtil.postFormWithResponse(parEndpoint, headers, parBody);
         }
     }
-
+    System.out.println("par response: " + parResponse);
     // 7. Extract request_uri from PAR response
     Map<String, Object> parJson = JsonUtil.fromJson(parResponse.body());
     String requestUri = (String) parJson.get("request_uri");
@@ -217,7 +242,8 @@ public class Main extends Application {
 
     headers.clear();
     headers.put("Content-Type", "application/x-www-form-urlencoded");
-    headers.put("DPoP", DPoPUtil.buildDPoP("POST", tokenEndpoint, session.dpopNonce));
+    headers.put("DPoP", DPoPUtil.buildDPoP("POST", parEndpoint, session.dpopNonce, publicJWK));
+
 
     HttpResponse<String> tokenResponse = HttpUtil.postFormWithResponse(tokenEndpoint, headers, tokenBody);
     String newNonce = HttpUtil.extractDpopNonce(tokenResponse);

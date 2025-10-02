@@ -6,5 +6,16 @@
   "grant_types": ["authorization_code", "refresh_token"],
   "response_types": ["code"],
   "scope": "atproto",
-  "token_endpoint_auth_method": "none"
+  "token_endpoint_auth_method": "none",
+   "jwks": {
+    "keys": [
+      {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "base64url(x-coordinate)",
+        "y": "base64url(y-coordinate)"
+      }
+    ]
+  }
+
 }

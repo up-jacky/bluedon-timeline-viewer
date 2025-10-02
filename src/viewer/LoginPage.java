@@ -56,7 +56,7 @@ public class LoginPage {
         loginBtn.setOnAction(e -> {
             Main.BlueskyOAuth oauth = new Main.BlueskyOAuth();
             try {
-                oauth.startOAuth("theowees.bsky.social"); // pass PDS origin
+                oauth.startOAuth("https://bsky.social"); // pass PDS origin
             } catch (Exception ex) {
                 ex.printStackTrace();
                 // optionally show an alert to the user

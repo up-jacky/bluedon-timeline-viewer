@@ -29,7 +29,6 @@ public class HomePage extends BorderPane {
     private String mastodonUser;
 
     private VBox postsBox = new VBox(15);
-    private VBox errorBox = new VBox(5);
     private List<Post> allPosts = new ArrayList<>();
 
     private Button blueskyLoginBtn;
@@ -98,8 +97,6 @@ public class HomePage extends BorderPane {
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
-        errorBox.getStyleClass().add("error-box");
-
         Button refreshBtn = new Button("Refresh Posts");
         refreshBtn.setOnAction(e -> refreshPosts());
 
@@ -113,7 +110,6 @@ public class HomePage extends BorderPane {
             blueskyFilterBtn, blueskyLoginBtn, blueskyUserLabel,
             mastodonFilterBtn, mastodonLoginBtn, mastodonUserLabel,
             spacer,
-            errorBox,
             refreshBtn,
             logoutAllBtn
         );
@@ -122,9 +118,12 @@ public class HomePage extends BorderPane {
     }
 
     private void addErrorMessage(String msg) {
-        Label errorLabel = new Label(msg);
-        errorLabel.getStyleClass().add("error-message");
-        errorBox.getChildren().add(errorLabel);
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(msg);
+
+        alert.showAndWait(); 
     }
 
     private void updateFilterButtonStyle(Button btn, boolean active) {
@@ -231,7 +230,6 @@ public class HomePage extends BorderPane {
 
     private void refreshPosts() {
         postsBox.getChildren().clear();
-        errorBox.getChildren().clear();
 
         for (Post post : allPosts) {
             boolean show = false;
@@ -284,7 +282,7 @@ public class HomePage extends BorderPane {
              BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
 
             String line;
-            reader.readLine(); // skip header
+            reader.readLine();
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",", 4);
                 if (parts.length == 4) {

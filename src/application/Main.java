@@ -176,7 +176,7 @@ public class Main extends Application {
     // KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
     // kpg.initialize(256);
     // KeyPair dpopKeyPair = kpg.generateKeyPair();
-    JWKGenerator.main(new String[]{}); //generate jwk for the metajson
+    //JWKGenerator.main(new String[]{}); //generate jwk for the metajson
     // try {
     // ECPublicKey pubKey = (ECPublicKey)dpopKeyPair.getPublic();
     // ECPrivateKey privKey = (ECPrivateKey)dpopKeyPair.getPrivate();
@@ -221,16 +221,18 @@ public class Main extends Application {
 
     // 6. Retry if server requires a DPoP nonce
     if ((parResponse.statusCode() == 401 || parResponse.statusCode() == 400)
-            && parResponse.body().contains("\"use_dpop_nonce\"")) {
-        String newNonce = HttpUtil.extractDpopNonce(parResponse);
-        System.out.println("Retried 401");
-        if (newNonce != null && !newNonce.isEmpty()) {
-            System.out.println("Retried 401 with Nonce");
-            session.dpopNonce = newNonce;
-            headers.put("DPoP", DPoPUtil.buildDPoP("POST", parEndpoint, session.dpopNonce, dpopKeyPair));
-            parResponse = HttpUtil.postFormWithResponse(parEndpoint, headers, parBody);
-        }
+        && parResponse.body().contains("\"use_dpop_nonce\"")) {
+    String newNonce = HttpUtil.extractDpopNonce(parResponse);
+    System.out.println("Retried 401");
+    if (newNonce != null && !newNonce.isEmpty()) {
+        System.out.println("Retried 401 with Nonce: " + newNonce);
+        session.dpopNonce = newNonce;
+        String dpopJwt = DPoPUtil.buildDPoP("POST", parEndpoint, session.dpopNonce, dpopKeyPair);
+        System.out.println("DPoP JWT with nonce: " + dpopJwt);
+        headers.put("DPoP", dpopJwt);
+        parResponse = HttpUtil.postFormWithResponse(parEndpoint, headers, parBody);
     }
+}
     System.out.println("par response: " + parResponse);
     // 7. Extract request_uri from PAR response
     Map<String, Object> parJson = JsonUtil.fromJson(parResponse.body());

@@ -33,12 +33,21 @@ public class DPoPUtil {
 
         JWTClaimsSet claimSet = claims.build();
 
+        // Build ECKey (JWK) from keyPair
+        ECPublicKey pubKey = (ECPublicKey) keyPair.getPublic();
+        ECPrivateKey privKey = (ECPrivateKey) keyPair.getPrivate();
+        com.nimbusds.jose.jwk.ECKey ecJWK = new com.nimbusds.jose.jwk.ECKey.Builder(
+                com.nimbusds.jose.jwk.Curve.P_256, pubKey)
+                .privateKey(privKey)
+                .build();
+
         JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.ES256)
                 .type(new JOSEObjectType("dpop+jwt"))
+                .jwk(ecJWK.toPublicJWK()) // Pass the public JWK as a JSON object
                 .build();
 
         SignedJWT signedJWT = new SignedJWT(header, claimSet);
-        signedJWT.sign(new ECDSASigner((ECPrivateKey) keyPair.getPrivate()));
+        signedJWT.sign(new ECDSASigner(privKey));
         System.out.println("Signed JWT generated");
         return signedJWT.serialize();
     }

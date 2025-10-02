@@ -46,7 +46,6 @@ import javafx.scene.web.WebEngine;
 import javafx.stage.Stage;
 
 import java.security.Signature;
-import java.security.interfaces.ECKey;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.KeyPair;
@@ -55,6 +54,11 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.MessageDigest;
+
+import com.nimbusds.jose.jwk.Curve;
+import com.nimbusds.jose.jwk.ECKey;
+import com.nimbusds.jose.util.Base64URL;
+
 
 
 public class Main extends Application {
@@ -157,11 +161,22 @@ public class Main extends Application {
     codeVerifier = PkceUtil.generateCodeVerifier();
     String codeChallenge = PkceUtil.generateCodeChallenge(codeVerifier);
 
-    // 3. Generate DPoP key pair (EC P-256)
-    KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
-    kpg.initialize(256);
-    KeyPair dpopKeyPair = kpg.generateKeyPair();
-    //JWKGenerator.main(new String[]{}); //generate jwk for the metajson
+    //Reconstruct from x, y, d
+    com.nimbusds.jose.jwk.ECKey ecJWK = new com.nimbusds.jose.jwk.ECKey.Builder(
+        Curve.P_256,
+        new Base64URL("-lL1dxMP6kqMKgAD_FmJMEgPTxDBivLPM2bM-kLvt2A"),
+        new Base64URL("BQh63v8bDWu9jz0tXFye6ukzGG9hCiGsWOoqNIdUvew")
+    )
+    .d(new Base64URL("mdeCxsSPc7ZV1_9vPLOjbj44G3cRtFeIFOaExmxQUPg")) // 👈 private scalar
+    .build();
+
+    KeyPair dpopKeyPair = new KeyPair(ecJWK.toECPublicKey(), ecJWK.toECPrivateKey());
+
+    // // 3. Generate DPoP key pair (EC P-256)
+    // KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
+    // kpg.initialize(256);
+    // KeyPair dpopKeyPair = kpg.generateKeyPair();
+    JWKGenerator.main(new String[]{}); //generate jwk for the metajson
     // try {
     // ECPublicKey pubKey = (ECPublicKey)dpopKeyPair.getPublic();
     // ECPrivateKey privKey = (ECPrivateKey)dpopKeyPair.getPrivate();
@@ -202,6 +217,7 @@ public class Main extends Application {
 
     HttpResponse<String> parResponse = HttpUtil.postFormWithResponse(parEndpoint, headers, parBody);
     System.out.println("ParResponse Statuscode: " + parResponse.statusCode());
+    System.out.println("ParResponse body: " + parResponse.body());
 
     // 6. Retry if server requires a DPoP nonce
     if ((parResponse.statusCode() == 401 || parResponse.statusCode() == 400)

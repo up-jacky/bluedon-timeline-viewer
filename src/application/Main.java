@@ -222,7 +222,8 @@ public class Main extends Application {
     // 6. Retry if server requires a DPoP nonce
     if ((parResponse.statusCode() == 401 || parResponse.statusCode() == 400)
         && parResponse.body().contains("\"use_dpop_nonce\"")) {
-    String newNonce = HttpUtil.extractDpopNonce(parResponse);
+    String newNonce = extractDpopNonce(parResponse);
+    System.out.println("NewNounc" + newNonce);
     System.out.println("Retried 401");
     if (newNonce != null && !newNonce.isEmpty()) {
         System.out.println("Retried 401 with Nonce: " + newNonce);
@@ -237,9 +238,12 @@ public class Main extends Application {
     // 7. Extract request_uri from PAR response
     Map<String, Object> parJson = JsonUtil.fromJson(parResponse.body());
     String requestUri = (String) parJson.get("request_uri");
-    if (requestUri == null || requestUri.isEmpty())
+    if (requestUri == null || requestUri.isEmpty()){
+        System.out.println("Retried PAR Status: " + parResponse.statusCode());
+        System.out.println("Retried PAR Headers: " + parResponse.headers());
+        System.out.println("Retried PAR Body: " + parResponse.body());
         throw new IOException("PAR failed, no request_uri returned");
-
+    }
     // 8. Open browser for user to authorize
     String authUrl = authEndpoint + "?client_id=" + urlenc(CLIENT_ID)
                      + "&request_uri=" + urlenc(requestUri)
@@ -305,6 +309,27 @@ public class Main extends Application {
         
         return (String) map.get("sub");
     }
+
+    public static String extractDpopNonce(HttpResponse<?> response) {
+    try {
+        String headers = response.headers().toString();
+        System.out.println("Header " + headers);
+
+
+        String body = response.body().toString();
+        Map<String, Object> json = JsonUtil.fromJson(body);
+        System.out.println("NONCE" + json);
+        Object nonce = json.get("DPoP_Nonce");
+        if (nonce == null) nonce = json.get("nonce");
+        if (nonce == null) nonce = response.headers().firstValue("dpop-nonce").orElse(null);
+        if (nonce == null) nonce = response.headers().firstValue("DPoP-Nonce").orElse(null);
+        System.out.println("NONCE" + nonce);
+        return nonce != null ? nonce.toString() : null;
+    } catch (Exception e) {
+        e.printStackTrace();
+        return null;
+    }
+}
 
     
    

@@ -22,11 +22,11 @@ public class DPoPUtil {
         URI uri = new URI(url);
 
         JWTClaimsSet.Builder claims = new JWTClaimsSet.Builder()
-                .jwtID(UUID.randomUUID().toString())
-                .issueTime(java.util.Date.from(now))
-                .claim("htm", method)      // HTTP method
-                .claim("htu", uri.toString()); // HTTP URL
-
+            .jwtID(UUID.randomUUID().toString())
+            .issueTime(java.util.Date.from(now))
+            .expirationTime(java.util.Date.from(now.plusSeconds(120))) // Add exp claim (2 min expiry)
+            .claim("htm", method)
+            .claim("htu", uri.toString());
         if (nonce != null) {
             claims.claim("nonce", nonce);
         }
@@ -39,11 +39,13 @@ public class DPoPUtil {
         com.nimbusds.jose.jwk.ECKey ecJWK = new com.nimbusds.jose.jwk.ECKey.Builder(
                 com.nimbusds.jose.jwk.Curve.P_256, pubKey)
                 .privateKey(privKey)
+                .keyID("dksadjakdjakdjsakdayawkona")
                 .build();
 
         JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.ES256)
                 .type(new JOSEObjectType("dpop+jwt"))
                 .jwk(ecJWK.toPublicJWK()) // Pass the public JWK as a JSON object
+                .keyID(ecJWK.getKeyID())
                 .build();
 
         SignedJWT signedJWT = new SignedJWT(header, claimSet);

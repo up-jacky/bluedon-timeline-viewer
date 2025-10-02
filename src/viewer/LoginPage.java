@@ -1,6 +1,7 @@
 package viewer;
 
 import application.Main;
+import application.Main.BlueskyOAuth;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -10,6 +11,13 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import javafx.scene.Scene;
+import javafx.scene.web.WebView;
+import javafx.scene.web.WebEngine;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 
 public class LoginPage {
 
@@ -45,7 +53,11 @@ public class LoginPage {
 
         Button loginBtn = new Button("LOG IN");
         loginBtn.getStyleClass().add("login-btn");
-        loginBtn.setOnAction(e -> app.showHomePage(blueskyField.getText()));
+        loginBtn.setOnAction(e -> {
+                    Main.BlueskyOAuth oauth = new Main.BlueskyOAuth(); 
+                    oauth.startOAuth();
+                });
+
 
         layout = new VBox(40, logoView, emailsBox, loginBtn);
         layout.setAlignment(Pos.CENTER);
@@ -56,4 +68,7 @@ public class LoginPage {
     public VBox getView() {
         return layout;
     }
+
 }
+
+

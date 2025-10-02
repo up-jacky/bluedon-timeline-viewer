@@ -1,0 +1,9 @@
+{
+  "client_id": "https://up-jacky.github.io/bluedon-timeline-viewer/oauth/client_metadata.json",
+  "client_name": "Bluedon Timeline Viewer",
+  "redirect_uris": ["http://127.0.0.1:8080/callback"],
+  "grant_types": ["authorization_code", "refresh_token"],
+  "response_types": ["code"],
+  "scope": "atproto",
+  "token_endpoint_auth_method": "none"
+}

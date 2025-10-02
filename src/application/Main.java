@@ -5,10 +5,17 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+
+import java.util.Map;
+import java.util.HashMap;
+import java.util.UUID;
+import java.awt.Desktop;
 
 import java.net.HttpURLConnection;
 import java.net.http.*;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -17,13 +24,17 @@ import java.net.http.HttpResponse;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.time.Instant;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import oauthServices.*;
 import viewer.HomePage;
 import viewer.LoginPage;
 
@@ -33,6 +44,14 @@ import javafx.scene.web.WebView;
 import javafx.scene.web.WebEngine;
 import javafx.stage.Stage;
 
+import java.security.Signature;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.MessageDigest;
+
 
 public class Main extends Application {
 
@@ -40,12 +59,14 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) {
+        try {
         this.primaryStage = stage;
-
         showLoginPage();
         stage.show();
+    } catch (Exception e) {
+        e.printStackTrace(); // prints the real cause
     }
-
+}
     public void showLoginPage() {
         LoginPage loginPage = new LoginPage(this);
         Scene loginScene = new Scene(loginPage.getView(), 1000, 600);
@@ -70,139 +91,174 @@ public class Main extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-
-
-
-
     public static class BlueskyOAuth {
 
+    // Replace with your actual client metadata URL
     private static final String CLIENT_ID = "https://up-jacky.github.io/bluedon-timeline-viewer/oauth/client_metadata.json";
     private static final String REDIRECT_URI = "http://127.0.0.1:8080/callback";
     private static final String AUTH_URL = "https://bsky.social/oauth/authorize";
     private static final String TOKEN_URL = "https://bsky.social/oauth/token";
-    private static final String FEED_URL = "https://bsky.social/xrpc/app.bsky.feed.getAuthorFeed";
-
+    
 
     private String codeVerifier;
+    private KeyPair dpopKeyPair;
+    private String dpopNonce;
 
-    public void startOAuth() {
-        Stage stage = new Stage();
-        VBox root = new VBox();
-        WebView webView = new WebView();
-        WebEngine engine = webView.getEngine();
+    public class CallbackResult {
+    private final String code;
+    private final String state;
+    private final String error;
+    private final String errorDescription;
 
-        // PKCE
-        codeVerifier = generateCodeVerifier();
-        String codeChallenge = generateCodeChallenge(codeVerifier);
-
-        // Build Auth URL
-        String authUrl = AUTH_URL
-                + "?response_type=code"
-                + "&client_id=" + url(CLIENT_ID)
-                + "&redirect_uri=" + url(REDIRECT_URI)
-                + "&scope=" + url("atproto")
-                + "&code_challenge=" + url(codeChallenge)
-                + "&code_challenge_method=S256";
-
-        engine.load(authUrl);
-
-        // Listen for redirect
-        engine.locationProperty().addListener((obs, oldLoc, newLoc) -> {
-            if (newLoc.startsWith(REDIRECT_URI)) {
-                if (newLoc.contains("code=")) {
-                    String code = newLoc.substring(newLoc.indexOf("code=") + 5);
-                    if (code.contains("&")) {
-                        code = code.substring(0, code.indexOf("&"));
-                    }
-                    System.out.println("Authorization Code: " + code);
-
-                    // Exchange code for tokens
-                    try {
-                        exchangeCodeForToken(code);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                    stage.close();
-                }
-            }
-        });
-
-        root.getChildren().add(webView);
-        stage.setScene(new Scene(root, 800, 600));
-        stage.setTitle("Login with Bluesky");
-        stage.show();
+    public CallbackResult(String code, String state, String error, String errorDescription) {
+        this.code = code;
+        this.state = state;
+        this.error = error;
+        this.errorDescription = errorDescription;
     }
 
-    private void exchangeCodeForToken(String code) throws IOException, InterruptedException {
-        HttpClient client = HttpClient.newHttpClient();
+    public String code() { return code; }
+    public String state() { return state; }
+}
 
-        String body = "grant_type=authorization_code"
-                + "&client_id=" + url(CLIENT_ID)
-                + "&redirect_uri=" + url(REDIRECT_URI)
-                + "&code=" + url(code)
-                + "&code_verifier=" + url(codeVerifier);
+    // This class holds tokens and DID
+    public static class AuthSession {
+        public String accessToken;
+        public String refreshToken;
+        public String did;
+        public String dpopNonce;
+        public String codeVerifier;
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(TOKEN_URL))
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .POST(HttpRequest.BodyPublishers.ofString(body))
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        String responseBody = response.body();
-        System.out.println("Token response: " + responseBody);
-
-        String accessToken = "";
-        String did = "";
-
-        if (responseBody.contains("\"access_token\"")) {
-            accessToken = responseBody.split("\"access_token\":\"")[1].split("\"")[0];
-        }
-        if (responseBody.contains("\"sub\"")) {
-            did = responseBody.split("\"sub\":\"")[1].split("\"")[0];
-        }
-
-        System.out.println("Access Token: " + accessToken);
-        System.out.println("DID: " + did);
-
-        fetchFeed(accessToken, did);
-    }
-
-
-    private void fetchFeed(String token, String did) throws IOException, InterruptedException {
-        HttpClient client = HttpClient.newHttpClient();
-        String url = FEED_URL + "?actor=" + url(did);
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .header("Authorization", "Bearer " + token)
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        System.out.println("Feed response: " + response.body());
-    }
-
-    // Utils
-    private static String generateCodeVerifier() {
-        byte[] randomBytes = new byte[32];
-        new SecureRandom().nextBytes(randomBytes);
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
-    }
-
-    private static String generateCodeChallenge(String verifier) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(verifier.getBytes(StandardCharsets.US_ASCII));
-            return Base64.getUrlEncoder().withoutPadding().encodeToString(hash);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        public AuthSession(String codeVerifier) {
+            this.codeVerifier = codeVerifier;
         }
     }
 
-    private static String url(String v) {
-        return URLEncoder.encode(v, StandardCharsets.UTF_8);
+    public AuthSession startOAuth(String pdsOrigin) throws Exception {
+    // 1. Discover endpoints
+    String metaUrl = pdsOrigin + "/.well-known/oauth-authorization-server";
+    String metaBody = HttpUtil.get(metaUrl, Map.of("Accept", "application/json"));
+    Map<String, Object> meta = JsonUtil.fromJson(metaBody);
+
+    String parEndpoint = (String) meta.get("pushed_authorization_request_endpoint");
+    String authEndpoint = (String) meta.get("authorization_endpoint");
+    String tokenEndpoint = (String) meta.get("token_endpoint");
+
+    // 2. Generate PKCE
+    codeVerifier = PkceUtil.generateCodeVerifier();
+    String codeChallenge = PkceUtil.generateCodeChallenge(codeVerifier);
+
+    // 3. Generate DPoP key pair (EC P-256)
+    KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
+    kpg.initialize(256);
+    dpopKeyPair = kpg.generateKeyPair();
+
+    AuthSession session = new AuthSession(codeVerifier);
+
+    // 4. Build PAR body (include dpop_bound_access_tokens)
+    String state = UUID.randomUUID().toString();
+    String parBody = String.format(
+        "client_id=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s" +
+        "&code_challenge=%s&code_challenge_method=S256&dpop_bound_access_tokens=true",
+        urlenc(CLIENT_ID),
+        urlenc(REDIRECT_URI),
+        urlenc("atproto"),
+        urlenc(state),
+        urlenc(codeChallenge)
+    );
+
+    // 5. Send PAR request with DPoP
+    Map<String, String> headers = new HashMap<>();
+    headers.put("Content-Type", "application/x-www-form-urlencoded");
+    headers.put("DPoP", DPoPUtil.buildDPoP("POST", parEndpoint, null));
+
+    HttpResponse<String> parResponse = HttpUtil.postFormWithResponse(parEndpoint, headers, parBody);
+
+    // 6. Retry if server requires a DPoP nonce
+    if ((parResponse.statusCode() == 401 || parResponse.statusCode() == 400)
+            && parResponse.body().contains("\"use_dpop_nonce\"")) {
+        String newNonce = HttpUtil.extractDpopNonce(parResponse);
+        if (newNonce != null && !newNonce.isEmpty()) {
+            session.dpopNonce = newNonce;
+            headers.put("DPoP", DPoPUtil.buildDPoP("POST", parEndpoint, session.dpopNonce));
+            parResponse = HttpUtil.postFormWithResponse(parEndpoint, headers, parBody);
+        }
     }
+
+    // 7. Extract request_uri from PAR response
+    Map<String, Object> parJson = JsonUtil.fromJson(parResponse.body());
+    String requestUri = (String) parJson.get("request_uri");
+    if (requestUri == null || requestUri.isEmpty())
+        throw new IOException("PAR failed, no request_uri returned");
+
+    // 8. Open browser for user to authorize
+    String authUrl = authEndpoint + "?client_id=" + urlenc(CLIENT_ID)
+                     + "&request_uri=" + urlenc(requestUri)
+                     + "&state=" + urlenc(state);
+
+    LocalCallbackServer callbackServer = new LocalCallbackServer();
+    callbackServer.start();
+    Desktop.getDesktop().browse(new URI(authUrl));
+
+    // 9. Wait for authorization code
+    LocalCallbackServer.CallbackResult cb = callbackServer.awaitAuthorizationCode(180);
+    callbackServer.stop();
+    if (cb == null) throw new IOException("Timeout waiting for callback");
+    if (!state.equals(cb.state)) throw new IOException("State mismatch");
+    if (cb.error != null)
+        throw new IOException("Authorization error: " + cb.error + " - " + cb.errorDescription);
+    if (cb.code == null) throw new IOException("Authorization code is null");
+
+    // 10. Exchange code for DPoP-bound access token
+    String tokenBody = String.format(
+        "grant_type=authorization_code&code=%s&redirect_uri=%s&code_verifier=%s&client_id=%s",
+        urlenc(cb.code), urlenc(REDIRECT_URI), urlenc(codeVerifier), urlenc(CLIENT_ID)
+    );
+
+    headers.clear();
+    headers.put("Content-Type", "application/x-www-form-urlencoded");
+    headers.put("DPoP", DPoPUtil.buildDPoP("POST", tokenEndpoint, session.dpopNonce));
+
+    HttpResponse<String> tokenResponse = HttpUtil.postFormWithResponse(tokenEndpoint, headers, tokenBody);
+    String newNonce = HttpUtil.extractDpopNonce(tokenResponse);
+    if (newNonce != null) session.dpopNonce = newNonce;
+
+    Map<String, Object> tokenJson = JsonUtil.fromJson(tokenResponse.body());
+    if (tokenJson.containsKey("error"))
+        throw new IOException("Token Error: " + tokenJson.get("error") + " - " + tokenJson.get("error_description"));
+
+    session.accessToken = (String) tokenJson.get("access_token");
+    session.refreshToken = (String) tokenJson.get("refresh_token");
+    session.did = extractDidFromToken(session.accessToken);
+
+    return session;
+}
+
+
+
+    private static String urlenc(String s) throws UnsupportedEncodingException {
+        return URLEncoder.encode(s, "UTF-8");
+    }
+
+    private String extractDidFromToken(String token) {
+        // Simple base64 decode from JWT payload
+        String payload = token.split("\\.")[1];
+        byte[] decoded = java.util.Base64.getUrlDecoder().decode(payload);
+        String json = new String(decoded, java.nio.charset.StandardCharsets.UTF_8);
+        Map<String, Object> map;
+        try{
+            map = JsonUtil.fromJson(json);
+        } catch (Exception e){
+            e.printStackTrace();
+            map = new HashMap<>();
+        }
+        
+        return (String) map.get("sub");
+    }
+
+    
+   
+
 }
 
 }

@@ -12,9 +12,11 @@ Write-Output "Compiling..."
 #javac --module-path "$JAVA_FX\lib" --add-modules javafx.controls,javafx.fxml,javafx.web `
  #     -d $BIN (Get-ChildItem -Recurse -Filter *.java $SRC | ForEach-Object { $_.FullName })
 
-javac --module-path "$JAVA_FX\lib" --add-modules javafx.controls,javafx.fxml,javafx.web -d bin src\application\Main.java src\viewer\*.java
+# javac --module-path "$JAVA_FX\lib" --add-modules javafx.controls,javafx.fxml,javafx.web `
+#       -cp "src\libs\*" -d bin src\application\Main.java src\viewer\*.java src\oauthServices\*.java
 
-
+javac --module-path "$JAVA_FX\lib" --add-modules javafx.controls,javafx.fxml,javafx.web `
+  -cp "src/libs/*" -d bin src\application\*.java src\viewer\*.java src\oauthServices\*.java
 
 
 if ($LASTEXITCODE -ne 0) {
@@ -27,4 +29,6 @@ Copy-Item -Recurse -Path $RES\* -Destination $BIN -Force
 
 Write-Output "Running..."
 java --module-path "$JAVA_FX\lib" --add-modules javafx.controls,javafx.fxml,javafx.web `
-     -cp $BIN application.Main
+  -cp "bin;src/libs/*" application.Main
+
+

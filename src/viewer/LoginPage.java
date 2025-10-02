@@ -54,9 +54,15 @@ public class LoginPage {
         Button loginBtn = new Button("LOG IN");
         loginBtn.getStyleClass().add("login-btn");
         loginBtn.setOnAction(e -> {
-                    Main.BlueskyOAuth oauth = new Main.BlueskyOAuth(); 
-                    oauth.startOAuth();
-                });
+            Main.BlueskyOAuth oauth = new Main.BlueskyOAuth();
+            try {
+                oauth.startOAuth("theowees.bsky.social"); // pass PDS origin
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                // optionally show an alert to the user
+            }
+        });
+
 
 
         layout = new VBox(40, logoView, emailsBox, loginBtn);

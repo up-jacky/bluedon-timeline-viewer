@@ -3,11 +3,12 @@ $JAVA_FX = "C:\javafx-sdk-17.0.16"
 $SRC = "src"
 $BIN = "bin"
 $RES = "resources"
+# Always run from repo root
+Set-Location -Path (Split-Path -Parent $MyInvocation.MyCommand.Definition)
 
 if (!(Test-Path $BIN)) {
     New-Item -ItemType Directory -Path $BIN | Out-Null
 }
-
 Write-Output "Compiling..."
 #javac --module-path "$JAVA_FX\lib" --add-modules javafx.controls,javafx.fxml,javafx.web `
  #     -d $BIN (Get-ChildItem -Recurse -Filter *.java $SRC | ForEach-Object { $_.FullName })

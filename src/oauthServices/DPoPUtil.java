@@ -48,23 +48,34 @@ public class DPoPUtil {
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
         kpg.initialize(256);
         KeyPair kp = kpg.generateKeyPair();
-        ECPublicKey pub = (ECPublicKey) kp.getPublic();
 
-        // 2. Get x and y coordinates
+        ECPublicKey pub = (ECPublicKey) kp.getPublic();
+        ECPrivateKey priv = (ECPrivateKey) kp.getPrivate();
+
+        // 2. Extract affine coordinates (x, y)
         byte[] xBytes = pub.getW().getAffineX().toByteArray();
         byte[] yBytes = pub.getW().getAffineY().toByteArray();
 
-        // Ensure unsigned (remove leading 0 if present)
+        // Ensure unsigned (strip leading zero if present)
         if (xBytes[0] == 0) xBytes = java.util.Arrays.copyOfRange(xBytes, 1, xBytes.length);
         if (yBytes[0] == 0) yBytes = java.util.Arrays.copyOfRange(yBytes, 1, yBytes.length);
 
-        // 3. Base64URL encode
+        // 3. Private scalar d
+        byte[] dBytes = priv.getS().toByteArray();
+        if (dBytes[0] == 0) dBytes = java.util.Arrays.copyOfRange(dBytes, 1, dBytes.length);
+
+        // 4. Base64URL encode (RFC 7515)
         String xB64 = Base64.getUrlEncoder().withoutPadding().encodeToString(xBytes);
         String yB64 = Base64.getUrlEncoder().withoutPadding().encodeToString(yBytes);
+        String dB64 = Base64.getUrlEncoder().withoutPadding().encodeToString(dBytes);
 
-        System.out.println("x: " + xB64);
-        System.out.println("y: " + yB64);
-        System.out.println("Use these values in your client metadata under jwks.keys[0].x and jwks.keys[0].y");
+        System.out.println("{");
+        System.out.println("  \"kty\": \"EC\",");
+        System.out.println("  \"crv\": \"P-256\",");
+        System.out.println("  \"x\": \"" + xB64 + "\",");
+        System.out.println("  \"y\": \"" + yB64 + "\",");
+        System.out.println("  \"d\": \"" + dB64 + "\"");
+        System.out.println("}");
     }
 }
 

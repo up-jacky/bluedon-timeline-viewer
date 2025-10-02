@@ -38,6 +38,7 @@ import oauthServices.*;
 import oauthServices.DPoPUtil.JWKGenerator;
 import viewer.HomePage;
 import viewer.LoginPage;
+//import viewer.OAuthWebViewPage;
 
 import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
@@ -88,6 +89,14 @@ public class Main extends Application {
         primaryStage.setScene(homeScene);
         primaryStage.setTitle("Bluedon Timeline - Home");
     }
+
+//     public void showOAuthWebView(String url, String redirectUri, java.util.function.Consumer<String> onRedirect) {
+//     //System.out.println("onRedirect called with: " + redirectUrl);
+//     viewer.OAuthWebViewPage webViewPage = new viewer.OAuthWebViewPage(url, redirectUri, onRedirect);
+//     Scene scene = new Scene(webViewPage, 1000, 600);
+//     scene.getStylesheets().add("file:resources/styles.css");
+//     primaryStage.setScene(scene);
+// }
     
     /* public void showHomePage(String username) {
         HomePage homePage = new HomePage(this, username);
@@ -100,6 +109,7 @@ public class Main extends Application {
         launch(args);
     }
     public static class BlueskyOAuth {
+        
 
     // Replace with your actual client metadata URL
     private static final String CLIENT_ID = "https://up-jacky.github.io/bluedon-timeline-viewer/oauth/client_metadata.json";
@@ -248,29 +258,83 @@ public class Main extends Application {
     String authUrl = authEndpoint + "?client_id=" + urlenc(CLIENT_ID)
                      + "&request_uri=" + urlenc(requestUri)
                      + "&state=" + urlenc(state);
+    ////////////////////////////// TRYING TO DEKSTOP APP THE THINGY open desktop oauth
+    // final AuthSession sessionFinal = session;
+    // final Object lock = new Object();
+    // final String[] codeHolder = new String[1];
+    // final String[] stateHolder = new String[1];
+    // final String[] errorHolder = new String[1];
+    // final String[] errorDescHolder = new String[1];
 
-    LocalCallbackServer callbackServer = new LocalCallbackServer();
+    // java.util.function.Consumer<String> onRedirect = (redirectUrl) -> {
+    //     System.out.println("onRedirect called with: " + redirectUrl);
+    //     try {
+    //         java.net.URI uriObj = new java.net.URI(redirectUrl);
+    //         String query = uriObj.getQuery();
+    //         java.util.Map<String, String> params = new java.util.HashMap<>();
+    //         for (String param : query.split("&")) {
+    //             String[] pair = param.split("=", 2);
+    //             if (pair.length == 2) params.put(pair[0], java.net.URLDecoder.decode(pair[1], "UTF-8"));
+    //         }
+    //         codeHolder[0] = params.get("code");
+    //         stateHolder[0] = params.get("state");
+    //         errorHolder[0] = params.get("error");
+    //         errorDescHolder[0] = params.get("error_description");
+    //         synchronized (lock) { lock.notify(); }
+    //     } catch (Exception ex) {
+    //         ex.printStackTrace();
+    //     }
+    // };
+    // System.out.println("Opening Oauth");
+    // //System.out.println("onRedirect called with: " + onRedirect);
+    // System.out.println("AUTH URL: " + authUrl);
+    // app.showOAuthWebView(authUrl, REDIRECT_URI, onRedirect);
+
+    // synchronized (lock) {
+    //     lock.wait(180_000); // wait up to 3 minutes
+    // }
+
+    // if (codeHolder[0] == null && errorHolder[0] == null)
+    //     throw new IOException("Timeout waiting for callback");
+    // if (!state.equals(stateHolder[0]))
+    //     throw new IOException("State mismatch");
+    // if (errorHolder[0] != null)
+    //     throw new IOException("Authorization error: " + errorHolder[0] + " - " + errorDescHolder[0]);
+    // if (codeHolder[0] == null)
+    //     throw new IOException("Authorization code is null");
+    
+    // // 10. Exchange code for DPoP-bound access token
+    //     String tokenBody = String.format(
+    //     "grant_type=authorization_code&code=%s&redirect_uri=%s&code_verifier=%s&client_id=%s",
+    //     urlenc(codeHolder[0]), urlenc(REDIRECT_URI), urlenc(codeVerifier), urlenc(CLIENT_ID)
+    // );
+
+    ////////////////////////////////////////////TRYING TO DESKTOP APP THE LOGIN
+      LocalCallbackServer callbackServer = new LocalCallbackServer();
     callbackServer.start();
+
+    // Open system browser for OAuth
     Desktop.getDesktop().browse(new URI(authUrl));
 
-    // 9. Wait for authorization code
+    // Wait for authorization code
     LocalCallbackServer.CallbackResult cb = callbackServer.awaitAuthorizationCode(180);
     callbackServer.stop();
+
     if (cb == null) throw new IOException("Timeout waiting for callback");
     if (!state.equals(cb.state)) throw new IOException("State mismatch");
     if (cb.error != null)
         throw new IOException("Authorization error: " + cb.error + " - " + cb.errorDescription);
     if (cb.code == null) throw new IOException("Authorization code is null");
+    System.out.println("Callback result: code=" + cb.code + ", state=" + cb.state + ", error=" + cb.error + ", errorDescription=" + cb.errorDescription);
 
-    // 10. Exchange code for DPoP-bound access token
     String tokenBody = String.format(
-        "grant_type=authorization_code&code=%s&redirect_uri=%s&code_verifier=%s&client_id=%s",
-        urlenc(cb.code), urlenc(REDIRECT_URI), urlenc(codeVerifier), urlenc(CLIENT_ID)
+    "grant_type=authorization_code&code=%s&redirect_uri=%s&code_verifier=%s&client_id=%s",
+    urlenc(cb.code), urlenc(REDIRECT_URI), urlenc(codeVerifier), urlenc(CLIENT_ID)
     );
-
+    System.out.println("Token Body" + tokenBody);
     headers.clear();
     headers.put("Content-Type", "application/x-www-form-urlencoded");
-    headers.put("DPoP", DPoPUtil.buildDPoP("POST", parEndpoint, session.dpopNonce, dpopKeyPair));
+    headers.put("DPoP", DPoPUtil.buildDPoP("POST", tokenEndpoint, session.dpopNonce, dpopKeyPair));
 
 
     HttpResponse<String> tokenResponse = HttpUtil.postFormWithResponse(tokenEndpoint, headers, tokenBody);
@@ -278,6 +342,9 @@ public class Main extends Application {
     if (newNonce != null) session.dpopNonce = newNonce;
 
     Map<String, Object> tokenJson = JsonUtil.fromJson(tokenResponse.body());
+    System.out.println("Token response status: " + tokenResponse.statusCode());
+    System.out.println("Token response headers: " + tokenResponse.headers());
+    System.out.println("Token response body: " + tokenResponse.body());
     if (tokenJson.containsKey("error"))
         throw new IOException("Token Error: " + tokenJson.get("error") + " - " + tokenJson.get("error_description"));
 

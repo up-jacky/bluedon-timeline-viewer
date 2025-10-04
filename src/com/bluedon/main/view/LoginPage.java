@@ -1,6 +1,7 @@
-package viewer;
+package com.bluedon.main.view;
 
-import application.Main;
+import com.bluedon.main.Main;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -15,7 +16,7 @@ public class LoginPage {
 
     private final VBox layout;
 
-    public LoginPage(Main app) {
+    public LoginPage(Main main) {
         Image logo = new Image(getClass().getResource("/bluedon.png").toExternalForm());
         ImageView logoView = new ImageView(logo);
         logoView.setFitHeight(100);
@@ -38,7 +39,7 @@ public class LoginPage {
             String mastodonEmail = mastodonField.getText().trim();
 
             if (!blueskyEmail.isEmpty() || !mastodonEmail.isEmpty()) {
-                app.showHomePage(blueskyEmail.isEmpty() ? null : blueskyEmail,
+                main.showHomePage(blueskyEmail.isEmpty() ? null : blueskyEmail,
                                  mastodonEmail.isEmpty() ? null : mastodonEmail);
             }
         });
@@ -50,7 +51,7 @@ public class LoginPage {
             String mastodonEmail = mastodonField.getText().trim();
 
             if (!blueskyEmail.isEmpty() || !mastodonEmail.isEmpty()) {
-                app.showHomePage(blueskyEmail.isEmpty() ? null : blueskyEmail,
+                main.showHomePage(blueskyEmail.isEmpty() ? null : blueskyEmail,
                                  mastodonEmail.isEmpty() ? null : mastodonEmail);
             }
         });

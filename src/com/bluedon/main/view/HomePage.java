@@ -1,4 +1,4 @@
-package viewer;
+package com.bluedon.main.view;
 
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -12,13 +12,14 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import application.Main;
+import com.bluedon.main.Main;
+
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 public class HomePage extends BorderPane {
 
-    private final Main app;
+    private final Main main;
 
     private boolean showBluesky = true;
     private boolean showMastodon = true;
@@ -38,8 +39,8 @@ public class HomePage extends BorderPane {
     private Label blueskyUserLabel;
     private Label mastodonUserLabel;
 
-    public HomePage(Main app, String blueskyEmail, String mastodonEmail) {
-        this.app = app;
+    public HomePage(Main main, String blueskyEmail, String mastodonEmail) {
+        this.main = main;
 
         if (blueskyEmail != null && !blueskyEmail.isBlank()) {
             blueskyLoggedIn = true;
@@ -99,7 +100,7 @@ public class HomePage extends BorderPane {
 
         Button logoutAllBtn = new Button("Log Out All Accounts");
         logoutAllBtn.setOnAction(e -> {
-            app.showLoginPage();  
+            main.showLoginPage();  
         });
 
         sidebar.getChildren().addAll(

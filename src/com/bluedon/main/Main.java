@@ -1,10 +1,11 @@
-package application;
+package com.bluedon.main;
+
+import com.bluedon.main.view.HomePage;
+import com.bluedon.main.view.LoginPage;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import viewer.HomePage;
-import viewer.LoginPage;
 
 public class Main extends Application {
 
@@ -21,7 +22,7 @@ public class Main extends Application {
     public void showLoginPage() {
         LoginPage loginPage = new LoginPage(this);
         Scene loginScene = new Scene(loginPage.getView(), 1000, 600);
-        loginScene.getStylesheets().add("file:resources/styles.css");
+        loginScene.getStylesheets().add("file:src/com/bluedon/resources/styles.css");
         primaryStage.setScene(loginScene);
         primaryStage.setTitle("Bluedon Login");
     }

@@ -35,7 +35,7 @@ public class BlueskyGetFeed {
     }
     if (pdsEndpoint == null) throw new Exception("Could not resolve PDS endpoint for DID: " + did);
 
-    String apiUrl = "https://api.bsky.app/xrpc/app.bsky.feed.getTimeline";
+    String apiUrl = pdsEndpoint + "/xrpc/app.bsky.feed.getTimeline";
     // IMPORTANT: Start with null nonce for the PDS (different server than token endpoint)
     String pdsNonce = null;
      // If we don't have a nonce yet, get one from the server first

@@ -119,18 +119,21 @@ public class Main extends Application {
 
         // Fetch the feed
         List<Map<String, Object>> feed = functionalities.BlueskyGetFeed.fetchBlueskyFeed(session, dpopKeyPair);
-        System.out.println("Feed " + feed);
+        //System.out.println("Feed " + feed);
         // Add posts to HomePage
         for (Map<String, Object> post : feed) {
             Map<String, Object> postObj = (Map<String, Object>) post.get("post");
-            String user = (String) ((Map<String, Object>) postObj.get("author")).get("handle");
-            String message = (String) postObj.get("text");
-            String timestamp = (String) postObj.get("createdAt");
-            // Add to HomePage's allPosts list
-            // homePage.allPosts.add(
-            //     new viewer.HomePage.Post(user, message, timestamp, viewer.HomePage.AccountType.BLUESKY)
-            // );
-            homePage.addBlueskyPost(user, message, timestamp); 
+            // Get author info
+            Map<String, Object> author = (Map<String, Object>) postObj.get("author");
+            String user = (String) author.get("handle");
+            
+            // Get the record object which contains text and createdAt
+            Map<String, Object> record = (Map<String, Object>) postObj.get("record");
+            String message = (String) record.get("text");
+            String timestamp = (String) record.get("createdAt");
+            
+            // Add to HomePage
+            homePage.addBlueskyPost(user, message, timestamp);
         }
         homePage.refreshPosts();
     } catch (Exception e) {
@@ -235,7 +238,7 @@ public class Main extends Application {
         "&code_challenge=%s&code_challenge_method=S256&dpop_bound_access_tokens=true",
         urlenc(CLIENT_ID),
         urlenc(REDIRECT_URI),
-        urlenc("atproto"),
+        urlenc("atproto transition:generic transition:chat.bsky"),
         urlenc(state),
         urlenc(codeChallenge)
     );

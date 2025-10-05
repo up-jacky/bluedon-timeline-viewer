@@ -54,7 +54,7 @@ public class LoginPage {
         Button loginBtn = new Button("LOG IN");
         loginBtn.getStyleClass().add("login-btn");
         loginBtn.setOnAction(e -> {
-            Main.BlueskyOAuth oauth = new Main.BlueskyOAuth();
+            Main.BlueskyOAuth oauth = new Main.BlueskyOAuth(app);
             try {
                 oauth.startOAuth("https://bsky.social"); // pass PDS origin
             } catch (Exception ex) {

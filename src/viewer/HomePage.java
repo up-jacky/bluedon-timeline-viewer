@@ -14,6 +14,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.scene.layout.Region;
 
 import application.Main;
 import javafx.scene.image.Image;
@@ -28,7 +29,7 @@ public class HomePage extends BorderPane {
     private boolean showMastodon = true;
 
     private VBox postsBox = new VBox(15);
-    private List<Post> allPosts = new ArrayList<>();
+    public List<Post> allPosts = new ArrayList<>();
 
     public HomePage(Main app, String username) {
         this.app = app;
@@ -90,7 +91,7 @@ public class HomePage extends BorderPane {
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
         Button logoutBtn = new Button("Log Out All Accounts");
-        logoutBtn.setOnAction(e -> app.showLoginPage());
+        logoutBtn.setOnAction(e -> app.showLoginPage("Invalid"));
 
         sidebar.getChildren().addAll(logo, blueskyBtn, mastodonBtn, spacer, logoutBtn);
         return sidebar;
@@ -115,7 +116,7 @@ public class HomePage extends BorderPane {
         }
     } */   
 
-    private void refreshPosts() {
+    public void refreshPosts() {
         postsBox.getChildren().clear();
 
         for (Post post : allPosts) {
@@ -185,7 +186,7 @@ public class HomePage extends BorderPane {
         }
     }
 
-    private static class Post {
+    public static class Post {
         String username;
         String message;
         String timestamp;
@@ -199,7 +200,7 @@ public class HomePage extends BorderPane {
         }
     }
 
-    private enum AccountType {
+    public static enum AccountType {
         BLUESKY, MASTODON
     }
 
@@ -208,4 +209,8 @@ public class HomePage extends BorderPane {
         scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
         return scene;
     }
+    // add bluesky post
+    public void addBlueskyPost(String user, String message, String timestamp) {
+    allPosts.add(new Post(user, message, timestamp, AccountType.BLUESKY));
+}
 }

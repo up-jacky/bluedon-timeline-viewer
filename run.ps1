@@ -17,7 +17,7 @@ Write-Output "Compiling..."
 #       -cp "src\libs\*" -d bin src\application\Main.java src\viewer\*.java src\oauthServices\*.java
 
 javac --module-path "$JAVA_FX\lib" --add-modules javafx.controls,javafx.fxml,javafx.web `
-  -cp "src/libs/*" -d bin src\application\*.java src\viewer\*.java src\oauthServices\*.java
+  -cp "src/libs/*" -d bin src\application\*.java src\viewer\*.java src\oauthServices\*.java src\functionalities\*.java
 
 
 if ($LASTEXITCODE -ne 0) {

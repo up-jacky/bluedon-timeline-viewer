@@ -1,8 +1,10 @@
 package oauthServices;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.time.Instant;
@@ -17,7 +19,7 @@ import com.nimbusds.jwt.SignedJWT;
 public class DPoPUtil {
 
     // Build DPoP JWT for given method and url
-    public static String buildDPoP(String method, String url, String nonce, KeyPair keyPair) throws Exception {
+    public static String buildDPoP(String method, String url, String nonce, KeyPair keyPair, String accessToken) throws Exception {
         Instant now = Instant.now();
         URI uri = new URI(url);
 
@@ -29,6 +31,11 @@ public class DPoPUtil {
             .claim("htu", uri.toString());
         if (nonce != null) {
             claims.claim("nonce", nonce);
+        }
+         // Add ath (access token hash) if access token is provided
+        if (accessToken != null) {
+            String ath = calculateAccessTokenHash(accessToken);
+            claims.claim("ath", ath);
         }
 
         JWTClaimsSet claimSet = claims.build();
@@ -88,7 +95,17 @@ public class DPoPUtil {
         System.out.println("  \"d\": \"" + dB64 + "\"");
         System.out.println("}");
     }
+    
 }
+/**
+     * Calculate SHA-256 hash of access token and encode as base64url (without padding)
+     * This is required for the "ath" claim in DPoP proofs when using an access token
+     */
+    private static String calculateAccessTokenHash(String accessToken) throws Exception {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] hashBytes = digest.digest(accessToken.getBytes(StandardCharsets.US_ASCII));
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(hashBytes);
+    }
 
    
 }

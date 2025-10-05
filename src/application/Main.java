@@ -1,5 +1,7 @@
 package application;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -9,6 +11,7 @@ import java.io.UnsupportedEncodingException;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 import java.awt.Desktop;
 
@@ -23,6 +26,9 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Base64;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -38,6 +44,8 @@ import oauthServices.*;
 import oauthServices.DPoPUtil.JWKGenerator;
 import viewer.HomePage;
 import viewer.LoginPage;
+import functionalities.*;
+
 //import viewer.OAuthWebViewPage;
 
 import javafx.scene.Scene;
@@ -70,46 +78,79 @@ public class Main extends Application {
     public void start(Stage stage) {
         try {
         this.primaryStage = stage;
-        showLoginPage();
+        showLoginPage("INVALID");
         stage.show();
     } catch (Exception e) {
         e.printStackTrace(); // prints the real cause
     }
 }
-    public void showLoginPage() {
+    public static void saveSession(Main.BlueskyOAuth.AuthSession session) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writeValueAsString(session);
+        Files.write(Paths.get("session.json"), json.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+    }
+
+    public static Main.BlueskyOAuth.AuthSession loadSession() throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        byte[] bytes = Files.readAllBytes(Paths.get("session.json"));
+        return mapper.readValue(bytes, Main.BlueskyOAuth.AuthSession.class);
+    }
+    public void showLoginPage(String username) {
         LoginPage loginPage = new LoginPage(this);
         Scene loginScene = new Scene(loginPage.getView(), 1000, 600);
         loginScene.getStylesheets().add("file:resources/styles.css");
         primaryStage.setScene(loginScene);
-    }
+}
 
     public void showHomePage(String username) {
         HomePage homePage = new HomePage(this, username);
-        Scene homeScene = homePage.getView();  // already a Scene
-        primaryStage.setScene(homeScene);
-        primaryStage.setTitle("Bluedon Timeline - Home");
+            // Load session and DPoP keypair
+    try {
+        BlueskyOAuth.AuthSession session = loadSession();
+        // Reconstruct DPoP keypair (same as in your OAuth flow)
+        com.nimbusds.jose.jwk.ECKey ecJWK = new com.nimbusds.jose.jwk.ECKey.Builder(
+            com.nimbusds.jose.jwk.Curve.P_256,
+            new com.nimbusds.jose.util.Base64URL("-lL1dxMP6kqMKgAD_FmJMEgPTxDBivLPM2bM-kLvt2A"),
+            new com.nimbusds.jose.util.Base64URL("BQh63v8bDWu9jz0tXFye6ukzGG9hCiGsWOoqNIdUvew")
+        )
+        .d(new com.nimbusds.jose.util.Base64URL("mdeCxsSPc7ZV1_9vPLOjbj44G3cRtFeIFOaExmxQUPg"))
+        .build();
+        KeyPair dpopKeyPair = new KeyPair(ecJWK.toECPublicKey(), ecJWK.toECPrivateKey());
+
+        // Fetch the feed
+        List<Map<String, Object>> feed = functionalities.BlueskyGetFeed.fetchBlueskyFeed(session, dpopKeyPair);
+        System.out.println("Feed " + feed);
+        // Add posts to HomePage
+        for (Map<String, Object> post : feed) {
+            Map<String, Object> postObj = (Map<String, Object>) post.get("post");
+            String user = (String) ((Map<String, Object>) postObj.get("author")).get("handle");
+            String message = (String) postObj.get("text");
+            String timestamp = (String) postObj.get("createdAt");
+            // Add to HomePage's allPosts list
+            // homePage.allPosts.add(
+            //     new viewer.HomePage.Post(user, message, timestamp, viewer.HomePage.AccountType.BLUESKY)
+            // );
+            homePage.addBlueskyPost(user, message, timestamp); 
+        }
+        homePage.refreshPosts();
+    } catch (Exception e) {
+        e.printStackTrace();
     }
 
-//     public void showOAuthWebView(String url, String redirectUri, java.util.function.Consumer<String> onRedirect) {
-//     //System.out.println("onRedirect called with: " + redirectUrl);
-//     viewer.OAuthWebViewPage webViewPage = new viewer.OAuthWebViewPage(url, redirectUri, onRedirect);
-//     Scene scene = new Scene(webViewPage, 1000, 600);
-//     scene.getStylesheets().add("file:resources/styles.css");
-//     primaryStage.setScene(scene);
-// }
-    
-    /* public void showHomePage(String username) {
-        HomePage homePage = new HomePage(this, username);
-        Scene homeScene = new Scene(homePage.getView(),1000, 600);
-        primaryStage.setTitle("Bluedon Timeline Viewer - Home");
-        primaryStage.setScene(homeScene);
-    } */
+    Scene homeScene = homePage.getView();
+    primaryStage.setScene(homeScene);
+    primaryStage.setTitle("Bluedon Timeline - Home");
+    }
 
     public static void main(String[] args) {
         launch(args);
     }
     public static class BlueskyOAuth {
-        
+        private final Main app;
+
+    public BlueskyOAuth(Main app) {
+        this.app = app;
+    }
 
     // Replace with your actual client metadata URL
     private static final String CLIENT_ID = "https://up-jacky.github.io/bluedon-timeline-viewer/oauth/client_metadata.json";
@@ -147,10 +188,13 @@ public class Main extends Application {
         public String dpopNonce;
         public String codeVerifier;
 
-        public AuthSession(String codeVerifier) {
-            this.codeVerifier = codeVerifier;
-        }
+        // Add this no-arg constructor for Jackson
+    public AuthSession() {}
+
+    public AuthSession(String codeVerifier) {
+        this.codeVerifier = codeVerifier;
     }
+}
 
     public AuthSession startOAuth(String pdsOrigin) throws Exception {
     // 1. Discover endpoints
@@ -182,25 +226,6 @@ public class Main extends Application {
 
     KeyPair dpopKeyPair = new KeyPair(ecJWK.toECPublicKey(), ecJWK.toECPrivateKey());
 
-    // // 3. Generate DPoP key pair (EC P-256)
-    // KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
-    // kpg.initialize(256);
-    // KeyPair dpopKeyPair = kpg.generateKeyPair();
-    //JWKGenerator.main(new String[]{}); //generate jwk for the metajson
-    // try {
-    // ECPublicKey pubKey = (ECPublicKey)dpopKeyPair.getPublic();
-    // ECPrivateKey privKey = (ECPrivateKey)dpopKeyPair.getPrivate();
-    // ECKey privateECKey = new ECKey.Builder(Curve.P_256, pubKey)
-    //                         .privateKey(privKey)
-    //                         .build();
-    // ECKey publicJWK = privateECKey.toPublicJWK();
-
-    // System.out.println("DPoP keypair generated");
-    // }catch (Exception var4) {
-    //         throw new RuntimeException("DPoP init failed", var4);
-    //      }
-
-
     AuthSession session = new AuthSession(codeVerifier);
 
     // 4. Build PAR body (include dpop_bound_access_tokens)
@@ -221,7 +246,7 @@ public class Main extends Application {
     // 5. Send PAR request with DPoP
     Map<String, String> headers = new HashMap<>();
     headers.put("Content-Type", "application/x-www-form-urlencoded");
-    headers.put("DPoP", DPoPUtil.buildDPoP("POST", parEndpoint, null, dpopKeyPair));
+    headers.put("DPoP", DPoPUtil.buildDPoP("POST", parEndpoint, null, dpopKeyPair, null));
     System.out.println("Header: " + headers);
     
 
@@ -238,7 +263,7 @@ public class Main extends Application {
     if (newNonce != null && !newNonce.isEmpty()) {
         System.out.println("Retried 401 with Nonce: " + newNonce);
         session.dpopNonce = newNonce;
-        String dpopJwt = DPoPUtil.buildDPoP("POST", parEndpoint, session.dpopNonce, dpopKeyPair);
+        String dpopJwt = DPoPUtil.buildDPoP("POST", parEndpoint, session.dpopNonce, dpopKeyPair, null);
         System.out.println("DPoP JWT with nonce: " + dpopJwt);
         headers.put("DPoP", dpopJwt);
         parResponse = HttpUtil.postFormWithResponse(parEndpoint, headers, parBody);
@@ -258,58 +283,7 @@ public class Main extends Application {
     String authUrl = authEndpoint + "?client_id=" + urlenc(CLIENT_ID)
                      + "&request_uri=" + urlenc(requestUri)
                      + "&state=" + urlenc(state);
-    ////////////////////////////// TRYING TO DEKSTOP APP THE THINGY open desktop oauth
-    // final AuthSession sessionFinal = session;
-    // final Object lock = new Object();
-    // final String[] codeHolder = new String[1];
-    // final String[] stateHolder = new String[1];
-    // final String[] errorHolder = new String[1];
-    // final String[] errorDescHolder = new String[1];
-
-    // java.util.function.Consumer<String> onRedirect = (redirectUrl) -> {
-    //     System.out.println("onRedirect called with: " + redirectUrl);
-    //     try {
-    //         java.net.URI uriObj = new java.net.URI(redirectUrl);
-    //         String query = uriObj.getQuery();
-    //         java.util.Map<String, String> params = new java.util.HashMap<>();
-    //         for (String param : query.split("&")) {
-    //             String[] pair = param.split("=", 2);
-    //             if (pair.length == 2) params.put(pair[0], java.net.URLDecoder.decode(pair[1], "UTF-8"));
-    //         }
-    //         codeHolder[0] = params.get("code");
-    //         stateHolder[0] = params.get("state");
-    //         errorHolder[0] = params.get("error");
-    //         errorDescHolder[0] = params.get("error_description");
-    //         synchronized (lock) { lock.notify(); }
-    //     } catch (Exception ex) {
-    //         ex.printStackTrace();
-    //     }
-    // };
-    // System.out.println("Opening Oauth");
-    // //System.out.println("onRedirect called with: " + onRedirect);
-    // System.out.println("AUTH URL: " + authUrl);
-    // app.showOAuthWebView(authUrl, REDIRECT_URI, onRedirect);
-
-    // synchronized (lock) {
-    //     lock.wait(180_000); // wait up to 3 minutes
-    // }
-
-    // if (codeHolder[0] == null && errorHolder[0] == null)
-    //     throw new IOException("Timeout waiting for callback");
-    // if (!state.equals(stateHolder[0]))
-    //     throw new IOException("State mismatch");
-    // if (errorHolder[0] != null)
-    //     throw new IOException("Authorization error: " + errorHolder[0] + " - " + errorDescHolder[0]);
-    // if (codeHolder[0] == null)
-    //     throw new IOException("Authorization code is null");
     
-    // // 10. Exchange code for DPoP-bound access token
-    //     String tokenBody = String.format(
-    //     "grant_type=authorization_code&code=%s&redirect_uri=%s&code_verifier=%s&client_id=%s",
-    //     urlenc(codeHolder[0]), urlenc(REDIRECT_URI), urlenc(codeVerifier), urlenc(CLIENT_ID)
-    // );
-
-    ////////////////////////////////////////////TRYING TO DESKTOP APP THE LOGIN
       LocalCallbackServer callbackServer = new LocalCallbackServer();
     callbackServer.start();
 
@@ -334,7 +308,7 @@ public class Main extends Application {
     System.out.println("Token Body" + tokenBody);
     headers.clear();
     headers.put("Content-Type", "application/x-www-form-urlencoded");
-    headers.put("DPoP", DPoPUtil.buildDPoP("POST", tokenEndpoint, session.dpopNonce, dpopKeyPair));
+    headers.put("DPoP", DPoPUtil.buildDPoP("POST", tokenEndpoint, session.dpopNonce, dpopKeyPair, null));
 
 
     HttpResponse<String> tokenResponse = HttpUtil.postFormWithResponse(tokenEndpoint, headers, tokenBody);
@@ -351,6 +325,12 @@ public class Main extends Application {
     session.accessToken = (String) tokenJson.get("access_token");
     session.refreshToken = (String) tokenJson.get("refresh_token");
     session.did = extractDidFromToken(session.accessToken);
+
+    // After successful token exchange
+    saveSession(session); // Save tokens for next use
+
+    // Redirect to home page (call from your Main instance)
+    app.showHomePage(session.did); 
 
     return session;
 }
@@ -397,9 +377,7 @@ public class Main extends Application {
         return null;
     }
 }
-
-    
-   
+       
 
 }
 

@@ -36,23 +36,27 @@ public class Login {
 	
 	public Button getButton(Social social) {
 		switch(social) {
-		case BLUESKY: return blueskyButton;
-		case MASTODON: return mastodonButton;
-		default: return null;
+			case BLUESKY: return blueskyButton;
+			case MASTODON: return mastodonButton;
+			default: return null;
 		}
 	}
 	
 	public void setField(Social social, TextField field) {
 		switch(social) {
-		case BLUESKY: blueskyField = field;
-		case MASTODON: mastodonField = field;
+			case BLUESKY: blueskyField = field;
+				break;
+			case MASTODON: mastodonField = field;
+				break;
 		}
 	}
 	
 	public void setButton(Social social, Button button) {
 		switch(social) {
-		case BLUESKY: blueskyButton = button;
-		case MASTODON: mastodonButton = button;
+			case BLUESKY: blueskyButton = button;
+				break;
+			case MASTODON: mastodonButton = button;
+				break;
 		}
 	}
 	

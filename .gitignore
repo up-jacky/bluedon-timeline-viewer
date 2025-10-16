@@ -1,2 +1,10 @@
 /bin/
 /javafx-sdk-17.0.16/
+/.vscode/
+/.settings/
+
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build

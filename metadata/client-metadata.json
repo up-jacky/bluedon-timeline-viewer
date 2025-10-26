@@ -1,5 +1,5 @@
 {
-  "client_id": "https://up-jacky.github.io/bluedon-timeline-viewer/client-metadata.json",
+  "client_id": "https://up-jacky.github.io/bluedon-timeline-viewer/metadata/client-metadata.json",
   "client_name": "Bluedon Timeline Viewer",
   "application_type": "native",
   "redirect_uris": ["http://127.0.0.1:8080/callback"],

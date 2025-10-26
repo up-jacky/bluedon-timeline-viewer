@@ -23,7 +23,7 @@ import java.util.UUID;
 public class BlueskyClient {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private static final String CLIENT_ID = "https://up-jacky.github.io/bluedon-timeline-viewer/oauth/client_metadata.json";
+    private static final String CLIENT_ID = "https://up-jacky.github.io/bluedon-timeline-viewer/metadata/client-metadata.json";
     private static final String REDIRECT_URI = "http://127.0.0.1:8080/callback";
     private static final String SCOPE = "atproto";
 

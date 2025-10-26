@@ -3,8 +3,6 @@ package com.bluedon.view;
 import com.bluedon.interfaces.PageView;
 import com.bluedon.view.ui.images.BluedonLogo;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -16,7 +14,7 @@ import javafx.scene.image.ImageView;
 
 public class HomeView implements PageView {
 
-    public VBox createSidebar(VBox blueskyComponents, VBox mastodonComponents, Button refreshButton, Button logoutAllButton) {
+    public VBox createSidebar(VBox blueskyComponents, VBox mastodonComponents, Button refreshButton) {
         VBox sidebar = new VBox(20);
         sidebar.getStyleClass().add("sidebar");
         sidebar.setPrefWidth(250);
@@ -31,11 +29,18 @@ public class HomeView implements PageView {
             blueskyComponents,
             mastodonComponents,
             spacer,
-            refreshButton,
-            logoutAllButton
+            refreshButton
         );
 
         return sidebar;
+    }
+
+    public PasswordField createPasswordField(String prompText) {
+        PasswordField passwordField = new PasswordField();
+        passwordField.setPromptText(prompText);
+        passwordField.getStyleClass().add("email-field");
+
+        return passwordField;
     }
 
 
@@ -51,13 +56,6 @@ public class HomeView implements PageView {
     	layout.setLeft(sidebar);
     	layout.setCenter(scrollPane);
     	return layout;
-    }
-
-    public Button createButton(String name, EventHandler<ActionEvent> e) {
-    	Button button = new Button(name);
-    	button.setOnAction(e);
-    	
-    	return button;
     }
 
     @Override

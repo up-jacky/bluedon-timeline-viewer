@@ -9,20 +9,32 @@
     -fx-background-radius: 6;
 }
 
+.mastodon {
+    -fx-background-color: linear-gradient(to right, #8645F6, #4A5899);
+    -fx-padding: 8;
+}
+
+.bluesky {
+    -fx-background-color: linear-gradient(to left, #279af1, #4A5899);
+}
+
 .login-btn {
-    -fx-background-color: linear-gradient(to right, #279af1, #8645F6);
+    /* -fx-background-color:  #279af1; */
     -fx-text-fill: white;
     -fx-font-weight: bold;
     -fx-font-size: 20px;
-    -fx-padding: 5 30;
+    -fx-padding: 16 28;
     -fx-background-radius: 20;
     -fx-background-insets: 0;
     -fx-pref-width: 250px;
     -fx-pref-height: 30px;
-    -fx-border-color: #ffffff;     
-    -fx-border-width: 8px;        
     -fx-border-radius: 12;
     -fx-border-insets: 0;
+}
+
+.login-btn:hover {
+    /* -fx-background-color: linear-gradient(to left, #279af1, #8645F6); */
+    -fx-background-color:  #4A5899;
 }
 
 .sidebar {

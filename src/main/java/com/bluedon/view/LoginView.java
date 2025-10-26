@@ -5,8 +5,6 @@ import com.bluedon.view.ui.images.BluedonLogo;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -14,8 +12,6 @@ import javafx.stage.Stage;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.event.EventHandler;
-import javafx.event.ActionEvent;
 
 public class LoginView implements PageView {
 
@@ -26,22 +22,6 @@ public class LoginView implements PageView {
     	container.setAlignment(Pos.CENTER);
     	container.getStyleClass().add("input-box");
     	return container;
-    }
-    
-    public Button createButton(String name, EventHandler<ActionEvent> e) {
-    	Button button = new Button(name);
-    	button.getStyleClass().add("login-btn");
-    	button.setOnAction(e);
-    	
-    	return button;
-    }
-    
-    public TextField createTextField(String promptText) {
-    	TextField textField = new TextField();
-    	textField.setPromptText(promptText);
-    	textField.getStyleClass().add("email-field");
-    	
-    	return textField;
     }
     
     public VBox createLayout(double spacing, Node ... children) {
@@ -58,7 +38,7 @@ public class LoginView implements PageView {
     @Override
     public void displayPage(Stage primaryStage, Parent layout) {
         Scene loginScene = new Scene(layout, 1000, 600);
-        loginScene.getStylesheets().add("file:src/com/bluedon/resources/styles.css");
+        loginScene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
         primaryStage.setScene(loginScene);
         primaryStage.setTitle("Bluedon Login");
     }

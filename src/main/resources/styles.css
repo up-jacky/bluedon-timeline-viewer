@@ -9,20 +9,32 @@
     -fx-background-radius: 6;
 }
 
+.mastodon {
+    -fx-background-color: linear-gradient(to right, #8645F6, #4A5899);
+    -fx-padding: 8;
+}
+
+.bluesky {
+    -fx-background-color: linear-gradient(to left, #279af1, #4A5899);
+}
+
 .login-btn {
-    -fx-background-color: linear-gradient(to right, #00c6ff, #ffcc70);
+    /* -fx-background-color:  #279af1; */
     -fx-text-fill: white;
     -fx-font-weight: bold;
     -fx-font-size: 20px;
-    -fx-padding: 5 30;
+    -fx-padding: 16 28;
     -fx-background-radius: 20;
     -fx-background-insets: 0;
     -fx-pref-width: 250px;
     -fx-pref-height: 30px;
-    -fx-border-color: #ffffff;     
-    -fx-border-width: 8px;        
     -fx-border-radius: 12;
     -fx-border-insets: 0;
+}
+
+.login-btn:hover {
+    /* -fx-background-color: linear-gradient(to left, #279af1, #8645F6); */
+    -fx-background-color:  #4A5899;
 }
 
 .sidebar {
@@ -34,7 +46,7 @@
 /*.logo {
     -fx-font-size: 28px;
     -fx-font-weight: bold;
-    -fx-text-fill: linear-gradient(#007BFF, #FF7F50);
+    -fx-text-fill: linear-gradient(#279af1, #8645f6);
 }*/
 
 .sidebar .button {
@@ -44,7 +56,7 @@
 }
 
 .sidebar .button.active {
-    -fx-background-color: #4caf50; /* green when active */
+    -fx-background-color: #4caf50;
 }
 
 .post-card {
@@ -66,16 +78,25 @@
 }
 
 .bluesky-marker {
-    -fx-fill: deepskyblue;
+    -fx-fill: #279af1;
 }
 
 .mastodon-marker {
-    -fx-fill: orange;
+    -fx-fill: #8645f6;
 }
 
 
 .avatar {
-    -fx-fill: lightgray;   /* Default placeholder color */
-    -fx-stroke: #ddd;      /* Optional subtle border */
+    -fx-fill: lightgray;   
+    -fx-stroke: #ddd;     
     -fx-stroke-width: 1;
+}
+
+.error-box {
+    -fx-padding: 10;
+}
+
+.error-message {
+    -fx-text-fill: red;
+    -fx-font-size: 12px;
 }

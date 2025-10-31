@@ -4,6 +4,7 @@ import com.bluedon.utils.DPoPUtil;
 import com.bluedon.utils.Http;
 import com.bluedon.utils.LocalCallbackServer;
 import com.bluedon.utils.Pkce;
+import com.bluedon.utils.SessionFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.awt.Desktop;
@@ -15,9 +16,10 @@ import java.net.URLEncoder;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import org.json.JSONObject;
 
 
 public class BlueskyClient {
@@ -226,18 +228,44 @@ public class BlueskyClient {
                 "Content-Type", "application/json"
         );
 
-        var response = Http.postFormWithResponse(url, headers, jsonBody);
-        
+        HttpResponse<String> response = Http.postFormWithResponse(url, headers, jsonBody);
+        JSONObject responseJson = new JSONObject(response.body());
 
         if (response.statusCode() == 200) {
             System.out.println("[INFO] Sucessful creating session!");
-            var responseBody = MAPPER.readValue(response.body(), Map.class);
-            session.accessJwt = (String) responseBody.get("accessJwt");
-            session.refreshJwt = (String) responseBody.get("refreshJwt");
-            session.handle = (String) responseBody.get("handle");
+            session.accessJwt = responseJson.getString("accessJwt");
+            session.refreshJwt = responseJson.getString("refreshJwt");
         } else {
             System.err.println("[ERROR] Error Creating Session!");
-            throw new Exception("Incorrect password!");
+            throw new Exception("[ERROR] " + responseJson.get("error") + ": " + responseJson.get("message"));
+        }
+    }
+
+    public void refreshSession(AuthSession session, String pdsOrigin) throws Exception {
+        if (session.did == null || session.did.isBlank()) {
+            throw new IllegalStateException("AuthSession has no DID. Make sure to set it after login.");
+        }
+
+        String url = pdsOrigin + "/xrpc/com.atproto.server.refreshSession";
+
+        Map<String, String> headers = Map.of(
+                "Authorization", "Bearer " + session.refreshJwt,
+                "Content-Type", "application/json"
+        );
+
+        HttpResponse<String> response = Http.postFormWithResponse(url, headers, "");
+        
+
+        if (response.statusCode() == 200) {
+            System.out.println("[INFO] Successful refreshing session!");
+            JSONObject jsonBody = new JSONObject(response.body());
+            session.accessJwt = jsonBody.getString("accessJwt");
+            session.refreshJwt = jsonBody.getString("refreshJwt");
+        } else if (response.statusCode() == 400) {
+            ServiceRegistry.setBlueskySession(null);
+            SessionFile.BlueskySessionFile.deleteSession();
+        } else {
+            System.out.println("[ERROR] Failed to refresh session! " + response.statusCode() + response.body());
         }
     }
 
@@ -247,8 +275,6 @@ public class BlueskyClient {
         }
 
         String url = pdsOrigin + "/xrpc/com.atproto.server.deleteSession";
-
-        // String dpop = DPoPUtil.buildDPoP("POST", url, session.dpopNonce);
 
         Map<String, String> headers = Map.of(
                 "Authorization", "Bearer " + session.refreshJwt,
@@ -264,16 +290,18 @@ public class BlueskyClient {
         }
     }
 
-    public void getProfile(AuthSession session, String pdsOrigin) throws Exception {
+    public void getProfile(AuthSession session) throws Exception {
         if (session.did == null || session.did.isBlank()) {
             throw new IllegalStateException("AuthSession has no DID. Make sure to set it after login.");
         }
 
-        String url = pdsOrigin + "/xrpc/app.bsky.actor.getProfile?actor=" + session.did;
-        System.out.println("[INFO] BlueskyClient.getTimeline(): url = " + url);
+        String url = "https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?actor=" + session.did;
+
+        String dpop = DPoPUtil.buildDPoP("GET", url, session.dpopNonce);
 
         Map<String, String> headers = Map.of(
-                "Authorization", "Bearer " + session.accessJwt,
+                "Authorization", "DPoP " + session.accessToken,
+                "DPoP", dpop,
                 "Content-Type", "application/json"
         );
 
@@ -284,6 +312,7 @@ public class BlueskyClient {
             System.out.println("[INFO] Successful getting user profile!");
             var responseBody = MAPPER.readValue(response.body(),Map.class);
 
+            session.handle = (String) responseBody.get("handle");
             session.displayName = (String) responseBody.get("displayName");
             session.avatarUri = (String) responseBody.get("avatar");
             session.profileUrl = "https://bsky.app/profile/" + session.handle;
@@ -292,7 +321,7 @@ public class BlueskyClient {
         }
     }
 
-    public List<Map<String, Object>> getTimeline(AuthSession session, String pdsOrigin) throws Exception {
+    public JSONObject getTimeline(AuthSession session, String pdsOrigin) throws Exception {
         if (session.did == null || session.did.isBlank()) {
             throw new IllegalStateException("AuthSession has no DID. Make sure to set it after login.");
         }
@@ -305,16 +334,15 @@ public class BlueskyClient {
         );
 
         var response = Http.getWithResponse(url, headers);
-        System.out.println("[INFO] response = " + response);
+        JSONObject json = new JSONObject(response.body());
+        System.out.println("JSONObject: " + json);
 
-        var json = MAPPER.readValue(response.body(), Map.class);
 
-        @SuppressWarnings("unchecked")
-        List<Map<String, Object>> feed = (List<Map<String, Object>>) json.get("feed");
+        if (response.statusCode() != 200) {
+            throw new IOException("View timeline failed with status: " + response.statusCode() + ", body: " + response.body());
+        }
 
-        System.out.println("Get Class: " + json.get("feed").getClass());
-
-        return feed;
+        return json;
     }
 
     private static String urlenc(String s) {

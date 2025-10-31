@@ -1,0 +1,40 @@
+.label {
+    -fx-padding: 4px;
+    -fx-pref-width: 64px;
+}
+
+.handle-field {
+    -fx-padding: 4px 8px;
+    -fx-border-color: #4A5899;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+.handle-field:focus {
+    -fx-border-color: #279af1;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+.exit-button {
+    -fx-max-width: 0;
+    -fx-min-width: 0;
+    -fx-pref-width: 0;
+    -fx-padding: 0;
+    -fx-opacity: 0;
+}
+
+.login-button {
+    -fx-background-color: linear-gradient(to left, #279af1, #4A5899);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-padding: 4px 8px;
+    -fx-border-radius: 32px;
+    -fx-background-radius: 32px;
+    -fx-border-insets: 0;
+}
+
+.login-button:hover {
+    -fx-background-color:  #279af1;
+}

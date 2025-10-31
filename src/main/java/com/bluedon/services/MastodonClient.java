@@ -13,9 +13,9 @@ import java.net.InetSocketAddress;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.json.JSONObject;
 
 public class MastodonClient {
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -134,6 +134,8 @@ public class MastodonClient {
                 throw new IOException("Token exchange failed with status: " + tokenResponse.statusCode() + ", body: " + tokenResponse.body());
             }
 
+            System.out.println("[INFO] Auth Headers: " + tokenResponse.headers());
+
             var tokenData = MAPPER.readValue(tokenResponse.body(), Map.class);
 
             String accessToken = (String) tokenData.get("access_token");
@@ -206,7 +208,6 @@ public class MastodonClient {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public void getUserInfo(AuthSession session) throws Exception {
         if (session.accessToken == null || session.instanceUrl == null) {
             throw new IllegalStateException("Session is not authenticated or missing instance URL.");
@@ -224,19 +225,19 @@ public class MastodonClient {
         if (response.statusCode() != 200) {
             throw new IOException("Get user info failed with status: " + response.statusCode() + ", body: " + response.body());
         } else {
-            System.out.println("[INFO] Succesfully revoked the current session.");
-            Map<String, Object> responseBody = MAPPER.readValue(response.body(), Map.class);
-            session.handle = (String) responseBody.get("preferred_username");
-            session.displayName = (String) responseBody.get("name");
-            session.avatarUri = (String) responseBody.get("picture");
-            session.profileUrl = (String) responseBody.get("profile");
+            System.out.println("[INFO] Succesfully get user info.");
+            JSONObject responseBody = new JSONObject(response.body());
+            session.handle = responseBody.getString("preferred_username") + "@mastodon.social";
+            session.displayName = responseBody.getString("name").isEmpty()? responseBody.getString("preferred_username"): responseBody.getString("name");
+            session.avatarUri = responseBody.getString("picture");
+            session.profileUrl = responseBody.getString("profile");
         }
 
     }
 
-    @SuppressWarnings("unchecked")
-    public List<Map<String, Object>> getTimeline(AuthSession session) throws Exception {
+    public JSONObject getTimeline(AuthSession session) throws Exception {
         if (session.accessToken == null || session.instanceUrl == null) {
+            System.out.println("[ERROR] access_token=\""+ session.accessToken + "\"" + "instance_url=\"" + session.instanceUrl + "\"");
             throw new IllegalStateException("Session is not authenticated or missing instance URL.");
         }
 
@@ -247,22 +248,13 @@ public class MastodonClient {
         );
 
         var response = Http.getWithResponse(postEndpoint, headers);
-        // System.out.println(response.body());
-
-        List<Map<String, Object>> timeline = MAPPER.readValue(response.body(), List.class);
-        System.out.println(timeline);
-
-        int i = 0;
-        for (Map<String, Object> post: timeline) {
-            System.out.println("[" + i + "]: " + post.keySet());
-            i += 1;
-        }
+        JSONObject json = new JSONObject("{\"feed\": " + response.body() + "}");
 
         if (response.statusCode() != 200) {
             throw new IOException("View timeline failed with status: " + response.statusCode() + ", body: " + response.body());
         }
 
-        return null;
+        return json;
     }
 
     private static String urlenc(String s) {

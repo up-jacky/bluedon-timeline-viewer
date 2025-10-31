@@ -9,13 +9,21 @@ import com.bluedon.services.MastodonClient;
 import com.bluedon.services.ServiceRegistry;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
-import javafx.scene.control.Label;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
+import javafx.scene.text.Text;
 
 
 public class Home {
@@ -26,14 +34,13 @@ public class Home {
     private Button blueskyLoginButton;
     
     private boolean displayMastodon = true;
-    private boolean isMastodonLoggedIn = false;
     private String mastodonUsername;
 	private String mastodonDisplayName;
 	private String mastodonAvatarUri;
     private Button mastodonLoginButton;
     
-    private VBox postsContainer = new VBox(15);
-    public List<Post> posts = new ArrayList<>();
+    public VBox postsContainer;
+    private List<Post> posts = new ArrayList<>();
     
     public void setButton(Social social, Button button) {
     	switch(social) {
@@ -101,12 +108,12 @@ public class Home {
 
 		switch (social) {
 			case BLUESKY:
-				names = new VBox(4, new Label(blueskyDisplayName), new Label(blueskyUsername));
+				names = new VBox(4, new Text(blueskyDisplayName), new Text(blueskyUsername));
 				avatar = new Avatar(blueskyAvatarUri).getCircleImage(36);
 				profile = new HBox(4, avatar, names);
 				return profile;
 			case MASTODON:
-				names = new VBox(4, new Label(mastodonDisplayName), new Label(mastodonUsername));
+				names = new VBox(4, new Text(mastodonDisplayName), new Text(mastodonUsername));
 				avatar = new Avatar(mastodonAvatarUri).getCircleImage(36);
 				profile = new HBox(4, avatar, names);
 				return profile;
@@ -141,25 +148,21 @@ public class Home {
     
     public Button getRefreshButton() {
     	Button button = new Button("Refresh Posts");
-    	button.setOnAction(e-> refreshPosts());
+    	button.setOnAction(e-> {
+			fetchTimeline();
+			refreshPosts();
+		});
     	return button;
     }
     
-    // public Button getLogoutAllButton() {
-    // 	Button button = new Button("Log Out All Accounts");
-    // 	button.setOnAction(e -> {
-    // 		// isBlueskyLoggedIn = false;
-    // 		blueskyUsername = null;
-    		
-    // 		isMastodonLoggedIn = false;
-    // 		mastodonUsername = null;
-	// 		PageController.displayLoginPage();
-    // 	});
-    // 	return button;
-    // }
-    
-    public VBox getPostsContainer() {
-    	return postsContainer;
+	private final static CompletableFuture<Boolean> isDoneFetching = new CompletableFuture<>();
+
+    public Boolean isDoneFetching(int timeoutInSecs) {
+		try {
+	    	return isDoneFetching.get(timeoutInSecs, TimeUnit.SECONDS);
+		} catch (Exception e) {
+			return null;
+		}
     }
     
     public VBox getUIComponents(Social social) {
@@ -180,12 +183,15 @@ public class Home {
     	
     }
 
-	public void getTimeline() {
+	public void fetchTimeline() {
 		BlueskyClient blueskyClient = ServiceRegistry.getBlueskyClient();
 		MastodonClient mastodonClient = ServiceRegistry.getMastodonClient();
 
 		AuthSession blueskySession = ServiceRegistry.getBlueskySession();
 		AuthSession mastodonSession = ServiceRegistry.getMastodonSession();
+
+		if (postsContainer != null) postsContainer.getChildren().clear();
+		posts.clear();
 
 		if (blueskySession != null){
 			try {
@@ -196,12 +202,32 @@ public class Home {
 					if(pdsOrigin == null) {
 						System.err.println("[ERROR] No PDS origin found in Bluesky session. Please re-authenticate");
 					} else {
-						Object timeline = blueskyClient.getTimeline(blueskySession, pdsOrigin);
-						System.out.println("[INFO] GET Timeline Success! \n**\n" + timeline + "\n**");
-
-						// for (Map<String, Object> post: timeline.) {
-
-						// }
+						JSONObject timelineRaw = blueskyClient.getTimeline(blueskySession, pdsOrigin);
+						JSONArray timeline = timelineRaw.getJSONArray("feed");
+						for(int i = 0; i < timeline.length(); i += 1) {
+							JSONObject post = timeline.getJSONObject(i).getJSONObject("post");
+							System.out.print(String.format("[RECORD %d]: ", i));
+							getAllKeySet(post, "root", 0);
+							JSONObject author = post.getJSONObject("author");
+							String displayName = author.getString("displayName");
+							String username = author.getString("handle");
+							String avatarUrl = author.getString("avatar");
+							String content = post.getJSONObject("record").getString("text");
+							String createdAt = post.getString("indexedAt");
+							String uri = post.getString("uri");
+							int likeCount = post.getInt("likeCount");
+							int replyCount = post.getInt("replyCount");
+							int repostCount = post.getInt("repostCount");
+							int bookmarkCount = post.getInt("bookmarkCount");
+							JSONObject embed = null;
+							try{
+								embed = post.getJSONObject("embed");
+							} catch (Exception e) {
+								System.out.println("[INFO] No embed found.");
+							}
+							Post postCard = new Post(Social.BLUESKY, displayName, username, avatarUrl, content, uri, createdAt, replyCount, repostCount, likeCount, likeCount, bookmarkCount, embed);
+							posts.add(postCard);
+						}
 					}
 				}
 			} catch(Exception e) {
@@ -215,43 +241,59 @@ public class Home {
 				if (mastodonSession.accessToken == null) {
 					System.err.println("[ERROR] Mastodon is not authenticated!");
 				} else {
-					Object timeline = mastodonClient.getTimeline(mastodonSession);
-					System.out.println("[INFO] GET Timeline Success! \n**\n" + timeline + "\n**");
+					JSONObject timelineRaw = mastodonClient.getTimeline(mastodonSession);
+					JSONArray timeline = timelineRaw.getJSONArray("feed");
+
+					for(int i = 0; i < timeline.length(); i += 1) {
+						JSONObject post = timeline.getJSONObject(i);
+						String content = post.getString("content");
+						if(content == null || content.trim().isEmpty()) {
+							post = post.getJSONObject("reblog");
+						}
+						content = post.getString("content");
+						JSONObject account = post.getJSONObject("account");
+						String url = post.getString("url");
+						String displayName = account.getString("display_name");
+						String username = account.getString("username");
+						String avatarUrl = account.getString("avatar");
+						String timeCreated = post.getString("created_at");
+						int favoritesCount = post.getInt("favourites_count");
+						int reblogsCount = post.getInt("reblogs_count");
+						int quotesCount = post.getInt("quotes_count");
+						Post postCard = new Post(Social.MASTODON, url, displayName, username, avatarUrl, content, timeCreated, favoritesCount, reblogsCount, quotesCount);
+						posts.add(postCard);
+					}
 				}
 			} catch(Exception e) {
-				System.err.println("[ERROR] Failed to get user timeline." + e.getMessage());
+				System.err.println("[ERROR] Failed to get user timeline. " + e.getMessage());
 				e.printStackTrace();
+			}
+		}
+		posts.sort(Comparator.comparing(Post::getCreatedAt).reversed());
+		isDoneFetching.complete(true);
+	}
+
+	private void getAllKeySet(JSONObject jsonObject, String parent, int depth) {
+		System.out.println("----".repeat(depth)+"("+parent+") " + jsonObject.keySet());
+		
+		for(String key: jsonObject.keySet()) {
+			if (jsonObject.get(key).getClass().getName() == JSONObject.class.getName()) {
+				getAllKeySet(jsonObject.getJSONObject(key), key, depth + 1);
+			} else if (jsonObject.get(key).getClass().getName() == JSONArray.class.getName()) {
+				JSONArray jsonArray = (JSONArray) jsonObject.get(key);
+				if(jsonArray.length() > 0) {
+					if (jsonArray.get(0).getClass().getName() == JSONObject.class.getName()) {
+						getAllKeySet(jsonArray.getJSONObject(0), key, depth + 1);
+					} else {
+						System.out.println("----".repeat(depth)+"("+parent+") " + key  + " -- " + jsonObject.get(key).getClass().getName() + " -- " + jsonObject.get(key).toString());
+					}
+				}
+			} else {
+				System.out.println("----".repeat(depth)+"("+parent+") " + key + " -- " + jsonObject.get(key).getClass().getName() + " -- " + jsonObject.get(key).toString());
 			}
 		}
 	}
     
-    // public void updateBlueskyLoginButton() {
-    //     if (isBlueskyLoggedIn) {
-    //         blueskyLoginButton.setText("Log Out Bluesky");
-    //         blueskyLoginButton.setOnAction(e -> {
-    //         	isBlueskyLoggedIn = false;
-    //             blueskyUsername = null;
-    //             updateBlueskyLoginButton();
-    //             refreshPosts();
-    //         });
-    //         blueskyUsernameLabel.setText("Logged in as @" + blueskyUsername);
-    //     } else {
-    //     	blueskyLoginButton.setText("Log In Bluesky");
-    //     	blueskyLoginButton.setOnAction(e -> {
-    //             LoginDialog user = new LoginDialog("Bluesky");
-    //             if (user.getUsername() != null && !user.getUsername().isBlank()) {
-    //             	isBlueskyLoggedIn = true;
-    //                 blueskyUsername = user.getUsername();
-    //                 updateBlueskyLoginButton();
-    //                 refreshPosts();
-    //             } else if(user.getUsername() == null && !user.getUsername().isBlank()) {
-    //                 new ErrorMessage("Failed to Login", "Input cannot be empty.");
-    //             }
-    //         });
-    //         blueskyUsernameLabel.setText("");
-    //     }
-    // }
-
     private void updateFilterButtonStyle(Button btn, boolean active) {
         if (active) {
             if (!btn.getStyleClass().contains("active")) {
@@ -262,43 +304,21 @@ public class Home {
         }
     }
     
-    // public void updateMastodonLoginButton() {
-    //     if (isMastodonLoggedIn) {
-    //         mastodonLoginButton.setText("Log Out Mastodon");
-    //         mastodonLoginButton.setOnAction(e -> {
-    //         	isMastodonLoggedIn = false;
-    //             mastodonUsername = null;
-    //             updateMastodonLoginButton();
-    //             refreshPosts();
-    //         });
-    //         mastodonUsernameLabel.setText("Logged in as @" + mastodonUsername);
-    //     } else {
-    //     	mastodonLoginButton.setText("Log In Mastodon");
-    //     	mastodonLoginButton.setOnAction(e -> {
-    //             LoginDialog user = new LoginDialog("Mastodon");
-    //             if (user.getUsername() != null) {
-    //             	isMastodonLoggedIn = true;
-    //                 mastodonUsername = user.getUsername();
-    //                 updateMastodonLoginButton();
-    //                 refreshPosts();
-    //             } else {
-    //                 new ErrorMessage("Failed to Login!", "Input cannot be empty.");
-    //             }
-    //         });
-    //         mastodonUsernameLabel.setText("");
-    //     }
-    // }
-    
     public void refreshPosts() {
+		if(postsContainer == null) postsContainer = new VBox(24);
     	postsContainer.getChildren().clear();
-    	
-    	for (Post post: posts) {
-    		boolean show = false;
-    		
-    		// if(post.type == Social.BLUESKY && displayBluesky) show = isBlueskyLoggedIn;
-    		if(post.type == Social.MASTODON && displayMastodon) show = isMastodonLoggedIn;
-    		if(show) postsContainer.getChildren().add(post.createPostCard());
-    	}
+
+		for (Post post: posts) {
+			boolean display = false;
+
+			if(post.social == Social.MASTODON && displayMastodon) display = ServiceRegistry.isMastodonLoggedIn();
+			if(post.social == Social.BLUESKY && displayBluesky) display = ServiceRegistry.isBlueskyLoggedIn();
+			if(display) {
+				Pane postContainer = post.createPostCard();
+				postsContainer.getChildren().add(postContainer);
+			}
+
+		}
     }
     
 }

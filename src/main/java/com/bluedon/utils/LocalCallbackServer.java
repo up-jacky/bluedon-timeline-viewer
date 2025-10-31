@@ -30,29 +30,61 @@ public class LocalCallbackServer {
                 String code = params.get("code");
                 String state = params.get("state");
                 String iss = params.get("iss");
+                String error = params.get("error");
+                String errorDescription  = params.get("error_description");
 
-                // Save the callback result
-                callbackFuture.complete(new CallbackResult(code, state, iss));
+                if (error != null) {
 
-                // Prepare the HTML response
-                String response = "<html><body><h1>Login successful!</h1><p>You can close this window.</p></body></html>";
-                byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
+                    // TODO: Format response with style
+                    String response = "<html><body><h1>Login failed!</h1><h2>Error: " + error + "</h2><p>" + errorDescription + "</p></body></html>";
+                    byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
 
-                // Send the response
-                exchange.getResponseHeaders().set("Content-Type", "text/html; charset=utf-8");
-                exchange.getResponseHeaders().set("Cache-Control", "no-store");
-                exchange.sendResponseHeaders(200, responseBytes.length);
+                    // Send the response
+                    exchange.getResponseHeaders().set("Content-Type", "text/html; charset=utf-8");
+                    exchange.getResponseHeaders().set("Cache-Control", "no-store");
+                    exchange.sendResponseHeaders(403, responseBytes.length);
 
-                try (var os = exchange.getResponseBody()) {
-                    os.write(responseBytes);
-                    os.flush();
+                    try (var os = exchange.getResponseBody()) {
+                        os.write(responseBytes);
+                        os.flush();
+                    }
+
+                    callbackFuture.completeExceptionally(new IOException("Failed to  login! Error: " + error));
+                } else {
+                    // Save the callback result
+                    callbackFuture.complete(new CallbackResult(code, state, iss));
+
+                    // Prepare the HTML response
+                    // TODO: Format response with style
+                    String response = "<html><body><h1>Login successful!</h1><p>You can close this window.</p></body></html>";
+                    byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
+
+                    // Send the response
+                    exchange.getResponseHeaders().set("Content-Type", "text/html; charset=utf-8");
+                    exchange.getResponseHeaders().set("Cache-Control", "no-store");
+                    exchange.sendResponseHeaders(200, responseBytes.length);
+
+                    try (var os = exchange.getResponseBody()) {
+                        os.write(responseBytes);
+                        os.flush();
+                    }
                 }
 
                 // Stop the server
                 stop();
             } else {
-                exchange.sendResponseHeaders(405, 0);
-                exchange.getResponseBody().close();
+                String response = "<html><body><h1>Login failed!</h1><p>Method is not allowed.</p></body></html>";
+                byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
+
+                exchange.getResponseHeaders().set("Content-Type", "text/html; charset=utf-8");
+                exchange.getResponseHeaders().set("Cache-Control", "no-store");
+                exchange.sendResponseHeaders(405, responseBytes.length);
+                try (var os = exchange.getResponseBody()) {
+                    os.write(responseBytes);
+                    os.flush();
+                }
+                stop();
+                throw new IOException("Failed to  login! Error: Method is not allowed.");
             }
         });
         server.start();

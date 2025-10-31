@@ -1,7 +1,7 @@
 package com.bluedon.controllers;
 
-import com.bluedon.services.AuthSession;
 import com.bluedon.services.ServiceRegistry;
+import com.bluedon.utils.SessionFile;
 
 import javafx.stage.Stage;
 
@@ -24,17 +24,20 @@ public class PageController {
      *  Displays the login page
      */
     public static void displayLoginPage() {
-        login.start(stage);
+        SessionFile.readSession();
+        System.out.println("[INFO] Bluesky: " + ServiceRegistry.isBlueskyLoggedIn() + " Mastodon: " + ServiceRegistry.isMastodonLoggedIn());
+        if (ServiceRegistry.isBlueskyLoggedIn() == false && ServiceRegistry.isMastodonLoggedIn() == false){
+            login.start(stage);
+        } else {
+            displayHomePage();
+        }
     }
 
     /**
      * Displays the home page
      */
     public static void displayHomePage() {
-        AuthSession blueskySession = ServiceRegistry.getBlueskySession();
-        AuthSession mastodonSession = ServiceRegistry.getMastodonSession();
-
-        if (blueskySession != null || mastodonSession != null) {
+        if (ServiceRegistry.isBlueskyLoggedIn() == true || ServiceRegistry.isMastodonLoggedIn() == true){
             home.start(stage);
         } else {
             displayLoginPage();

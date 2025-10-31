@@ -22,7 +22,6 @@ public class ServiceRegistry {
         blueskySession = session;
     }
 
-
     // Bluesky PDS Origin
     public static String getBlueskyPdsOrigin() {
         return blueskyPdsOrigin;
@@ -30,6 +29,10 @@ public class ServiceRegistry {
 
     public static void setBlueskyPdsOrigin(String pdsOrigin) {
         blueskyPdsOrigin = pdsOrigin;
+    }
+    
+    public static boolean isBlueskyLoggedIn() {
+        return (blueskySession != null && blueskySession.accessJwt != null);
     }
 
     // Mastodon Client
@@ -44,5 +47,9 @@ public class ServiceRegistry {
     
     public static void setMastodonSession(AuthSession session) {
         mastodonSession = session;
+    }
+
+    public static boolean isMastodonLoggedIn() {
+        return (mastodonSession != null);
     }
 }

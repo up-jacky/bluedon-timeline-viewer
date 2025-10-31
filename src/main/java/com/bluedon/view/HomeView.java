@@ -64,6 +64,7 @@ public class HomeView implements PageView {
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setFitToWidth(true);
         scrollPane.setFitToHeight(true);
+        scrollPane.setPannable(true);
         if(posts == null) {
             StackPane sp = getProgressIndicator();
             sp.setPrefHeight(scrollPane.getHeight());
@@ -73,9 +74,14 @@ public class HomeView implements PageView {
             sp.setPrefHeight(scrollPane.getHeight());
             scrollPane.setContent(sp);
         } else {
-    	    posts.setPadding(new Insets(24));
+    	    posts.setPadding(new Insets(36));
             scrollPane.setContent(posts);
             scrollPane.setPrefViewportWidth(ScrollPane.USE_COMPUTED_SIZE);
+            posts.setOnScroll(e -> {
+                double deltaY = e.getDeltaY() * (0.5);
+                scrollPane.setVvalue(scrollPane.getVvalue() - deltaY / scrollPane.getHeight());
+                e.consume();
+            });
         }
         return scrollPane;
     }

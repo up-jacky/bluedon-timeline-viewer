@@ -78,7 +78,7 @@ public class HomeView implements PageView {
             scrollPane.setContent(posts);
             scrollPane.setPrefViewportWidth(ScrollPane.USE_COMPUTED_SIZE);
             posts.setOnScroll(e -> {
-                double deltaY = e.getDeltaY() * (0.5);
+                double deltaY = e.getTextDeltaY() * (0.3);
                 scrollPane.setVvalue(scrollPane.getVvalue() - deltaY / scrollPane.getHeight());
                 e.consume();
             });

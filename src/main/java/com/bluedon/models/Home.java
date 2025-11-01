@@ -20,7 +20,6 @@ import org.json.JSONObject;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
@@ -202,12 +201,12 @@ public class Home {
 					if(pdsOrigin == null) {
 						System.err.println("[ERROR] No PDS origin found in Bluesky session. Please re-authenticate");
 					} else {
-						JSONObject timelineRaw = blueskyClient.getTimeline(blueskySession, pdsOrigin);
+						JSONObject timelineRaw = blueskyClient.getTimeline(blueskySession, pdsOrigin, 50);
 						JSONArray timeline = timelineRaw.getJSONArray("feed");
 						for(int i = 0; i < timeline.length(); i += 1) {
 							JSONObject post = timeline.getJSONObject(i).getJSONObject("post");
 							System.out.print(String.format("[RECORD %d]: ", i));
-							getAllKeySet(post, "root", 0);
+							// getAllKeySet(post, "root", 0);
 							JSONObject author = post.getJSONObject("author");
 							String displayName = author.getString("displayName");
 							String username = author.getString("handle");
@@ -241,7 +240,7 @@ public class Home {
 				if (mastodonSession.accessToken == null) {
 					System.err.println("[ERROR] Mastodon is not authenticated!");
 				} else {
-					JSONObject timelineRaw = mastodonClient.getTimeline(mastodonSession);
+					JSONObject timelineRaw = mastodonClient.getTimeline(mastodonSession, 40);
 					JSONArray timeline = timelineRaw.getJSONArray("feed");
 
 					for(int i = 0; i < timeline.length(); i += 1) {

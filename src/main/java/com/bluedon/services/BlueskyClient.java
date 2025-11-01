@@ -321,12 +321,12 @@ public class BlueskyClient {
         }
     }
 
-    public JSONObject getTimeline(AuthSession session, String pdsOrigin) throws Exception {
+    public JSONObject getTimeline(AuthSession session, String pdsOrigin, int limit) throws Exception {
         if (session.did == null || session.did.isBlank()) {
             throw new IllegalStateException("AuthSession has no DID. Make sure to set it after login.");
         }
 
-        String url = pdsOrigin + "/xrpc/app.bsky.feed.getTimeline";
+        String url = pdsOrigin + "/xrpc/app.bsky.feed.getTimeline?limit=" + limit;
         System.out.println("[INFO] BlueskyClient.getTimeline(): url = " + url);
 
         Map<String, String> headers = Map.of(

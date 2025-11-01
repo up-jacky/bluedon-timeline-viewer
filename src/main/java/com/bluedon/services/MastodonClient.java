@@ -235,13 +235,13 @@ public class MastodonClient {
 
     }
 
-    public JSONObject getTimeline(AuthSession session) throws Exception {
+    public JSONObject getTimeline(AuthSession session, int limit) throws Exception {
         if (session.accessToken == null || session.instanceUrl == null) {
             System.out.println("[ERROR] access_token=\""+ session.accessToken + "\"" + "instance_url=\"" + session.instanceUrl + "\"");
             throw new IllegalStateException("Session is not authenticated or missing instance URL.");
         }
 
-        String postEndpoint = session.instanceUrl + "/api/v1/timelines/home";
+        String postEndpoint = session.instanceUrl + "/api/v1/timelines/home?limit=" + limit;
 
         Map<String, String> headers = Map.of(
             "Authorization", "Bearer " + session.accessToken

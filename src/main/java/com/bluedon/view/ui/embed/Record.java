@@ -2,6 +2,7 @@ package com.bluedon.view.ui.embed;
 
 import java.awt.Desktop;
 import java.net.URI;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -33,7 +34,7 @@ public class Record extends Embed {
     private int repostCount;
     private DateTimeFormatter currentYearFormatter = DateTimeFormatter.ofPattern("MMM dd");
     private DateTimeFormatter generalFormatter = DateTimeFormatter.ofPattern("MMM dd yyyy");
-    private DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+    private DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm a");
     private boolean mediaOnly = false;
 
     public Record(JSONObject rawJson) {
@@ -221,6 +222,6 @@ public class Record extends Embed {
     }
 
     private static LocalDateTime parseDate(String rawDate) {
-        return LocalDateTime.parse(rawDate.replaceAll("\\..*", ""));
+        return LocalDateTime.parse(rawDate.replaceAll("\\..*", "")).plus(Duration.ofHours(8));
     }
 }

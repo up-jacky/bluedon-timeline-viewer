@@ -3,6 +3,7 @@ package com.bluedon.view.ui.cards;
 
 import java.awt.Desktop;
 import java.net.URI;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -49,7 +50,7 @@ public class Post {
 
     private DateTimeFormatter currentYearFormatter = DateTimeFormatter.ofPattern("MMM dd");
     private DateTimeFormatter generalFormatter = DateTimeFormatter.ofPattern("MMM dd yyyy");
-    private DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+    private DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm a");
 
     /**
      * Post settings for Mastodon
@@ -150,7 +151,7 @@ public class Post {
         Text createdAtText = new Text(parsedCreatedAt);
         createdAtText.getStyleClass().add("post-time-created");
 
-        Text contentText = new Text(parseHtml(content));
+        Text contentText = new Text(content);
         contentText.getStyleClass().add("post-content");
         TextFlow contentFlow = new TextFlow(contentText);
         
@@ -266,6 +267,7 @@ public class Post {
     }
 
     private static String parseHtml(String rawHtml) {
+        System.out.println("[INFO] " + rawHtml);
         return rawHtml.replaceAll("<\\/?[^>]+(>|$)", "");
     }
 
@@ -274,6 +276,6 @@ public class Post {
     }
 
     private static LocalDateTime parseDate(String rawDate) {
-        return LocalDateTime.parse(rawDate.replaceAll("\\..*", ""));
+        return LocalDateTime.parse(rawDate.replaceAll("\\..*", "")).plus(Duration.ofHours(8));
     }
 }

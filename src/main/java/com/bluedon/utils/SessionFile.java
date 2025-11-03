@@ -43,10 +43,10 @@ public class SessionFile {
 }
             """, codeVerifier, accessToken, refreshToken, did, dpopNonce, accessJwt, refreshJwt);
                 writer.write(data);
-                System.out.println("[INFO] Successfully saved Bluesky session.");
+                System.out.println("[INFO][SessionFile][BlueskySessionFile][saveSession] Successfully saved Bluesky session.");
             } catch (Exception e) {
+                System.err.println("[ERROR][SessionFile][BlueskySessionFile][saveSession] Failed to save current Bluesky session. " + e.getMessage());
                 e.printStackTrace();
-                System.err.println("[ERROR] Failed to save current Bluesky session. " + e.getMessage());
             }
         }
 
@@ -57,7 +57,7 @@ public class SessionFile {
                 String jsonString = String.join("",Files.readAllLines(filePath));
                 JSONObject jsonObject = new JSONObject(jsonString);
                 if (jsonObject.getString("code_verifier").isEmpty()) {
-                    System.out.println("[INFO] No saved Bluesky session.");
+                    System.out.println("[INFO][SessionFile][BlueskySessionFile][readSession] No saved Bluesky session.");
                     return;
                 }
                 AuthSession session = new AuthSession(jsonObject.getString("code_verifier"));
@@ -73,18 +73,19 @@ public class SessionFile {
                 BlueskyClient blueskyClient = ServiceRegistry.getBlueskyClient();
                 blueskyClient.getProfile(session);
                 if (session.refreshJwt != null) blueskyClient.refreshSession(session, ServiceRegistry.getBlueskyPdsOrigin());
-                System.out.println("[INFO] Successfully read Bluesky session.");
+                System.out.println("[INFO][SessionFile][BlueskySessionFile][readSession] Successfully read Bluesky session.");
             } catch (Exception e) {
-                System.err.println("[ERROR] " + e.getMessage());
+                System.err.println("[ERROR][SessionFile][BlueskySessionFile][readSession] " + e.getMessage());
+                e.printStackTrace();
             }
         }
 
         public static void deleteSession() {
             File fileSession = new File(fileName);
             if (fileSession.delete()) {
-                System.out.println("[INFO] Successfully deleted Bluesky session.");
+                System.out.println("[INFO][SessionFile][BlueskySessionFile][deleteSession] Successfully deleted Bluesky session.");
             } else {
-                System.err.println("[ERROR] Failed to deleted Bluesky session.");
+                System.err.println("[ERROR][SessionFile][BlueskySessionFile][deleteSession] Failed to deleted Bluesky session.");
             }
         }
     }
@@ -96,17 +97,21 @@ public class SessionFile {
             try (FileWriter writer = new FileWriter(fileName)) {
                 String accessToken = session.accessToken == null? "" : session.accessToken;
                 String refreshToken = session.refreshToken == null? "" : session.refreshToken;
+                String clientId = session.clientId == null? "" : session.clientId;
+                String clientSecret = session.clientSecret == null? "" : session.clientSecret;
                 String data = String.format("""
 {
     "access_token": "%s",
     "refresh_token": "%s",
+    "client_id": "%s",
+    "client_secret": "%s"
 }
-            """, accessToken, refreshToken);
+            """, accessToken, refreshToken, clientId, clientSecret);
                 writer.write(data);
-                System.out.println("[INFO] Successfully saved Mastodon session.");
+                System.out.println("[INFO][SessionFile][MastodonSessionFile][saveSession] Successfully saved Mastodon session.");
             } catch (Exception e) {
+                System.err.println("[ERROR][SessionFile][MastodonSessionFile][saveSession] Failed to save current Mastodon session. " + e.getMessage());
                 e.printStackTrace();
-                System.err.println("[ERROR] Failed to save current Mastodon session. " + e.getMessage());
             }
         }
 
@@ -117,34 +122,37 @@ public class SessionFile {
                 String jsonString = String.join("",Files.readAllLines(filePath));
                 JSONObject jsonObject = new JSONObject(jsonString);
                 if (jsonObject.getString("access_token").isEmpty()) {
-                    System.out.println("[INFO] No saved Mastodon session.");
+                    System.out.println("[INFO][SessionFile][MastodonSessionFile][readSession] No saved Mastodon session.");
                     return;
                 }
                 AuthSession session = new AuthSession(null);
                 session.accessToken = jsonObject.getString("access_token");
                 session.refreshToken = jsonObject.getString("refresh_token");
+                session.clientId = jsonObject.getString("client_id");
+                session.clientSecret = jsonObject.getString("client_secret");
                 session.instanceUrl = "https://mastodon.social";
                 
                 MastodonClient mastodonClient = ServiceRegistry.getMastodonClient();
                 try {
                     mastodonClient.getUserInfo(session);
                 } catch (Exception e) {
-                    System.err.println("[ERROR] " + e.getMessage());
+                    System.err.println("[ERROR][SessionFile][MastodonSessionFile][readSession] " + e.getMessage());
                 }
 
                 ServiceRegistry.setMastodonSession(session);
-                System.out.println("[INFO] Successfully read Mastodon session.");
+                System.out.println("[INFO][SessionFile][MastodonSessionFile][readSession] Successfully read Mastodon session.");
             } catch (Exception e) {
-                System.err.println("[ERROR] " + e.getMessage());
+                System.err.println("[ERROR][SessionFile][MastodonSessionFile][readSession] " + e.getMessage());
+                e.printStackTrace();
             }
         }
 
         public static void deleteSession() {
             File fileSession = new File(fileName);
             if (fileSession.delete()) {
-                System.out.println("[INFO] Successfully deleted Mastodon session.");
+                System.out.println("[INFO][SessionFile][MastodonSessionFile][deleteSession] Successfully deleted Mastodon session.");
             } else {
-                System.err.println("[ERROR] Failed to deleted Mastodon session.");
+                System.err.println("[ERROR][SessionFile][MastodonSessionFile][deleteSession] Failed to deleted Mastodon session.");
             }
         }
     }

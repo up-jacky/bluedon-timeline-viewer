@@ -107,11 +107,12 @@ public class BlueskyClient {
                 if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(java.awt.Desktop.Action.BROWSE)) {
                     Desktop.getDesktop().browse(URI.create(authUrl));
                 } else {
-                    System.out.println("Open this URL in your browser: " + authUrl);
+                    System.err.println("[WARNING][BlueskyClient][startAuth] Open this URL in your browser: " + authUrl);
                 }
             } catch (Exception e) {
-                System.out.println("Failed to open system browser: " + e.getMessage());
-                System.out.println("Open this URL in your browser: " + authUrl);
+                System.err.println("[WARNING][BlueskyClient][startAuth] Open this URL in your browser: " + authUrl);
+                System.err.println("[ERROR][BlueskyClient][startAuth] Failed to open system browser: " + e.getMessage());
+                e.printStackTrace();
             }
 
             // Wait for callback
@@ -149,8 +150,6 @@ public class BlueskyClient {
                 throw new IOException("Token Exchange Error: " + error +
                     (errorDescription != null ? " - " + errorDescription : ""));
             }
-
-            System.out.println("[INFO] tokenJson: " + tokenJson);
 
             // Supply session tokens
             session.accessToken = (String) tokenJson.get("access_token");
@@ -202,14 +201,15 @@ public class BlueskyClient {
                 }
             }
         } catch (Exception e) {
-            System.out.println("Could not extract DID from token: " + e.getMessage());
+            System.err.println("[ERROR][BlueskyClient][extractDidFromToken] Could not extract DID from token: " + e.getMessage());
+            e.printStackTrace();
         }
         return null;
     }
 
     public void createSession(AuthSession session, String pdsOrigin, String password) throws Exception {
-        if (session.did == null || session.did.isBlank()) {
-            throw new IllegalStateException("AuthSession has no DID. Make sure to set it after login.");
+        if (session.accessToken == null || session.accessToken.isBlank()) {
+            throw new IllegalStateException("Unauthorized Session: Session has no 'accessToken' or 'accessToken' is empty.");
         }
 
         String url = pdsOrigin + "/xrpc/com.atproto.server.createSession";
@@ -229,21 +229,21 @@ public class BlueskyClient {
         );
 
         HttpResponse<String> response = Http.postFormWithResponse(url, headers, jsonBody);
-        JSONObject responseJson = new JSONObject(response.body());
+        JSONObject responseBody = new JSONObject(response.body());
 
         if (response.statusCode() == 200) {
-            System.out.println("[INFO] Sucessful creating session!");
-            session.accessJwt = responseJson.getString("accessJwt");
-            session.refreshJwt = responseJson.getString("refreshJwt");
+            System.out.println("[INFO][BlueskyClient][createSession] Sucessful creating session!");
+            session.accessJwt = responseBody.getString("accessJwt");
+            session.refreshJwt = responseBody.getString("refreshJwt");
         } else {
-            System.err.println("[ERROR] Error Creating Session!");
-            throw new Exception("[ERROR] " + responseJson.get("error") + ": " + responseJson.get("message"));
+            System.err.println("[ERROR][BlueskyClient][createSession]  Error creating session!");
+            throw new Exception(response.statusCode() + " " + responseBody.getString("error") + ": " + responseBody.getString("message"));
         }
     }
 
     public void refreshSession(AuthSession session, String pdsOrigin) throws Exception {
-        if (session.did == null || session.did.isBlank()) {
-            throw new IllegalStateException("AuthSession has no DID. Make sure to set it after login.");
+        if (session.refreshJwt == null || session.refreshJwt.isBlank()) {
+            throw new IllegalStateException("Unauthorized Session: Session has no 'refreshJwt' or 'refreshJwt' is empty.");
         }
 
         String url = pdsOrigin + "/xrpc/com.atproto.server.refreshSession";
@@ -254,24 +254,25 @@ public class BlueskyClient {
         );
 
         HttpResponse<String> response = Http.postFormWithResponse(url, headers, "");
-        
+        JSONObject responseBody = new JSONObject(response.body());
 
         if (response.statusCode() == 200) {
-            System.out.println("[INFO] Successful refreshing session!");
-            JSONObject jsonBody = new JSONObject(response.body());
-            session.accessJwt = jsonBody.getString("accessJwt");
-            session.refreshJwt = jsonBody.getString("refreshJwt");
+            System.out.println("[INFO][BlueskyClient][refreshSession] Successful refreshing session!");
+            session.accessJwt = responseBody.getString("accessJwt");
+            session.refreshJwt = responseBody.getString("refreshJwt");
         } else if (response.statusCode() == 400) {
+            System.out.println("[INFO][BlueskyClient][refreshSession] Session has expired. Deleting saved session...");
             ServiceRegistry.setBlueskySession(null);
             SessionFile.BlueskySessionFile.deleteSession();
         } else {
-            System.out.println("[ERROR] Failed to refresh session! " + response.statusCode() + response.body());
+            System.err.println("[ERROR][BlueskyClient][refreshSession] Failed to refresh session!");
+            throw new Exception(response.statusCode() + " " + responseBody.getString("error") + ": " + responseBody.getString("message"));
         }
     }
 
     public void deleteSession(AuthSession session, String pdsOrigin) throws Exception {
-        if (session.did == null || session.did.isBlank()) {
-            throw new IllegalStateException("AuthSession has no DID. Make sure to set it after login.");
+        if (session.refreshJwt == null || session.refreshJwt.isBlank()) {
+            throw new IllegalStateException("Unauthorized Session: Session has no 'refreshJwt' or 'refreshJwt' is empty.");
         }
 
         String url = pdsOrigin + "/xrpc/com.atproto.server.deleteSession";
@@ -284,20 +285,25 @@ public class BlueskyClient {
         HttpResponse<String> response = Http.postFormWithResponse(url, headers, "");
 
         if (response.statusCode() == 200) {
-            System.out.println("[INFO] Successful deleting session!");
+            System.out.println("[INFO][BlueskyClient][deleteSession] Successful deleting session!");
         } else {
-            System.out.println("[ERROR] Failed to delete session! " + response.body());
+            JSONObject responseBody = new JSONObject(response.body());
+            System.err.println("[ERROR][BlueskyClient][deleteSession] Failed to delete session!");
+            throw new Exception(response.statusCode() + " " + responseBody.getString("error") + ": " + responseBody.getString("message"));
         }
     }
 
     public void getProfile(AuthSession session) throws Exception {
         if (session.did == null || session.did.isBlank()) {
-            throw new IllegalStateException("AuthSession has no DID. Make sure to set it after login.");
+            throw new IllegalStateException("Unauthorized Session: Session has no 'did' or 'did' is empty.");
         }
 
         String url = "https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?actor=" + session.did;
-
         String dpop = DPoPUtil.buildDPoP("GET", url, session.dpopNonce);
+        
+        if (session.accessToken == null || session.accessToken.isBlank()) {
+            throw new IllegalStateException("Unauthorized Session: Session has no 'accessToken' or 'accessToken' is empty.");
+        }
 
         Map<String, String> headers = Map.of(
                 "Authorization", "DPoP " + session.accessToken,
@@ -305,44 +311,46 @@ public class BlueskyClient {
                 "Content-Type", "application/json"
         );
 
-        var response = Http.getWithResponse(url, headers);
-        System.out.println("[INFO] response = " + response);
+        HttpResponse<String> response = Http.getWithResponse(url, headers);
+        JSONObject responseBody = new JSONObject(response.body());
 
         if (response.statusCode() == 200) {
-            System.out.println("[INFO] Successful getting user profile!");
-            var responseBody = MAPPER.readValue(response.body(),Map.class);
-
-            session.handle = (String) responseBody.get("handle");
+            System.out.println("[INFO][BlueskyClient][getProfile] Successful getting user profile!");
+            session.handle = responseBody.getString("handle");
             session.displayName = (String) responseBody.get("displayName");
+            if(session.displayName == null || session.displayName.isEmpty()) {    
+                System.out.println("[INFO][BlueskyClient][getProfile] User has no 'displayName'. Setting its value to 'handle'.");
+                session.displayName = session.handle;
+            }
             session.avatarUri = (String) responseBody.get("avatar");
             session.profileUrl = "https://bsky.app/profile/" + session.handle;
         } else {
-            System.out.println("[ERROR] Failed to get profile! " + response.body());
+            System.err.println("[ERROR][BlueskyClient][getProfile] Failed to get profile!");
+            throw new Exception(response.statusCode() + " " + responseBody.getString("error") + ": " + responseBody.getString("message"));
         }
     }
 
     public JSONObject getTimeline(AuthSession session, String pdsOrigin, int limit) throws Exception {
-        if (session.did == null || session.did.isBlank()) {
-            throw new IllegalStateException("AuthSession has no DID. Make sure to set it after login.");
+        if (session.accessJwt == null || session.accessJwt.isBlank()) {
+            throw new IllegalStateException("Unauthorized Session: Session has no 'accessJwt' or 'accessJwt' is empty.");
         }
 
         String url = pdsOrigin + "/xrpc/app.bsky.feed.getTimeline?limit=" + limit;
-        System.out.println("[INFO] BlueskyClient.getTimeline(): url = " + url);
 
         Map<String, String> headers = Map.of(
                 "Authorization", "Bearer " + session.accessJwt
         );
 
         var response = Http.getWithResponse(url, headers);
-        JSONObject json = new JSONObject(response.body());
-        System.out.println("JSONObject: " + json);
+        JSONObject responseBody = new JSONObject(response.body());
 
-
-        if (response.statusCode() != 200) {
-            throw new IOException("View timeline failed with status: " + response.statusCode() + ", body: " + response.body());
+        if (response.statusCode() == 200) {
+            System.out.println("[INFO][BlueskyClient][getTimeline] Successful getting user timeline!");
+            return responseBody;
+        } else {
+            System.err.println("[ERROR][BlueskyClient][getTimeline] Failed to get user timeline!");
+            throw new Exception(response.statusCode() + " " + responseBody.getString("error") + ": " + responseBody.getString("message"));
         }
-
-        return json;
     }
 
     private static String urlenc(String s) {

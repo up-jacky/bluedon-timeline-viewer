@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import com.bluedon.view.ui.images.Thumb;
 
 import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 
@@ -16,10 +17,11 @@ public class External extends EmbedMedia {
     private String thumb;
     private String title;
     private String uri;
+    private double fitWidth;
 
-    public External(JSONObject rawJson) {
+    public External(JSONObject rawJson, double fitWidth) {
         String subType = getSubType(rawJson.getString("$type"));
-
+        this.fitWidth = fitWidth;
         switch (subType) {
             case "view":
                 rawJson = rawJson.getJSONObject("external");
@@ -58,9 +60,8 @@ public class External extends EmbedMedia {
     public VBox getEmbed() {
         VBox card = new VBox(16);
         card.getStyleClass().add("post-embed-external");
-        card.setFillWidth(true);
 
-        ImageView thumbImage = new Thumb(thumb).getImage(250, true);
+        ImageView thumbImage = new Thumb(thumb).getImage(fitWidth, true);
         thumbImage.getStyleClass().add("post-embed-external-thumb");
 
         Text titleText = new Text(title);
@@ -68,8 +69,11 @@ public class External extends EmbedMedia {
         
         Text descriptionText = new Text(description);
         descriptionText.getStyleClass().add("post-embed-external-description");
+        TextFlow descriptionFlow = new TextFlow(descriptionText);
+        descriptionText.setWrappingWidth(fitWidth);
+        descriptionFlow.setPrefWidth(fitWidth);
 
-        VBox info = new VBox(8, titleText, descriptionText);
+        VBox info = new VBox(8, titleText, descriptionFlow);
 
         card.getChildren().addAll(thumbImage, info);
         card.setOnMouseClicked(e -> {
@@ -78,8 +82,8 @@ public class External extends EmbedMedia {
                     Desktop.getDesktop().browse(URI.create(uri));
                 }
             } catch (Exception error) {
-                System.err.println("[ERROR] Failed to launch in browser! " + error.getMessage());
-                System.out.println("[INFO] Open the link to browser instead: " + uri);
+                System.err.println("[ERROR][External][getEmbed] Failed to launch in browser! " + error.getMessage());
+                System.out.println("[INFO][External][getEmbed] Open the link to browser instead: " + uri);
             }
         });
 

@@ -58,7 +58,7 @@ public class LoginDialog {
         dialog.getDialogPane();
 
         dialog.setOnCloseRequest(e -> {
-            System.out.println("[INFO] Closing login dialog...");
+            System.out.println("[INFO][LoginDialog][showLoginDialog] Closing login dialog...");
             if (passwordField.getText() == null) {
                 e.consume();
             }
@@ -85,7 +85,6 @@ public class LoginDialog {
                 ServiceRegistry.setBlueskySession(null);
                 return "";
             } else if (button == ButtonType.CLOSE) {
-                System.out.println("[INFO] Passing by CLOSE button...");
                 passwordField.setText("");
                 return "";
             }

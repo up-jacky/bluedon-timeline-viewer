@@ -56,12 +56,34 @@
 }*/
 
 .sidebar .button {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
     -fx-font-size: 14px;
     -fx-background-radius: 8;
     -fx-padding: 10 15 10 15;
 }
 
+.refresh {
+    -fx-background-color: linear-gradient(to bottom, #4A5899, #252d50);
+}
+
+.refresh:hover {
+    -fx-background-color: #4A5899;
+}
+
+.filter {
+    -fx-background-color: linear-gradient(to bottom, #af4c4c, #874d3f);
+}
+
+.filter:hover {
+    -fx-background-color: #af4c4c;
+}
+
 .sidebar .button.active {
+    -fx-background-color: linear-gradient(to bottom, #4caf50, #49946f);
+}
+
+.sidebar .button.active:hover {
     -fx-background-color: #4caf50;
 }
 

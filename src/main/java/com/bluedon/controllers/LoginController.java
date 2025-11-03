@@ -14,17 +14,17 @@ public class LoginController {
 	private static LoginView view = new LoginView();
 	
 	public void start(Stage stage) {
-        System.out.println("In Login Controller");
+        System.out.println("[INFO][LoginController][start] In Login...");
 		view.init();
 		
-		model.setButton(Social.BLUESKY, LoginButton.createButton(Social.BLUESKY));
-		model.setButton(Social.MASTODON, LoginButton.createButton(Social.MASTODON));
+		model.setButton(Social.BLUESKY, LoginButton.createButton(Social.BLUESKY, stage));
+		model.setButton(Social.MASTODON, LoginButton.createButton(Social.MASTODON, stage));
 		
 		VBox blueskyLayout = view.createContainer(10, model.getButton(Social.BLUESKY));
 		VBox mastodonLayout = view.createContainer(10, model.getButton(Social.MASTODON));
 		view.updateLayout(40, blueskyLayout, mastodonLayout);
 		
-        System.out.println("Displaying Login Page...");
+        System.out.println("[INFO][LoginController][start] Displaying Login Page...");
 		view.displayPage(stage);
 		stage.show();
 	}

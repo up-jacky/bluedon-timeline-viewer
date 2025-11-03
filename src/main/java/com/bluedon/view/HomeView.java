@@ -21,11 +21,11 @@ public class HomeView implements PageView {
     private Scene scene;
 
     public VBox createSidebar(VBox blueskyComponents, VBox mastodonComponents, Button refreshButton) {
-        VBox sidebar = new VBox(20);
+        VBox sidebar = new VBox(24);
         sidebar.getStyleClass().add("sidebar");
-        sidebar.setPrefWidth(250);
+        sidebar.setPrefWidth(224);
 
-        ImageView logo = new BluedonLogo().getImage(50, true);
+        ImageView logo = new BluedonLogo().getImage(52, true);
 
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
@@ -62,23 +62,25 @@ public class HomeView implements PageView {
 
     public ScrollPane createPostsArea(VBox posts) {
         ScrollPane scrollPane = new ScrollPane();
-        scrollPane.setFitToWidth(true);
-        scrollPane.setFitToHeight(true);
         scrollPane.setPannable(true);
         if(posts == null) {
+            scrollPane.setFitToWidth(true);
+            scrollPane.setFitToHeight(true);
             StackPane sp = getProgressIndicator();
             sp.setPrefHeight(scrollPane.getHeight());
             scrollPane.setContent(sp);
         } else if(posts.getChildren().isEmpty()) {
+            scrollPane.setFitToWidth(true);
+            scrollPane.setFitToHeight(true);
             StackPane sp = getNoContent();
             sp.setPrefHeight(scrollPane.getHeight());
             scrollPane.setContent(sp);
         } else {
-    	    posts.setPadding(new Insets(36));
+    	    posts.setPadding(new Insets(24));
             scrollPane.setContent(posts);
-            scrollPane.setPrefViewportWidth(ScrollPane.USE_COMPUTED_SIZE);
+            scrollPane.setPrefWidth(800);
             posts.setOnScroll(e -> {
-                double deltaY = e.getTextDeltaY() * (0.3);
+                double deltaY = e.getTextDeltaY() * (0.5);
                 scrollPane.setVvalue(scrollPane.getVvalue() - deltaY / scrollPane.getHeight());
                 e.consume();
             });
@@ -87,14 +89,15 @@ public class HomeView implements PageView {
     }
     
     public void updateLayout(VBox sidebar, ScrollPane scrollPane) {
-    	if(sidebar != null) layout.setLeft(sidebar);
+        if(layout == null) init();
+    	if(sidebar != null) {layout.setLeft(sidebar);}
     	if(scrollPane != null) layout.setCenter(scrollPane);
     }
 
     @Override
     public void init() { 
         layout = new BorderPane();
-        scene = new Scene(layout, 1000,600);
+        scene = new Scene(layout, 1072,603);
         scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
     }
 

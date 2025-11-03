@@ -37,7 +37,7 @@ public final class DPoPUtil {
             privateECKey = new ECKey.Builder(Curve.P_256, pub).privateKey(priv).build();
             publicJWK = privateECKey.toPublicJWK();
 
-            System.out.println("DPoP keypair generated");
+            System.out.println("[INFO][DPoPUtil][init] DPoP keypair generated");
         } catch (Exception e) {
             throw new RuntimeException("DPoP init failed", e);
         }

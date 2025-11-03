@@ -11,6 +11,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.ProgressIndicator;
 
 public class LoginView implements PageView {
 
@@ -25,10 +26,21 @@ public class LoginView implements PageView {
     	return container;
     }
     
-    public void updateLayout(double spacing, Node ... children) {
-        HBox accountsBox = new HBox(spacing, children);
-        accountsBox.setAlignment(Pos.CENTER);
+    private VBox getProgressIndicator() {
+        ProgressIndicator pi = new ProgressIndicator();
+        pi.setProgress(-1.0);
+        pi.setPrefSize(64, 64);
+        pi.setMinSize(64, 64);
+        return new VBox(pi);
+    }
 
+    public void updateLayout(double spacing, Node ... children) {
+        if (layout == null) init();
+        layout.getChildren().clear();
+        VBox sp = getProgressIndicator();
+        HBox accountsBox = new HBox(spacing, children);
+        if(accountsBox.getChildren().isEmpty()) accountsBox = new HBox(spacing, sp);
+        accountsBox.setAlignment(Pos.CENTER);
         layout.getChildren().addAll(logo, accountsBox);
         layout.setAlignment(Pos.CENTER);
         layout.setPadding(new Insets(40));
@@ -38,7 +50,7 @@ public class LoginView implements PageView {
     @Override
     public void init() {
         layout = new VBox(64);
-        scene = new Scene(layout, 1000, 600);
+        scene = new Scene(layout, 1024, 576);
         scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
     }
     

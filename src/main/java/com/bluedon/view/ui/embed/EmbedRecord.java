@@ -19,7 +19,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 
-public class Record extends Embed {
+public class EmbedRecord extends Embed {
     private Author author;
     private boolean blocked = false;
     private boolean detached = false;
@@ -36,17 +36,25 @@ public class Record extends Embed {
     private DateTimeFormatter generalFormatter = DateTimeFormatter.ofPattern("MMM dd yyyy");
     private DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm a");
     private boolean mediaOnly = false;
+    private double cardWidth;
+    private double padding = 24;
+    private double fitWidth;
 
-    public Record(JSONObject rawJson) {
+    public EmbedRecord(JSONObject rawJson, double fitWidth) {
         init(rawJson);
+        cardWidth = fitWidth;
+        this.fitWidth = cardWidth - (2.0*padding);
     }
 
-    public Record(JSONObject rawJson, boolean mediaOnly) {
+    public EmbedRecord(JSONObject rawJson, double fitWidth, boolean mediaOnly) {
         init(rawJson);
+        cardWidth = fitWidth;
+        this.fitWidth = cardWidth - (2.0*padding);
         this.mediaOnly = mediaOnly;
     }
 
     private void init(JSONObject rawJson) {
+        rawJson = rawJson.getJSONObject("record");
         String subType = rawJson.getString("$type").replaceAll(".*(?:#)", "");
         
         switch (subType) {
@@ -74,11 +82,7 @@ public class Record extends Embed {
                 quoteCount = rawJson.getInt("quoteCount");
                 repostCount = rawJson.getInt("repostCount");
                 content = rawJson.getJSONObject("value").getString("text");
-                try {
-                    embeds = rawJson.getJSONArray("embeds");
-                } catch (Exception e) {
-                    System.out.println("[INFO] No embeds");
-                }
+                embeds = rawJson.get("embeds") == null? null: rawJson.getJSONArray("embeds");
                 break;
             default:
                 break;
@@ -138,8 +142,9 @@ public class Record extends Embed {
     
     private VBox viewRecord() {
         VBox card = new VBox(12);
-        card.setPadding(new Insets(24));
+        card.setPadding(new Insets(padding));
         card.getStyleClass().add("post-card");
+        card.setPrefWidth(cardWidth);
 
         Circle avatar = author.getAvatar(16);
         avatar.getStyleClass().add("post-avatar");
@@ -159,9 +164,10 @@ public class Record extends Embed {
 
         Text contentText = new Text(content);
         contentText.getStyleClass().add("post-content");
+        contentText.setWrappingWidth(fitWidth);
         TextFlow contentFlow = new TextFlow(contentText);
     
-        HBox authorProfile = new HBox(8, avatar, name);
+        HBox authorProfile = new HBox(16, avatar, name);
         authorProfile.getStyleClass().add("post-author-container");
 
         Text likeCountText = new Text(likeCount + " likes");
@@ -183,19 +189,19 @@ public class Record extends Embed {
             for(int i = 0; i < embeds.length(); i += 1) {
                 Object rawEmbed = embeds.get(i);
                 if(rawEmbed.getClass().getName() != JSONObject.class.getName()) {
-                    System.err.println("[FATAL] Embed records must be a JSONObject.");
+                    System.err.println("[FATAL][Record][viewRecord] Embed records must be a JSONObject.");
                     return null;
                 }
                 JSONObject embed = embeds.getJSONObject(i);
                 EmbedType eType = getEmbedType(embed.getString("$type"));
                 
                 switch(eType) {
-                    case EXTERNAL: embedContainer =  new External(embed).getEmbed(); break;
-                    case IMAGES: embedContainer = new Images(embed).getEmbed(); break;
+                    case EXTERNAL: embedContainer =  new External(embed, fitWidth).getEmbed(); break;
+                    case IMAGES: embedContainer = new Images(embed, fitWidth).getEmbed(); break;
                     case VIDEO: break;
                     case RECORD_WITH_MEDIA: 
-                        if(mediaOnly) embedContainer = new RecordWithMedia(embed, mediaOnly).getEmbed(); 
-                        else embedContainer = new RecordWithMedia(embed).getEmbed();
+                        if(mediaOnly) embedContainer = new RecordWithMedia(embed, fitWidth, mediaOnly).getEmbed(); 
+                        else embedContainer = new RecordWithMedia(embed, fitWidth).getEmbed();
                         break;
                     default: break;
                 }
@@ -204,14 +210,16 @@ public class Record extends Embed {
 
         card.getChildren().addAll(authorProfile, contentFlow, embedContainer, createdAtText, metrics);
         card.setOnMouseClicked(e -> {
-            try {
-                if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(java.awt.Desktop.Action.BROWSE)) {
-                    Desktop.getDesktop().browse(URI.create(url));
+            if(e.isPrimaryButtonDown()) {
+                try {
+                    if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(java.awt.Desktop.Action.BROWSE)) {
+                        Desktop.getDesktop().browse(URI.create(url));
+                    }
+                } catch (Exception error) {
+                    System.err.println("[ERROR][Record][viewRecord] Failed to launch in browser! " + error.getMessage());
+                    System.out.println("[INFO][Record][viewRecord] Open the link to browser instead: " + url);
                 }
-            } catch (Exception error) {
-                System.err.println("[ERROR] Failed to launch in browser! " + error.getMessage());
-                System.out.println("[INFO] Open the link to browser instead: " + url);
-            }
+            } else e.consume();
         });
 
         return card;

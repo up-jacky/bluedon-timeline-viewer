@@ -11,53 +11,50 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 
-public class Images extends EmbedMedia {
-
-    private List<EmbedImage> images = new ArrayList<>();
+public class MediaAttachments {
+    private List<MediaAttachment> images = new ArrayList<>();
     private double fitWidth;
-    private double spacing = 32;
-
-    public Images(JSONObject rawJson, double fitWidth) {
-        String subType = getSubType(rawJson.getString("$type"));
+    private double spacing;
+    
+    public MediaAttachments(JSONArray rawJsonArray, double fitWidth) {
         this.fitWidth = fitWidth;
-        JSONArray jsonArray = rawJson.getJSONArray("images");
-        for(int i = 0; i < jsonArray.length(); i += 1) {
-            JSONObject rawImage = jsonArray.getJSONObject(i);
-            images.add(new EmbedImage(rawImage, subType));
+        for(int i = 0; i < rawJsonArray.length(); i += 1) {
+            JSONObject rawJson = rawJsonArray.getJSONObject(i);
+            if(rawJson.getString("type").compareTo("image") == 0) images.add(new MediaAttachment(rawJson));
         }
     }
 
-    @Override
-    public Pane getEmbed() {
+    public Pane getImages() {
+        System.out.println("[INFO][MediaAttachments][getImages] Getting images...");
         ImageView img1, img2, img3, img4;
         Pane pane;
         switch (images.size()) {
             case 1: 
-                img1 = images.get(0).getEmbed();
+                img1 = images.get(0).getImage();
                 pane = new HBox(img1);
                 img1.setFitWidth(fitWidth);
                 return pane;
             case 2: 
-                img1 = images.get(0).getEmbed();
-                img2 = images.get(1).getEmbed();
+                img1 = images.get(0).getImage();
+                img2 = images.get(1).getImage();
                 pane = new HBox(spacing, img1, img2);
                 img1.setFitWidth((fitWidth-spacing)/2.0);
                 img2.setFitWidth((fitWidth-spacing)/2.0);
                 return pane;
             case 3:
-                img1 = images.get(0).getEmbed();
-                img2 = images.get(1).getEmbed();
-                img3 = images.get(2).getEmbed();
+                img1 = images.get(0).getImage();
+                img2 = images.get(1).getImage();
+                img3 = images.get(2).getImage();
                 img1.setFitWidth((fitWidth-spacing)/2.0);
                 img2.setFitWidth((fitWidth-spacing)/2.0);
                 img3.setFitWidth((fitWidth-spacing)/2.0);
                 pane = new VBox(spacing, img2, img3);
                 return new HBox(spacing, img1, pane);
             case 4:
-                img1 = images.get(0).getEmbed();
-                img2 = images.get(1).getEmbed();
-                img3 = images.get(2).getEmbed();
-                img4 = images.get(3).getEmbed();
+                img1 = images.get(0).getImage();
+                img2 = images.get(1).getImage();
+                img3 = images.get(2).getImage();
+                img4 = images.get(3).getImage();
                 img1.setFitWidth((fitWidth-spacing)/2.0);
                 img2.setFitWidth((fitWidth-spacing)/2.0);
                 img3.setFitWidth((fitWidth-spacing)/2.0);

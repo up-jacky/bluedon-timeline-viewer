@@ -19,7 +19,6 @@ public class Http {
     }
 
     public static HttpResponse<String> postFormWithResponse(String url, Map<String, String> headers, String body) {
-        System.out.println("url: " + url + "\nheaders: " + headers + "\nbody: " + body);
         try {
             HttpRequest.Builder builder = HttpRequest.newBuilder()
                     .uri(URI.create(url))

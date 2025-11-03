@@ -14,10 +14,10 @@ public class Thumb implements ImageViewer {
     }
 
     @Override
-    public ImageView getImage(double fitHeight, boolean ratio) {
+    public ImageView getImage(double fitWidth, boolean ratio) {
         Image thumbImage = new Image(thumb);
         ImageView thumbView = new ImageView(thumbImage);
-        thumbView.setFitHeight(fitHeight);
+        thumbView.setFitWidth(fitWidth);
         thumbView.setPreserveRatio(ratio);
         
         return thumbView;

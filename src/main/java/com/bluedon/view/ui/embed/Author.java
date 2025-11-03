@@ -11,6 +11,10 @@ public class Author {
     private String handle;
     private String avatarUrl;
 
+    public static Circle getDummyAvatar(int radius) {
+        return new Avatar(null).getCircleImage(radius);
+    }
+
     public Author(JSONObject rawJson) {
         displayName = rawJson.getString("displayName");
         handle = rawJson.getString("handle");

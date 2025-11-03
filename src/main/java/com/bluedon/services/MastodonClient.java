@@ -64,7 +64,7 @@ public class MastodonClient {
 
         InstanceCredentials creds = new InstanceCredentials(clientId, clientSecret);
         instanceCredentials.put(instanceUrl, creds);
-        System.out.println("Registered app on " + instanceUrl + ", Client ID: " + clientId);
+        System.out.println("[INFO][MastodonClient][registerApp] Registered app on " + instanceUrl + ", Client ID: " + clientId);
         return creds;
     }
 
@@ -105,11 +105,11 @@ public class MastodonClient {
                 if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(java.awt.Desktop.Action.BROWSE)) {
                     Desktop.getDesktop().browse(URI.create(authUrl));
                 } else {
-                    System.out.println("Open this URL in your browser: " + authUrl);
+                    System.err.println("[WARNING][MastodonClient][startAuth] Open this URL in your browser: " + authUrl);
                 }
             } catch (Exception e) {
-                System.out.println("Failed to open system browser: " + e.getMessage());
-                System.out.println("Open this URL in your browser: " + authUrl);
+                System.err.println("[WARNING][MastodonClient][startAuth] Failed to open system browser: " + e.getMessage());
+                System.err.println("[WARNING][MastodonClient][startAuth] Open this URL in your browser: " + authUrl);
             }
 
             // Wait for callback
@@ -134,8 +134,6 @@ public class MastodonClient {
                 throw new IOException("Token exchange failed with status: " + tokenResponse.statusCode() + ", body: " + tokenResponse.body());
             }
 
-            System.out.println("[INFO] Auth Headers: " + tokenResponse.headers());
-
             var tokenData = MAPPER.readValue(tokenResponse.body(), Map.class);
 
             String accessToken = (String) tokenData.get("access_token");
@@ -147,7 +145,7 @@ public class MastodonClient {
                 throw new IOException("Token exchange response missing access_token: " + tokenResponse.body());
             }
             if (!"Bearer".equalsIgnoreCase(tokenType)) {
-                System.out.println("Warning: Expected token_type 'Bearer', got '" + tokenType + "'");
+                System.err.println("[WARNING][MastodonClient][startAuth] Expected token_type 'Bearer', got '" + tokenType + "'");
             }
 
             // Save client_id and client_secret for revoking the OAuth
@@ -204,7 +202,7 @@ public class MastodonClient {
         if (response.statusCode() != 200) {
             throw new IOException("Revoke token failed with status: " + response.statusCode() + ", body: " + response.body());
         } else {
-            System.out.println("[INFO] Succesfully revoked the current session.");
+            System.out.println("[INFO][MastodonClient][revokeAuth] Succesfully revoked the current session.");
         }
     }
 
@@ -225,7 +223,7 @@ public class MastodonClient {
         if (response.statusCode() != 200) {
             throw new IOException("Get user info failed with status: " + response.statusCode() + ", body: " + response.body());
         } else {
-            System.out.println("[INFO] Succesfully get user info.");
+            System.out.println("[INFO][MastodonClient][getUserInfo] Succesfully get user info.");
             JSONObject responseBody = new JSONObject(response.body());
             session.handle = responseBody.getString("preferred_username") + "@mastodon.social";
             session.displayName = responseBody.getString("name").isEmpty()? responseBody.getString("preferred_username"): responseBody.getString("name");
@@ -237,7 +235,6 @@ public class MastodonClient {
 
     public JSONObject getTimeline(AuthSession session, int limit) throws Exception {
         if (session.accessToken == null || session.instanceUrl == null) {
-            System.out.println("[ERROR] access_token=\""+ session.accessToken + "\"" + "instance_url=\"" + session.instanceUrl + "\"");
             throw new IllegalStateException("Session is not authenticated or missing instance URL.");
         }
 
@@ -251,7 +248,7 @@ public class MastodonClient {
         JSONObject json = new JSONObject("{\"feed\": " + response.body() + "}");
 
         if (response.statusCode() != 200) {
-            throw new IOException("View timeline failed with status: " + response.statusCode() + ", body: " + response.body());
+            throw new IOException("Fetch timeline failed with status: " + response.statusCode() + ", body: " + response.body());
         }
 
         return json;

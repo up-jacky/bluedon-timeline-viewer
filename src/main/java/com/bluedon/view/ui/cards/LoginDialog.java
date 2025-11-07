@@ -15,6 +15,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 public class LoginDialog {
+    private static boolean isHandleValid = true;
+    private static boolean isPasswordValid = true;
 
     public static JSONObject showLoginDialog() {
         Dialog<JSONObject> dialog = new Dialog<>();
@@ -23,13 +25,14 @@ public class LoginDialog {
         DialogPane dialogPane = dialog.getDialogPane();
         dialogPane.getStylesheets().add("css/login.css");
 
+
         Label  handleLabel = new Label("Handle:");
         Label  blueskyLabel = new Label("bsky.social");
         Label passwordLabel = new Label("Password:");
         TextField handleField = new TextField();
         PasswordField passwordField = new PasswordField();
 
-        blueskyLabel.getStyleClass().add("label");
+        blueskyLabel.getStyleClass().add("bsky");
         handleLabel.getStyleClass().add("label");
         handleField.getStyleClass().add("handle-field");
 
@@ -52,37 +55,45 @@ public class LoginDialog {
 
         dialog.getDialogPane();
 
+        dialog.setOnCloseRequest(e -> {
+            if(!isHandleValid || !isPasswordValid) {
+                Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                errorAlert.setTitle("Login failed!");
+                if(!isHandleValid) {
+                    isHandleValid = true;
+                    errorAlert.setHeaderText("Handle Field is empty.");
+                    errorAlert.setContentText("Please input your handle in the handle field.");
+                    errorAlert.showAndWait();
+                    e.consume();
+                } else {
+                    isPasswordValid = true;
+                    errorAlert.setHeaderText("Password Field is empty.");
+                    errorAlert.setContentText("Please input your password in the password field.");
+                    errorAlert.showAndWait();
+                    e.consume();
+                }
+            }
+        });
+
         dialog.setResultConverter(button -> {
             if (button == loginButtonType) {
                 JSONObject jsonCreds = new JSONObject();
                 jsonCreds.put("handle", handleField.getText() + ".bsky.social");
                 jsonCreds.put("password", passwordField.getText());
-                
-                Alert errorAlert = new Alert(Alert.AlertType.ERROR);
-                errorAlert.setTitle("Login failed!");
 
                 if (jsonCreds.getString("handle") == null || jsonCreds.getString("handle").trim().isEmpty()) {
-                    errorAlert.setHeaderText("Handle Field is empty.");
-                    errorAlert.setContentText("Please input your handle in the handle field.");
-                    errorAlert.showAndWait();
-                    handleField.setText(null);
-                    return new JSONObject();
+                    handleField.setText("");
+                    isHandleValid = false;
+                    
                 } else if (jsonCreds.getString("password") == null || jsonCreds.getString("password").trim().isEmpty()) {
-                    errorAlert.setHeaderText("Password Field is empty.");
-                    errorAlert.setContentText("Please input your password in the password field.");
-                    errorAlert.showAndWait();
-                    passwordField.setText(null);
-                    return new JSONObject();
-                }
-                return jsonCreds;
+                    passwordField.setText("");
+                    isPasswordValid = false;
+                } else return jsonCreds;
             } 
             return null;
         });
 
         dialog.showAndWait();
-        JSONObject jsonCreds = new JSONObject();
-        jsonCreds.put("handle", handleField.getText() + ".bsky.social");
-        jsonCreds.put("password", passwordField.getText());
-        return jsonCreds;
+        return dialog.getResult();
     }
 }

@@ -3,6 +3,10 @@
     -fx-pref-width: 64px;
 }
 
+.bsky {
+    -fx-pref-width: 72px;
+}
+
 .handle-field {
     -fx-padding: 4px 8px;
     -fx-border-color: #4A5899;

@@ -7,7 +7,6 @@ import com.bluedon.view.ui.images.Avatar;
 import com.bluedon.services.AuthSession;
 import com.bluedon.services.ServiceRegistry;
 
-import java.nio.file.DirectoryStream.Filter;
 import java.util.List;
 
 import javafx.scene.control.Button;

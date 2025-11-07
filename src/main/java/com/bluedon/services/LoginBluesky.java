@@ -1,5 +1,7 @@
 package com.bluedon.services;
 
+import org.json.JSONObject;
+
 import com.bluedon.controllers.PageController;
 import com.bluedon.enums.Page;
 import com.bluedon.utils.SessionFile;
@@ -13,47 +15,41 @@ public class LoginBluesky extends Task<Boolean> {
     @Override
     protected Boolean call() throws Exception {
         System.out.println("[DEBUG][LoginBluesky][call] Thread: " + Thread.currentThread());
-        String pdsOrigin = "https://bsky.social";
-        AuthSession session =  ServiceRegistry.getBlueskySession();
-        if (session == null) {
-            System.out.println("[INFO][LoginBluesky][call] Authenticating Bluesky...");
-            session = blueskyClient.startAuth(pdsOrigin);
-            ServiceRegistry.setBlueskySession(session);
-            ServiceRegistry.setBlueskyPdsOrigin(pdsOrigin);
-            blueskyClient.getProfile(session);
-            SessionFile.BlueskySessionFile.saveSession();
-        }
         return true;
     }
 
     @Override
     protected void succeeded() {
         System.out.println("[DEBUG][LoginBluesky][succeeded] Thread: " + Thread.currentThread());
-        String pdsOrigin = "https://bsky.social";
-        AuthSession session =  ServiceRegistry.getBlueskySession();try {
+        AuthSession session =  ServiceRegistry.getBlueskySession();
+        String pdsOrigin = ServiceRegistry.getBlueskyPdsOrigin();
+        if (session == null) {
+            session = new AuthSession();
+            System.out.println("[INFO][LoginBluesky][call] Logging in to Bluesky...");
             
-            String password = LoginDialog.showLoginDialog();
+            JSONObject rawCreds = LoginDialog.showLoginDialog();
 
-            if (ServiceRegistry.getBlueskySession() == null) {
-                System.out.println("[INFO][LoginBluesky][succeeded] Logout successful!");
-                PageController.displayLoginPage();
-                return;
-            }
-
-            if (password.trim().isEmpty()) {
+            if (rawCreds == null) {
                 System.out.println("[INFO][LoginBluesky][succeeded] Login dialog closed.");
                 if(PageController.currentPage == Page.LOGIN) PageController.displayLoginPage();
                 return;
             }
+            
+            try {
+                blueskyClient.createSession(session, pdsOrigin, rawCreds.getString("password"), rawCreds.getString("handle"));
+                blueskyClient.getProfile(session, pdsOrigin);
+                ServiceRegistry.setBlueskySession(session);
+            } catch (Exception e) {
+                System.err.println("[ERROR][LoginBluesky][succeeded] Login failed!");
+                System.err.println("[ERROR][LoginBluesky][succeeded] Error: " + e.getMessage());
+                e.printStackTrace();
+                if(PageController.currentPage == Page.LOGIN) PageController.displayLoginPage();
+                return;
+            }
 
-            blueskyClient.createSession(session, pdsOrigin, password);
             SessionFile.BlueskySessionFile.saveSession();
-        } catch (Exception e) {
-            System.err.println("[ERROR][LoginBluesky][succeeded] Failed to login to Bluesky: " +  e.getMessage());
-            e.printStackTrace();
-            return;
         }
-        System.out.println("[INFO][LoginBluesky][succeeded] Authentication successful!");
+        System.out.println("[INFO][LoginBluesky][succeeded] Login successful!");
         System.out.println("[INFO][LoginBluesky][succeeded] Logged in as: " + session.handle);
         PageController.displayHomePage();
     }
@@ -61,7 +57,7 @@ public class LoginBluesky extends Task<Boolean> {
     @Override
     protected void failed() {
         System.out.println("[DEBUG][LoginBluesky][failed] Thread: " + Thread.currentThread());
-        System.err.println("[ERROR][LoginBluesky][failed] Authentication failed!");
+        System.err.println("[ERROR][LoginBluesky][failed] Login failed!");
         System.err.println("[ERROR][LoginBluesky][failed] Error: " + getException().getMessage());
         getException().printStackTrace();
         if(PageController.currentPage == Page.LOGIN) PageController.displayLoginPage();

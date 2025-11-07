@@ -24,24 +24,16 @@ public class SessionFile {
         public static void saveSession() {
             AuthSession session = ServiceRegistry.getBlueskySession();
             try (FileWriter writer = new FileWriter(fileName)) {
-                String codeVerifier = session.codeVerifier == null? "" : session.codeVerifier;
-                String accessToken = session.accessToken == null? "" : session.accessToken;
-                String refreshToken = session.refreshToken == null? "" : session.refreshToken;
                 String accessJwt = session.accessJwt == null? "" : session.accessJwt;
                 String refreshJwt = session.refreshJwt == null? "" : session.refreshJwt;
                 String did = session.did == null? "" : session.did;
-                String dpopNonce = session.dpopNonce == null? "" : session.dpopNonce;
                 String data = String.format("""
 {
-    "code_verifier": "%s",
-    "access_token": "%s",
-    "refresh_token": "%s",
     "did": "%s",
-    "dpop_nonce": "%s",
     "access_jwt": "%s",
     "refresh_jwt": "%s",
 }
-            """, codeVerifier, accessToken, refreshToken, did, dpopNonce, accessJwt, refreshJwt);
+            """, did, accessJwt, refreshJwt);
                 writer.write(data);
                 System.out.println("[INFO][SessionFile][BlueskySessionFile][saveSession] Successfully saved Bluesky session.");
             } catch (Exception e) {
@@ -56,22 +48,15 @@ public class SessionFile {
                 Path filePath = Paths.get(pathString);
                 String jsonString = String.join("",Files.readAllLines(filePath));
                 JSONObject jsonObject = new JSONObject(jsonString);
-                if (jsonObject.getString("code_verifier").isEmpty()) {
-                    System.out.println("[INFO][SessionFile][BlueskySessionFile][readSession] No saved Bluesky session.");
-                    return;
-                }
-                AuthSession session = new AuthSession(jsonObject.getString("code_verifier"));
-                session.accessToken = jsonObject.getString("access_token");
-                session.refreshToken = jsonObject.getString("refresh_token");
+                AuthSession session = new AuthSession();
+
                 session.did = jsonObject.getString("did");
-                session.dpopNonce = jsonObject.getString("dpop_nonce");
                 session.accessJwt = jsonObject.getString("access_jwt").isEmpty()? null : jsonObject.getString("access_jwt");
                 session.refreshJwt = jsonObject.getString("refresh_jwt").isEmpty()? null : jsonObject.getString("refresh_jwt");
                 ServiceRegistry.setBlueskySession(session);
-                ServiceRegistry.setBlueskyPdsOrigin("https://bsky.social");
                 
                 BlueskyClient blueskyClient = ServiceRegistry.getBlueskyClient();
-                blueskyClient.getProfile(session);
+                blueskyClient.getProfile(session, ServiceRegistry.getBlueskyPdsOrigin());
                 if (session.refreshJwt != null) blueskyClient.refreshSession(session, ServiceRegistry.getBlueskyPdsOrigin());
                 System.out.println("[INFO][SessionFile][BlueskySessionFile][readSession] Successfully read Bluesky session.");
             } catch (Exception e) {
@@ -125,7 +110,7 @@ public class SessionFile {
                     System.out.println("[INFO][SessionFile][MastodonSessionFile][readSession] No saved Mastodon session.");
                     return;
                 }
-                AuthSession session = new AuthSession(null);
+                AuthSession session = new AuthSession();
                 session.accessToken = jsonObject.getString("access_token");
                 session.refreshToken = jsonObject.getString("refresh_token");
                 session.clientId = jsonObject.getString("client_id");

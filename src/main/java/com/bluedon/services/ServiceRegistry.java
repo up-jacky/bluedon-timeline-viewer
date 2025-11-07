@@ -3,7 +3,7 @@ package com.bluedon.services;
 public class ServiceRegistry {
     private static BlueskyClient blueskyClient = new BlueskyClient();
     private static AuthSession blueskySession;
-    private static String blueskyPdsOrigin;
+    private static String blueskyPdsOrigin = "https://bsky.social";
 
     private static MastodonClient mastodonClient = new MastodonClient();
     private static AuthSession mastodonSession;
@@ -25,10 +25,6 @@ public class ServiceRegistry {
     // Bluesky PDS Origin
     public static String getBlueskyPdsOrigin() {
         return blueskyPdsOrigin;
-    }
-
-    public static void setBlueskyPdsOrigin(String pdsOrigin) {
-        blueskyPdsOrigin = pdsOrigin;
     }
     
     public static boolean isBlueskyLoggedIn() {

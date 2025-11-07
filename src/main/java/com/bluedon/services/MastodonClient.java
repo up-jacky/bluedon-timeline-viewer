@@ -84,7 +84,7 @@ public class MastodonClient {
             creds = registerApp(instanceUrl);
         }
 
-        AuthSession session = new AuthSession(null);
+        AuthSession session = new AuthSession();
         String authEndpoint = instanceUrl + "/oauth/authorize";
 
         String state = UUID.randomUUID().toString();

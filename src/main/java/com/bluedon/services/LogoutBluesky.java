@@ -12,7 +12,6 @@ public class LogoutBluesky extends Task<Boolean> {
     protected Boolean call() throws Exception {
         System.out.println("[DEBUG][LogoutBluesky][call] Thread: " + Thread.currentThread());
         System.out.println("[INFO] Logging out of Bluesky...");
-        String pdsOrigin = "https://bsky.social";
         AuthSession session = ServiceRegistry.getBlueskySession();
 
         if (session == null) {
@@ -20,7 +19,7 @@ public class LogoutBluesky extends Task<Boolean> {
             throw new IllegalStateException("Fatal: State should not be possible");
         }
 
-        blueskyClient.deleteSession(session, pdsOrigin);
+        blueskyClient.deleteSession(session, ServiceRegistry.getBlueskyPdsOrigin());
         return true;
     }
 
@@ -28,7 +27,6 @@ public class LogoutBluesky extends Task<Boolean> {
     protected void succeeded() {
         System.out.println("[DEBUG][LogoutBluesky][succeeded] Thread: " + Thread.currentThread());
         ServiceRegistry.setBlueskySession(null);
-        ServiceRegistry.setBlueskyPdsOrigin(null);
         SessionFile.BlueskySessionFile.deleteSession();
         PageController.displayHomePage();
     }

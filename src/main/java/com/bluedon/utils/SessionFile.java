@@ -60,6 +60,7 @@ public class SessionFile {
                 if (session.refreshJwt != null) blueskyClient.refreshSession(session, ServiceRegistry.getBlueskyPdsOrigin());
                 System.out.println("[INFO][SessionFile][BlueskySessionFile][readSession] Successfully read Bluesky session.");
             } catch (Exception e) {
+                if(e.getMessage().equals(System.getProperty("user.dir")  + "\\" + fileName)) return;
                 System.err.println("[ERROR][SessionFile][BlueskySessionFile][readSession] " + e.getMessage());
                 e.printStackTrace();
             }
@@ -127,6 +128,7 @@ public class SessionFile {
                 ServiceRegistry.setMastodonSession(session);
                 System.out.println("[INFO][SessionFile][MastodonSessionFile][readSession] Successfully read Mastodon session.");
             } catch (Exception e) {
+                if(e.getMessage().equals(System.getProperty("user.dir")  + "\\" + fileName)) return;
                 System.err.println("[ERROR][SessionFile][MastodonSessionFile][readSession] " + e.getMessage());
                 e.printStackTrace();
             }

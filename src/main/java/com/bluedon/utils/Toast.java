@@ -1,11 +1,14 @@
 package com.bluedon.utils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.bluedon.controllers.PageController;
 import com.bluedon.enums.ToastType;
 
+import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -60,6 +63,7 @@ public class Toast {
                 HBox root = new HBox(label);
                 HBox.setHgrow(label,Priority.ALWAYS);
                 root.getStyleClass().add(type.name().toLowerCase());
+                root.setOpacity(0);
 
                 Scene scene = new Scene(root);
                 scene.setFill(Color.TRANSPARENT);
@@ -75,8 +79,6 @@ public class Toast {
                 double primaryHeight = owner.getHeight();
                 lock.lock();
                 double index = (double) toasts.indexOf(message) + 1;
-                System.out.println(message + ": " + index);
-                System.out.println("TOASTS: " + toasts);
                 lock.unlock();
                 double offsetX = 24;
                 double offsetY = 24;
@@ -100,20 +102,55 @@ public class Toast {
                 toasts.addListener(new ListChangeListener<String>() {
                     @Override
                     public void onChanged(Change<? extends String> c) {
-                        double newIndex = (double) c.getList().indexOf(message) + 1;
-                        stage.setY(owner.getY() + owner.getHeight() -((root.getBoundsInLocal().getHeight() * newIndex) + offsetY + (12 * (newIndex - 1))));
+                        c.next();
+                        if(c.wasRemoved() && !c.getList().isEmpty()){
+                            double newIndex = (double) c.getList().indexOf(message) + 1;
+                            double oldY = stage.getY();
+                            double newY = owner.getY() + owner.getHeight() -((root.getBoundsInLocal().getHeight() * newIndex) + offsetY + (12 * (newIndex - 1)));
+                            double stepY = (newY - oldY) / 30;
+                            List<KeyFrame> keyFrames = new ArrayList<>();
+                            int easeStep = 0;
+                            for(int i = 0; i < 7; i += 1) {
+                                easeStep += i;
+                                int step = easeStep;
+                                keyFrames.add(new KeyFrame(Duration.millis(i*10), e -> stage.setY(oldY + (stepY * step))));
+                            }
+                            for(int i = 1; i < 10; i += 1) {
+                                int step = i;
+                                keyFrames.add(new KeyFrame(Duration.millis((i + 6) * 10), e -> stage.setY(oldY + (stepY * (21 + step)))));
+                            }
+                            Timeline timeline = new Timeline(
+                                keyFrames.toArray(new KeyFrame[16])
+                            );
+                            timeline.play();
+                        }
                     }
                 });
 
                 stage.setX(primaryX + primaryWidth - (root.getBoundsInLocal().getWidth() + offsetX));
                 stage.setY(primaryY + primaryHeight - ((root.getBoundsInLocal().getHeight() * index) + offsetY + (12 * (index - 1))));
 
-                Timeline timeline = new Timeline(new KeyFrame(Duration.millis(durationInMillis), e -> {
-                    stage.close();
-                    lock.lock();
-                    toasts.remove(message);
-                    lock.unlock();
-                }));
+                Timeline timeline = new Timeline(
+                    new KeyFrame(Duration.ZERO, e -> {
+                        FadeTransition fadeTransition = new FadeTransition(Duration.millis(durationInMillis/10), root);
+                        fadeTransition.setFromValue(0);
+                        fadeTransition.setToValue(1);
+                        fadeTransition.play();
+                    }),
+                    new KeyFrame(Duration.millis(durationInMillis - (durationInMillis/10)), e -> {
+                        FadeTransition fadeTransition = new FadeTransition(Duration.millis(durationInMillis/10), root);
+                        fadeTransition.setFromValue(1);
+                        fadeTransition.setToValue(0);
+                        fadeTransition.play();
+                    }),
+                    new KeyFrame(Duration.millis(durationInMillis), e -> {
+                        stage.close();
+                        lock.lock();
+                        toasts.remove(message);
+                        lock.unlock();
+                    })
+                );
+
                 timeline.play();
             });
         }

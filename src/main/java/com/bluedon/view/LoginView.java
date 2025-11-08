@@ -1,7 +1,6 @@
 package com.bluedon.view;
 
 import com.bluedon.interfaces.PageView;
-import com.bluedon.utils.Toast;
 import com.bluedon.view.ui.images.BluedonLogo;
 
 import javafx.geometry.Insets;

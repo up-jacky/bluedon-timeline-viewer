@@ -2,7 +2,8 @@ package com.bluedon.view.ui.cards;
 
 import org.json.JSONObject;
 
-import javafx.scene.control.Alert;
+import com.bluedon.utils.Toast;
+
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
@@ -13,6 +14,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 public class LoginDialog {
     private static boolean isHandleValid = true;
@@ -56,22 +58,14 @@ public class LoginDialog {
         dialog.getDialogPane();
 
         dialog.setOnCloseRequest(e -> {
-            if(!isHandleValid || !isPasswordValid) {
-                Alert errorAlert = new Alert(Alert.AlertType.ERROR);
-                errorAlert.setTitle("Login failed!");
-                if(!isHandleValid) {
-                    isHandleValid = true;
-                    errorAlert.setHeaderText("Handle Field is empty.");
-                    errorAlert.setContentText("Please input your handle in the handle field.");
-                    errorAlert.showAndWait();
-                    e.consume();
-                } else {
-                    isPasswordValid = true;
-                    errorAlert.setHeaderText("Password Field is empty.");
-                    errorAlert.setContentText("Please input your password in the password field.");
-                    errorAlert.showAndWait();
-                    e.consume();
-                }
+            if(isHandleValid == false) {
+                isHandleValid = true;
+                Toast.error.showToast(dialogPane.getScene().getWindow(),"Login failed! Error: Handle field is empty.");
+                e.consume();
+            } else if(isPasswordValid == false) {
+                isPasswordValid = true;
+                Toast.error.showToast(dialogPane.getScene().getWindow(),"Login failed! Error: Password field is empty.");
+                e.consume();
             }
         });
 
@@ -81,17 +75,21 @@ public class LoginDialog {
                 jsonCreds.put("handle", handleField.getText() + ".bsky.social");
                 jsonCreds.put("password", passwordField.getText());
 
-                if (jsonCreds.getString("handle") == null || jsonCreds.getString("handle").trim().isEmpty()) {
+                if (jsonCreds.getString("handle") == null || jsonCreds.getString("handle").trim().equals(".bsky.social")) {
                     handleField.setText("");
                     isHandleValid = false;
-                    
+                    return null;
                 } else if (jsonCreds.getString("password") == null || jsonCreds.getString("password").trim().isEmpty()) {
                     passwordField.setText("");
                     isPasswordValid = false;
+                    return null;
                 } else return jsonCreds;
             } 
             return null;
         });
+
+        Stage dialogStage = (Stage) dialogPane.getScene().getWindow();
+        dialogStage.setAlwaysOnTop(true);
 
         dialog.showAndWait();
         return dialog.getResult();

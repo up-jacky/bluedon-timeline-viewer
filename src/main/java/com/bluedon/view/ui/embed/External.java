@@ -5,6 +5,7 @@ import java.net.URI;
 
 import org.json.JSONObject;
 
+import com.bluedon.utils.Toast;
 import com.bluedon.view.ui.images.Thumb;
 
 import javafx.scene.text.Text;
@@ -84,6 +85,7 @@ public class External extends EmbedMedia {
             } catch (Exception error) {
                 System.err.println("[ERROR][External][getEmbed] Failed to launch in browser! " + error.getMessage());
                 System.out.println("[INFO][External][getEmbed] Open the link to browser instead: " + uri);
+                Toast.error.showToast("Failed to launch in browser! Error: " + error.getMessage());
             }
         });
 

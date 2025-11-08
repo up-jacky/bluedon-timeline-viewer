@@ -1,0 +1,35 @@
+.label {
+    -fx-padding: 4px 12px;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+}
+
+.debug {
+    -fx-background-color: rgb(5, 242, 255);
+    -fx-background-radius: 8;
+}
+
+.info {
+    -fx-background-color: rgb(2, 48, 255);
+    -fx-background-radius: 8;
+}
+
+.success {
+    -fx-background-color: rgb(135, 235, 136);
+    -fx-background-radius: 8;
+}
+
+.warning {
+    -fx-background-color: rgb(205, 116, 0);
+    -fx-background-radius: 8;
+}
+
+.error {
+    -fx-background-color: rgb(255, 0, 0);
+    -fx-background-radius: 8;
+}
+
+.fatal {
+    -fx-background-color: rgb(111, 0, 255);
+    -fx-background-radius: 8;
+}

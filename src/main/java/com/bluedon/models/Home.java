@@ -6,6 +6,7 @@ import com.bluedon.view.ui.cards.Post;
 import com.bluedon.view.ui.images.Avatar;
 import com.bluedon.services.AuthSession;
 import com.bluedon.services.ServiceRegistry;
+import com.bluedon.utils.Toast;
 
 import java.util.List;
 
@@ -141,6 +142,7 @@ public class Home {
 
 		int i = 0;
 		System.out.println("[INFO][Home][refreshPosts] Updating postsContainer...");
+		Toast.info.showToast("Updating posts...");
 		System.out.println("[INFO][Home][refreshPosts] Total # of posts: " + posts.size());
 		System.out.println("[INFO][Home][refreshPosts] Bluesky status: " + ServiceRegistry.isBlueskyLoggedIn() + " Mastodon status: " + ServiceRegistry.isMastodonLoggedIn());
 		for (Post post: posts) {
@@ -157,5 +159,6 @@ public class Home {
 			i += 1;
 		}
 		System.out.println("[INFO][Home][refreshPosts] Done updating postsContainer.");
+		Toast.success.showToast("Done updating posts!");
     }
 }

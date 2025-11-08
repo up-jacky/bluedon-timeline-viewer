@@ -5,6 +5,7 @@ import org.json.JSONObject;
 import com.bluedon.controllers.PageController;
 import com.bluedon.enums.Page;
 import com.bluedon.utils.SessionFile;
+import com.bluedon.utils.Toast;
 import com.bluedon.view.ui.cards.LoginDialog;
 
 import javafx.concurrent.Task;
@@ -26,11 +27,13 @@ public class LoginBluesky extends Task<Boolean> {
         if (session == null) {
             session = new AuthSession();
             System.out.println("[INFO][LoginBluesky][call] Logging in to Bluesky...");
+            Toast.info.showToast("Logging in to Bluesky...");
             
             JSONObject rawCreds = LoginDialog.showLoginDialog();
 
             if (rawCreds == null) {
                 System.out.println("[INFO][LoginBluesky][succeeded] Login dialog closed.");
+                Toast.info.showToast("Login dialog closed.");
                 if(PageController.currentPage == Page.LOGIN) PageController.displayLoginPage();
                 return;
             }
@@ -42,6 +45,7 @@ public class LoginBluesky extends Task<Boolean> {
             } catch (Exception e) {
                 System.err.println("[ERROR][LoginBluesky][succeeded] Login failed!");
                 System.err.println("[ERROR][LoginBluesky][succeeded] Error: " + e.getMessage());
+                Toast.error.showToast("Login failed! Error: " + e.getMessage());
                 e.printStackTrace();
                 if(PageController.currentPage == Page.LOGIN) PageController.displayLoginPage();
                 return;
@@ -51,6 +55,7 @@ public class LoginBluesky extends Task<Boolean> {
         }
         System.out.println("[INFO][LoginBluesky][succeeded] Login successful!");
         System.out.println("[INFO][LoginBluesky][succeeded] Logged in as: " + session.handle);
+        Toast.success.showToast("Welcome " + session.handle + "!");
         PageController.displayHomePage();
     }
 
@@ -59,6 +64,7 @@ public class LoginBluesky extends Task<Boolean> {
         System.out.println("[DEBUG][LoginBluesky][failed] Thread: " + Thread.currentThread());
         System.err.println("[ERROR][LoginBluesky][failed] Login failed!");
         System.err.println("[ERROR][LoginBluesky][failed] Error: " + getException().getMessage());
+        Toast.error.showToast("Login failed! Error: " + getException().getMessage());
         getException().printStackTrace();
         if(PageController.currentPage == Page.LOGIN) PageController.displayLoginPage();
     }

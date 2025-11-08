@@ -14,6 +14,7 @@ import org.json.JSONObject;
 
 import com.bluedon.enums.EmbedType;
 import com.bluedon.enums.Social;
+import com.bluedon.utils.Toast;
 import com.bluedon.view.ui.embed.Embed;
 import com.bluedon.view.ui.embed.EmbedRecord;
 import com.bluedon.view.ui.embed.External;
@@ -245,6 +246,7 @@ public class Post {
                 } catch (Exception error) {
                     System.err.println("[ERROR] Failed to launch in browser! " + error.getMessage());
                     System.out.println("[INFO][Post] Open the link to browser instead: " + url);
+                    Toast.error.showToast("Failed to launch in browser! Error: " + error.getMessage());
                 }
             } else e.consume();
         });

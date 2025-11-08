@@ -2,6 +2,7 @@ package com.bluedon.services;
 
 import com.bluedon.utils.Http;
 import com.bluedon.utils.SessionFile;
+import com.bluedon.utils.Toast;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -37,12 +38,15 @@ public class BlueskyClient {
 
         if (response.statusCode() == 200) {
             System.out.println("[INFO][BlueskyClient][createSession] Sucessful creating session!");
+            Toast.success.showToast("Successful logging in!");
             session.accessJwt = responseBody.getString("accessJwt");
             session.refreshJwt = responseBody.getString("refreshJwt");
             session.did = responseBody.getString("did");
         } else {
+            String errorMessage = response.statusCode() + " " + responseBody.getString("error") + ": " + responseBody.getString("message");
             System.err.println("[ERROR][BlueskyClient][createSession]  Error creating session!");
-            throw new Exception(response.statusCode() + " " + responseBody.getString("error") + ": " + responseBody.getString("message"));
+            Toast.error.showToast("Failed logging in! Error: " + errorMessage);
+            throw new Exception(errorMessage);
         }
     }
 
@@ -63,17 +67,21 @@ public class BlueskyClient {
 
         if (response.statusCode() == 200) {
             System.out.println("[INFO][BlueskyClient][refreshSession] Successful refreshing session!");
+            Toast.success.showToast("Successful refreshing session!");
             session.accessJwt = responseBody.getString("accessJwt");
             session.refreshJwt = responseBody.getString("refreshJwt");
             session.did = responseBody.getString("did");
             SessionFile.BlueskySessionFile.saveSession();
         } else if (response.statusCode() == 400) {
             System.out.println("[INFO][BlueskyClient][refreshSession] Session has expired. Deleting saved session...");
+            Toast.info.showToast("Session has expired.");
             ServiceRegistry.setBlueskySession(null);
             SessionFile.BlueskySessionFile.deleteSession();
         } else {
+            String errorMessage = response.statusCode() + " " + responseBody.getString("error") + ": " + responseBody.getString("message");
             System.err.println("[ERROR][BlueskyClient][refreshSession] Failed to refresh session!");
-            throw new Exception(response.statusCode() + " " + responseBody.getString("error") + ": " + responseBody.getString("message"));
+            Toast.error.showToast("Failed to refresh session! Error: " + errorMessage);
+            throw new Exception(errorMessage);
         }
     }
 
@@ -93,10 +101,13 @@ public class BlueskyClient {
 
         if (response.statusCode() == 200) {
             System.out.println("[INFO][BlueskyClient][deleteSession] Successful deleting session!");
+            Toast.success.showToast("Successful deleting Bluesky session!");
         } else {
             JSONObject responseBody = new JSONObject(response.body());
+            String errorMessage = response.statusCode() + " " + responseBody.getString("error") + ": " + responseBody.getString("message");
             System.err.println("[ERROR][BlueskyClient][deleteSession] Failed to delete session!");
-            throw new Exception(response.statusCode() + " " + responseBody.getString("error") + ": " + responseBody.getString("message"));
+            Toast.error.showToast("Failed deleting Bluesky session! Error: " + errorMessage);
+            throw new Exception(errorMessage);
         }
     }
 
@@ -121,6 +132,7 @@ public class BlueskyClient {
 
         if (response.statusCode() == 200) {
             System.out.println("[INFO][BlueskyClient][getProfile] Successful getting user profile!");
+            Toast.success.showToast("Successful getting Bluesky profile!");
             session.handle = responseBody.getString("handle");
             session.displayName = (String) responseBody.get("displayName");
             if(session.displayName == null || session.displayName.isEmpty()) {    
@@ -130,8 +142,10 @@ public class BlueskyClient {
             session.avatarUri = (String) responseBody.get("avatar");
             session.profileUrl = "https://bsky.app/profile/" + session.handle;
         } else {
+            String errorMessage = response.statusCode() + " " + responseBody.getString("error") + ": " + responseBody.getString("message");
             System.err.println("[ERROR][BlueskyClient][getProfile] Failed to get profile!");
-            throw new Exception(response.statusCode() + " " + responseBody.getString("error") + ": " + responseBody.getString("message"));
+            Toast.error.showToast("Failed getting Bluesky profile! Error: " + errorMessage);
+            throw new Exception(errorMessage);
         }
     }
 
@@ -154,8 +168,10 @@ public class BlueskyClient {
             System.out.println("[INFO][BlueskyClient][getTimeline] Successful getting user timeline!");
             return responseBody;
         } else {
+            String errorMessage = response.statusCode() + " " + responseBody.getString("error") + ": " + responseBody.getString("message");
             System.err.println("[ERROR][BlueskyClient][getTimeline] Failed to get user timeline!");
-            throw new Exception(response.statusCode() + " " + responseBody.getString("error") + ": " + responseBody.getString("message"));
+            Toast.error.showToast(" Failed to get user timeline! Error: " + errorMessage);
+            throw new Exception(errorMessage);
         }
     }
 }

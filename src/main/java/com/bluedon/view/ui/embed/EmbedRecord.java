@@ -10,6 +10,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.bluedon.enums.EmbedType;
+import com.bluedon.utils.Toast;
 
 import javafx.geometry.Insets;
 import javafx.scene.text.Text;
@@ -190,6 +191,7 @@ public class EmbedRecord extends Embed {
                 Object rawEmbed = embeds.get(i);
                 if(rawEmbed.getClass().getName() != JSONObject.class.getName()) {
                     System.err.println("[FATAL][Record][viewRecord] Embed records must be a JSONObject.");
+                    Toast.fatal.showToast("Fatal Error: Embed records must be a JSONObject.");
                     return null;
                 }
                 JSONObject embed = embeds.getJSONObject(i);
@@ -218,6 +220,7 @@ public class EmbedRecord extends Embed {
                 } catch (Exception error) {
                     System.err.println("[ERROR][Record][viewRecord] Failed to launch in browser! " + error.getMessage());
                     System.out.println("[INFO][Record][viewRecord] Open the link to browser instead: " + url);
+                    Toast.error.showToast("Failed to launch in browser! Error: " + error.getMessage());
                 }
             } else e.consume();
         });

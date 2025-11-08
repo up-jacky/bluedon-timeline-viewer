@@ -12,6 +12,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.bluedon.enums.Social;
+import com.bluedon.utils.Toast;
 import com.bluedon.view.ui.images.Avatar;
 
 import javafx.geometry.Insets;
@@ -135,6 +136,7 @@ public class QuotedStatus {
                 } catch (Exception error) {
                     System.err.println("[ERROR][QuotedStatus][getQuotedStatus] Failed to launch in browser! " + error.getMessage());
                     System.out.println("[INFO][QuotedStatus][getQuotedStatus] Open the link to browser instead: " + url);
+                    Toast.error.showToast("Failed to launch in browser! Error: " + error.getMessage());
                 }
             } else e.consume();
         });

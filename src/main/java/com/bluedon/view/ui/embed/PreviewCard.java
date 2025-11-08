@@ -6,6 +6,7 @@ import java.net.URI;
 
 import org.json.JSONObject;
 
+import com.bluedon.utils.Toast;
 import com.bluedon.view.ui.images.Thumb;
 
 import javafx.scene.image.ImageView;
@@ -74,6 +75,7 @@ public class PreviewCard {
             } catch (Exception error) {
                 System.err.println("[ERROR][PreviewCard][getCard] Failed to launch in browser! " + error.getMessage());
                 System.out.println("[INFO][PreviewCard][getCard] Open the link to browser instead: " + url);
+                Toast.error.showToast("Failed to launch in browser! Error: " + error.getMessage());
             }
         });
 

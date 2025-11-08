@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import com.bluedon.controllers.PageController;
 import com.bluedon.enums.Social;
 import com.bluedon.models.Home;
+import com.bluedon.utils.Toast;
 import com.bluedon.view.HomeView;
 import com.bluedon.view.ui.cards.Post;
 
@@ -41,7 +42,8 @@ public class FetchTimeline extends Task<Boolean> {
                     blueskyThread.start();
 				}
 			} catch(Exception e) {
-				System.err.println("[ERROR][FetchTimeline][fetchTimeline] Failed to get Bluesky timeline:" + e.getMessage());
+				System.err.println("[ERROR][FetchTimeline][fetchTimeline] Failed to fetch Bluesky timeline:" + e.getMessage());
+                Toast.error.showToast("Failed to fetch Bluesky timeline! Error: " + e.getMessage());
 				e.printStackTrace();
 			}
 		}
@@ -51,7 +53,8 @@ public class FetchTimeline extends Task<Boolean> {
                 mastodonThread.setDaemon(true);
                 mastodonThread.start();
 			} catch(Exception e) {
-				System.err.println("[ERROR][FetchTimeline][fetchTimeline] Failed to get Mastodon timeline: " + e.getMessage());
+				System.err.println("[ERROR][FetchTimeline][fetchTimeline] Failed to fetch Mastodon timeline: " + e.getMessage());
+                Toast.error.showToast("Failed to fetch Mastodon timeline! Error: " + e.getMessage());
 				e.printStackTrace();
 			}
 		}
@@ -67,6 +70,7 @@ public class FetchTimeline extends Task<Boolean> {
             }
         } catch (Exception e) {
             System.err.println("[ERROR][FetchTimeline][fetchTimeline] Failed to fetch timeline: " + e.getMessage());
+            Toast.error.showToast("Failed to fetch timeline! Error: " + e.getMessage());
             e.printStackTrace();
         }
         
@@ -128,6 +132,7 @@ public class FetchTimeline extends Task<Boolean> {
     protected void failed() {
         System.out.println("[DEBUG][FetchTimeline][failed] Thread: " + Thread.currentThread());
         System.err.println("[ERROR] Failed to fetch timeline: " + getException().getMessage());
+        Toast.error.showToast("Failed to fetch timeline! Error: " + getException().getMessage());
         getException().printStackTrace();
     }
 

@@ -2,6 +2,7 @@ package com.bluedon.services;
 
 import com.bluedon.controllers.PageController;
 import com.bluedon.models.Home;
+import com.bluedon.utils.Toast;
 import com.bluedon.view.HomeView;
 import com.bluedon.view.LoginView;
 
@@ -49,6 +50,7 @@ public class Refresh {
         protected Boolean call() throws Exception {
             System.out.println("[DEBUG][Refresh][call] Thread: " + Thread.currentThread());
             System.out.println("[INFO][Refresh][call] Refreshing posts...");
+            Toast.info.showToast("Refreshing posts...");
             model.refreshPosts();
             return true;
         }
@@ -57,6 +59,7 @@ public class Refresh {
         protected void succeeded() {
             System.out.println("[DEBUG][Refresh][succeeded] Thread: " + Thread.currentThread());
             System.out.println("[INFO][Refresh][succeeded] Refreshing posts success!");
+            Toast.success.showToast("Successful refreshing posts!");
             ScrollPane postsArea = view.createPostsArea(model.postsContainer);
             view.updateLayout(null, postsArea);
             view.displayPage(stage);

@@ -57,10 +57,4 @@ public class Http {
     public static String get(String url, Map<String, String> headers) {
         return getWithResponse(url, headers).body();
     }
-
-    public static String extractDpopNonce(HttpResponse<String> response) {
-        String nonce = response.headers().firstValue("DPoP-Nonce")
-                .orElse(response.headers().firstValue("dpop-nonce").orElse(null));
-        return nonce;
-    }
 }

@@ -2,7 +2,7 @@ package com.bluedon.services;
 
 import com.bluedon.utils.Http;
 import com.bluedon.utils.LocalCallbackServer;
-
+import com.bluedon.utils.Toast;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.awt.Desktop;
@@ -146,6 +146,7 @@ public class MastodonClient {
             }
             if (!"Bearer".equalsIgnoreCase(tokenType)) {
                 System.err.println("[WARNING][MastodonClient][startAuth] Expected token_type 'Bearer', got '" + tokenType + "'");
+                Toast.warn.showToast("Expected token_type 'Bearer', got '" + tokenType + "'");
             }
 
             // Save client_id and client_secret for revoking the OAuth
@@ -203,6 +204,7 @@ public class MastodonClient {
             throw new IOException("Revoke token failed with status: " + response.statusCode() + ", body: " + response.body());
         } else {
             System.out.println("[INFO][MastodonClient][revokeAuth] Succesfully revoked the current session.");
+            Toast.success.showToast("Successfully revoked Mastodon session.");
         }
     }
 
@@ -224,6 +226,7 @@ public class MastodonClient {
             throw new IOException("Get user info failed with status: " + response.statusCode() + ", body: " + response.body());
         } else {
             System.out.println("[INFO][MastodonClient][getUserInfo] Succesfully get user info.");
+            Toast.success.showToast("Successful getting user info.");
             JSONObject responseBody = new JSONObject(response.body());
             session.handle = responseBody.getString("preferred_username") + "@mastodon.social";
             session.displayName = responseBody.getString("name").isEmpty()? responseBody.getString("preferred_username"): responseBody.getString("name");

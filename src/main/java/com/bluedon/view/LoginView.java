@@ -1,6 +1,7 @@
 package com.bluedon.view;
 
 import com.bluedon.interfaces.PageView;
+import com.bluedon.utils.Toast;
 import com.bluedon.view.ui.images.BluedonLogo;
 
 import javafx.geometry.Insets;
@@ -50,7 +51,7 @@ public class LoginView implements PageView {
     @Override
     public void init() {
         layout = new VBox(64);
-        scene = new Scene(layout, 1024, 576);
+        scene = new Scene(layout, 1072,603);
         scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
     }
     

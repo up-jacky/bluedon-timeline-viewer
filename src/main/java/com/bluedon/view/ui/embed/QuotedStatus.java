@@ -1,10 +1,7 @@
 package com.bluedon.view.ui.embed;
 
-import java.awt.Desktop;
-import java.net.URI;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,17 +9,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.bluedon.enums.Social;
-import com.bluedon.utils.Toast;
-import com.bluedon.view.ui.images.Avatar;
-
-import javafx.geometry.Insets;
-import javafx.scene.input.MouseButton;
-import javafx.scene.layout.HBox;
+import com.bluedon.view.ui.cards.MastodonPostCard;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
-import javafx.scene.shape.Circle;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
 
 public class QuotedStatus {
     public Social social;
@@ -37,15 +25,8 @@ public class QuotedStatus {
     private int favoritesCount;
     private int reblogsCount;
     private int quotesCount;
-    private double cardWidth;
-    private double padding = 24;
-    private double fitWidth;
 
-    private DateTimeFormatter currentYearFormatter = DateTimeFormatter.ofPattern("MMM dd");
-    private DateTimeFormatter generalFormatter = DateTimeFormatter.ofPattern("MMM dd yyyy");
-    private DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm a");
-
-    public QuotedStatus(JSONObject rawJson, double fitWidth) {
+    public QuotedStatus(JSONObject rawJson) {
         if(rawJson.getString("content") == null || rawJson.getString("content").trim().isEmpty()) {
             rawJson = rawJson.getJSONObject("reblog");
         }
@@ -61,8 +42,6 @@ public class QuotedStatus {
             System.out.println("[INFO][QuotedStatus][getQuotedStatus] User has no card.");
             previewCard = null;
         }
-        cardWidth = fitWidth;
-        this.fitWidth = cardWidth - (2.0 * padding);
         content = parseHtml(rawJson.getString("content"));
         JSONObject account = rawJson.getJSONObject("account");
         url = rawJson.getString("url");
@@ -76,72 +55,14 @@ public class QuotedStatus {
     }
 
     public Pane getQuotedStatus() {
-        VBox card = new VBox(12);
-        card.getStyleClass().add("post-card");
-        card.setPadding(new Insets(padding));
-        card.setPrefWidth(cardWidth);
 
-        Circle avatar = new Avatar(avatarUrl).getCircleImage(16);
-        avatar.getStyleClass().add("post-avatar");
+        String[] rawMetrics = {
+            reblogsCount + " boosts",
+            quotesCount + " quotes",
+            favoritesCount + " favorites"
+        };
 
-        Text displayNameText = new Text(displayName);
-        displayNameText.getStyleClass().add("post-display-name");
-        Text usernameText = new Text(username);
-        usernameText.getStyleClass().add("post-username");
-
-        VBox name = new VBox(4, displayNameText, usernameText);
-
-        String parsedCreatedAt = createdAt.format(generalFormatter) + " at " + createdAt.format(timeFormatter);
-        if(createdAt.getYear() == LocalDateTime.now().getYear()) parsedCreatedAt = createdAt.format(currentYearFormatter) + " at " + createdAt.format(timeFormatter);
-
-        Text createdAtText = new Text(parsedCreatedAt);
-        createdAtText.getStyleClass().add("post-time-created");
-
-        Text contentText = new Text(content);
-        contentText.getStyleClass().add("post-content");
-        contentText.setWrappingWidth(fitWidth);
-        TextFlow contentFlow = new TextFlow(contentText);
-        contentFlow.setPrefWidth(fitWidth);
-
-        Text reblogsCountText = new Text(reblogsCount + " boosts");
-        reblogsCountText.getStyleClass().add("post-reblogs");
-
-        Text quotesCountText = new Text(quotesCount + " quotes");
-        quotesCountText.getStyleClass().add("post-quotes");
-
-        Text favoritesCountText = new Text(favoritesCount + " favorites");
-        favoritesCountText.getStyleClass().add("post-favorites");
-
-        Pane mediaContainer = null;
-        if (mediaAttachments != null) mediaContainer = new MediaAttachments(mediaAttachments, fitWidth).getImages();
-
-        Pane previewCardContainer = null;
-        if (previewCard != null) previewCardContainer = new PreviewCard(previewCard, fitWidth).getCard();
-
-        HBox authorProfile = new HBox(16, avatar, name);
-        authorProfile.getStyleClass().add("post-author-container");
-
-        HBox metrics = new HBox(8, reblogsCountText, quotesCountText, favoritesCountText);
-
-        card.getChildren().addAll(authorProfile, contentFlow);
-        if(mediaContainer != null) card.getChildren().add(mediaContainer);
-        if(previewCardContainer != null) card.getChildren().add(previewCardContainer);
-        card.getChildren().addAll(createdAtText, metrics);
-        card.setOnMouseClicked(e -> {
-            if(e.getButton() == MouseButton.PRIMARY) {
-                try {
-                    if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(java.awt.Desktop.Action.BROWSE)) {
-                        Desktop.getDesktop().browse(URI.create(url));
-                    }
-                } catch (Exception error) {
-                    System.err.println("[ERROR][QuotedStatus][getQuotedStatus] Failed to launch in browser! " + error.getMessage());
-                    System.out.println("[INFO][QuotedStatus][getQuotedStatus] Open the link to browser instead: " + url);
-                    Toast.error.showToast("Failed to launch in browser! Error: " + error.getMessage());
-                }
-            } else e.consume();
-        });
-
-        return card;
+        return MastodonPostCard.createPostCard(url, null, avatarUrl, displayName, username, createdAt, content, null, mediaAttachments, previewCard, rawMetrics);
     }
     
     private static String parseHtml(String rawHtml) {

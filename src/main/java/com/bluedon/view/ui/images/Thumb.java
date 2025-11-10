@@ -1,25 +1,33 @@
 package com.bluedon.view.ui.images;
 
-import com.bluedon.view.ui.interfaces.ImageViewer;
-
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
-public class Thumb implements ImageViewer {
+public class Thumb {
 
-    private String thumb;
-
-    public Thumb(String uri) {
-        thumb = uri;
+    public static ImageView getImage(String thumb, boolean ratio, double fit, boolean isFitWidth) {
+        Image thumbImage = new Image(thumb);
+        ImageView imageView = new ImageView(thumbImage);
+        if(isFitWidth) imageView.setFitWidth(fit);
+        else imageView.setFitHeight(fit);
+        imageView.setPreserveRatio(ratio);
+    
+        return imageView;
     }
 
-    @Override
-    public ImageView getImage(double fitWidth, boolean ratio) {
+    public static ImageView getImage(String thumb, double fitWidth) {
+        return getImage(thumb, true, fitWidth, true);
+    }
+
+    public static ImageView getImage(String thumb, boolean ratio, double fitHeight) {
+        return getImage(thumb, ratio, fitHeight, false);
+    }
+
+    public static ImageView getImage(String thumb, boolean preserveRatio) {
         Image thumbImage = new Image(thumb);
-        ImageView thumbView = new ImageView(thumbImage);
-        thumbView.setFitWidth(fitWidth);
-        thumbView.setPreserveRatio(ratio);
-        
-        return thumbView;
+        ImageView imageView = new ImageView(thumbImage);
+        imageView.setPreserveRatio(preserveRatio);
+
+        return imageView;
     }
 }

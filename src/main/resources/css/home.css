@@ -1,0 +1,119 @@
+#root {
+    -fx-bluesky-color: #279AF1;
+    -fx-bluesky-bg: #151d28;
+    -fx-mastodon-color: #8645F6;
+    -fx-mastodon-bg: #180c2c;
+    -fx-default-color: #4A5899;
+    -fx-scroll-pane-color: #0f0b18;
+}
+
+.sidebar {
+    -fx-background-color: #181634;
+    -fx-padding: 24;
+    -fx-spacing: 24;
+}
+
+.sidebar .button {
+    -fx-pref-width: 200px;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-background-radius: 8;
+    -fx-padding: 8 16 8 16;
+}
+
+.sidebar .button .text {
+    -fx-font-family: "Consolas";
+}
+
+.sidebar .bluesky.avatar {
+    -fx-stroke: -fx-bluesky-color;
+    -fx-stroke-width: 2px;
+    -fx-effect: dropshadow(three-pass-box, -fx-bluesky-color, 2, 0, 0, 2);
+}
+
+.sidebar .mastodon.avatar {
+    -fx-stroke: -fx-mastodon-color;
+    -fx-stroke-width: 2px;
+    -fx-effect: dropshadow(three-pass-box, -fx-mastodon-color, 2, 0, 0, 2);
+}
+
+.sidebar .name {
+    -fx-fill: white;
+    -fx-font-family: "Courier New";
+    -fx-font-size: 14px;
+}
+
+.sidebar .handle {
+    -fx-font-family: "Courier New";
+    -fx-font-size: 12px;
+}
+
+.sidebar .bluesky.handle {
+    -fx-fill: -fx-bluesky-color;
+}
+
+.sidebar .mastodon.handle {
+    -fx-fill: -fx-mastodon-color;
+}
+
+.button.login.main.bluesky {
+    -fx-background-color: -fx-bluesky-color;
+}
+
+.button.login.main.mastodon {
+    -fx-background-color: -fx-mastodon-color
+}
+
+.button.refresh {
+    -fx-background-color: -fx-default-color;
+}
+
+.button.filter {
+    -fx-background-color: #af4c4c
+}
+
+.button.filter.active {
+    -fx-background-color: #4caf50
+}
+
+.scroll-pane {
+    -fx-background-color: -fx-scroll-pane-color;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: -fx-scroll-pane-color;
+}
+
+.scroll-pane > .corner {
+    -fx-background-color: -fx-scroll-pane-color;
+}
+
+.scroll-bar:vertical, .scroll-bar:horizontal {
+    -fx-background-color: -fx-scroll-pane-color;
+    -fx-border-width: 0;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+}
+
+.scroll-bar:vertical .track, .scroll-bar:horizontal .track {
+    -fx-background-color: -fx-scroll-pane-color; 
+    -fx-border-width: 0;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+}
+
+.scroll-bar:vertical .thumb, .scroll-bar:horizontal .thumb {
+    -fx-background-color: -fx-default-color;
+    -fx-background-insets: 0, 0, 0, 0;
+    -fx-background-radius: 32px;
+}
+
+.scroll-bar > .increment-button, .scroll-bar > .decrement-button {
+    -fx-background-color: -fx-scroll-pane-color;
+    -fx-padding: 0;
+}
+
+.scroll-bar > .increment-button > .increment-arrow, .scroll-bar > .decrement-button > .decrement-arrow {
+    -fx-background-color: -fx-default-color;
+}

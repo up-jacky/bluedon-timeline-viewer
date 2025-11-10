@@ -14,9 +14,7 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
 
@@ -79,14 +77,11 @@ public class Home {
 
 	private Text createDisplayName(String text) {
 		Text displayName = new Text(text);
-		displayName.setFont(Font.font("Courier New", 12));
 		return displayName;
 	}
 
 	private Text createHandle(String text) {
 		Text handle = new Text(text);
-		handle.setFill(Color.GRAY);
-		handle.setFont(Font.font("Courier New", 10));
 		return handle;
 	}
 
@@ -100,16 +95,26 @@ public class Home {
 		switch (social) {
 			case BLUESKY:
 				if (blueskySession != null) {
-					names = new VBox(4, createDisplayName(blueskySession.displayName), createHandle("@"+blueskySession.handle));
-					avatar = new Avatar(blueskySession.avatarUri).getCircleImage(24);
-					profile = new VBox(8, new HBox(16, avatar, FilterButton.createButton(social)), names);
+					Text displayName = createDisplayName(blueskySession.displayName);
+					Text handle = createHandle("@"+blueskySession.handle);
+					displayName.getStyleClass().addAll("bluesky","name");
+					handle.getStyleClass().addAll("bluesky","handle");
+					names = new VBox(4, displayName, handle);
+					avatar = new Avatar(blueskySession.avatarUri).getCircleImage(32);
+					avatar.getStyleClass().addAll("bluesky","avatar");
+					profile = new VBox(16, new HBox(16, avatar, FilterButton.createButton(social)), names);
 					return profile;
 				} break;
 			case MASTODON:
 				if (mastodonSession != null) {
-					names = new VBox(4, createDisplayName(mastodonSession.displayName), createHandle("@"+mastodonSession.handle));
-					avatar = new Avatar(mastodonSession.avatarUri).getCircleImage(24);
-					profile = new VBox(8, new HBox(16, avatar, FilterButton.createButton(social)), names);
+					Text displayName = createDisplayName(mastodonSession.displayName);
+					Text handle = createHandle("@"+mastodonSession.handle);
+					displayName.getStyleClass().addAll("mastodon","name");
+					handle.getStyleClass().addAll("mastodon","handle");
+					names = new VBox(4, displayName, handle);
+					avatar = new Avatar(mastodonSession.avatarUri).getCircleImage(32);
+					avatar.getStyleClass().addAll("mastodon","avatar");
+					profile = new VBox(16, new HBox(16, avatar, FilterButton.createButton(social)), names);
 					return profile;
 				} break;
 			default:
@@ -137,7 +142,7 @@ public class Home {
     }
     
     public void refreshPosts() {
-		if(postsContainer == null) postsContainer = new VBox(24);
+		if(postsContainer == null) postsContainer = new VBox();
     	postsContainer.getChildren().clear();
 
 		int i = 0;

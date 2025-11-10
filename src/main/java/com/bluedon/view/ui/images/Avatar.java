@@ -17,10 +17,9 @@ public class Avatar implements ImageViewer {
     }
 
     @Override
-    public ImageView getImage(double fitHeight, boolean ratio) {
+    public ImageView getImage(boolean ratio) {
         Image avatar = new Image(avatarUri);
         ImageView avatarView = new ImageView(avatar);
-        avatarView.setFitHeight(fitHeight);
         avatarView.setPreserveRatio(ratio);
         
         return avatarView;

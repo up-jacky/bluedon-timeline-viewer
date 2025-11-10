@@ -17,12 +17,11 @@ public class LoginView implements PageView {
 
     private static VBox layout;
     private static Scene scene;
-    private final static ImageView logo = new BluedonLogo().getImage(100, true);
+    private final static ImageView logo = new BluedonLogo().getImage(true);
     
     public VBox createContainer(double spacing, Node ... children) {
     	VBox container = new VBox(spacing, children);
     	container.setAlignment(Pos.CENTER);
-    	container.getStyleClass().add("input-box");
     	return container;
     }
     
@@ -44,14 +43,14 @@ public class LoginView implements PageView {
         layout.getChildren().addAll(logo, accountsBox);
         layout.setAlignment(Pos.CENTER);
         layout.setPadding(new Insets(40));
-        layout.getStyleClass().add("login-root");
     }
 
     @Override
     public void init() {
         layout = new VBox(64);
+        layout.setId("root");
         scene = new Scene(layout, 1072,603);
-        scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
+        scene.getStylesheets().add(getClass().getResource("/css/login.css").toExternalForm());
     }
     
     @Override

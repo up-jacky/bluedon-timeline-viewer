@@ -1,44 +1,57 @@
+#root {
+    -fx-bluesky-color: #279AF1;
+    -fx-mastodon-color: #8645F6;
+    -fx-default-color: #4A5899;
+}
+
+.text {
+    -fx-font-family: "Consolas";
+}
+
 .label {
+    -fx-font-size: 14px;
     -fx-padding: 4px;
-    -fx-pref-width: 64px;
+    -fx-pref-width: 96px;
 }
 
-.bsky {
-    -fx-pref-width: 72px;
-}
-
-.handle-field {
+.text-field {
+    -fx-font-family: "Consolas";
+    -fx-font-size: 14px;
     -fx-padding: 4px 8px;
-    -fx-border-color: #4A5899;
-    -fx-border-radius: 8px;
-    -fx-background-radius: 8px;
+    -fx-border-color: -fx-default-color;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
 }
 
-.handle-field:focus {
-    -fx-border-color: #279af1;
-    -fx-border-radius: 8px;
-    -fx-background-radius: 8px;
+.text-field:focus {
+    -fx-border-color: -fx-bluesky-color;
 }
 
-.exit-button {
-    -fx-max-width: 0;
-    -fx-min-width: 0;
-    -fx-pref-width: 0;
-    -fx-padding: 0;
-    -fx-opacity: 0;
+.button.login.dialog {
+    -fx-background-color: -fx-bluesky-color;
+    -fx-padding: 4px 8px;
+    -fx-font-size: 14px;
 }
 
-.login-button {
-    -fx-background-color: linear-gradient(to left, #279af1, #4A5899);
+.button.login.main.bluesky {
+    -fx-background-color: -fx-bluesky-color;
+}
+
+.button.login.main.mastodon {
+    -fx-background-color: -fx-mastodon-color
+}
+
+.button.login.main {
+    -fx-font-size: 20px;
+    -fx-padding: 8px 16px;
+    -fx-pref-width: 240px;
+    -fx-pref-height: 28px;
+}
+
+.button.login {
     -fx-text-fill: white;
     -fx-font-weight: bold;
-    -fx-font-size: 12px;
-    -fx-padding: 4px 8px;
     -fx-border-radius: 32px;
-    -fx-background-radius: 32px;
+    -fx-border-radius: 12px;
     -fx-border-insets: 0;
-}
-
-.login-button:hover {
-    -fx-background-color:  #279af1;
 }

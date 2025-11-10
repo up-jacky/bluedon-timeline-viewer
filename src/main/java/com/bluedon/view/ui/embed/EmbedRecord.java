@@ -1,24 +1,19 @@
 package com.bluedon.view.ui.embed;
 
-import java.awt.Desktop;
-import java.net.URI;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.bluedon.enums.EmbedType;
 import com.bluedon.utils.Toast;
+import com.bluedon.view.ui.cards.BlueskyPostCard;
 
 import javafx.geometry.Insets;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Circle;
 
 public class EmbedRecord extends Embed {
     private Author author;
@@ -33,24 +28,14 @@ public class EmbedRecord extends Embed {
     private int replyCount;
     private int quoteCount;
     private int repostCount;
-    private DateTimeFormatter currentYearFormatter = DateTimeFormatter.ofPattern("MMM dd");
-    private DateTimeFormatter generalFormatter = DateTimeFormatter.ofPattern("MMM dd yyyy");
-    private DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm a");
     private boolean mediaOnly = false;
-    private double cardWidth;
-    private double padding = 24;
-    private double fitWidth;
 
-    public EmbedRecord(JSONObject rawJson, double fitWidth) {
+    public EmbedRecord(JSONObject rawJson) {
         init(rawJson);
-        cardWidth = fitWidth;
-        this.fitWidth = cardWidth - (2.0*padding);
     }
 
-    public EmbedRecord(JSONObject rawJson, double fitWidth, boolean mediaOnly) {
+    public EmbedRecord(JSONObject rawJson, boolean mediaOnly) {
         init(rawJson);
-        cardWidth = fitWidth;
-        this.fitWidth = cardWidth - (2.0*padding);
         this.mediaOnly = mediaOnly;
     }
 
@@ -105,11 +90,11 @@ public class EmbedRecord extends Embed {
     private VBox viewBlockedRecord() {
         VBox card = new VBox(12);
         card.setPadding(new Insets(16));
-        card.getStyleClass().add("post-card");
+        card.getStyleClass().add("post");
 
         Text content = new Text("Blocked");
-        content.getStyleClass().add("post-content");
-        content.getStyleClass().add("post-blocked");
+        content.getStyleClass().add("content");
+        content.getStyleClass().add("blocked");
 
         card.getChildren().add(content);
         return card;
@@ -118,11 +103,11 @@ public class EmbedRecord extends Embed {
     private VBox viewDetachedRecord() {
         VBox card = new VBox(12);
         card.setPadding(new Insets(16));
-        card.getStyleClass().add("post-card");
+        card.getStyleClass().add("post");
 
         Text content = new Text("Removed by author.");
-        content.getStyleClass().add("post-content");
-        content.getStyleClass().add("post-detached");
+        content.getStyleClass().add("content");
+        content.getStyleClass().add("detached");
 
         card.getChildren().add(content);
         return card;
@@ -131,61 +116,26 @@ public class EmbedRecord extends Embed {
     private VBox viewNotFoundRecord() {
         VBox card = new VBox(12);
         card.setPadding(new Insets(16));
-        card.getStyleClass().add("post-card");
+        card.getStyleClass().add("post");
 
         Text content = new Text("Content Not Found");
-        content.getStyleClass().add("post-content");
-        content.getStyleClass().add("post-not-found");
+        content.getStyleClass().add("content");
+        content.getStyleClass().add("not-found");
 
         card.getChildren().add(content);
         return card;
     }
     
     private VBox viewRecord() {
-        VBox card = new VBox(12);
-        card.setPadding(new Insets(padding));
-        card.getStyleClass().add("post-card");
-        card.setPrefWidth(cardWidth);
 
-        Circle avatar = author.getAvatar(16);
-        avatar.getStyleClass().add("post-avatar");
+        String[] rawMetrics = {
+            likeCount + " likes",
+            replyCount + " replies",
+            repostCount + " reposts",
+            quoteCount + " quotes"
+        };
 
-        Text displayNamText = new Text(author.getName());
-        displayNamText.getStyleClass().add("post-display-name");
-        Text usernameText = new Text(author.getHandle());
-        usernameText.getStyleClass().add("post-username");
-
-        VBox name = new VBox(4, displayNamText, usernameText);
-
-        String parsedCreatedAt = createdAt.format(generalFormatter) + " at " + createdAt.format(timeFormatter);
-        if(createdAt.getYear() == LocalDateTime.now().getYear()) parsedCreatedAt = createdAt.format(currentYearFormatter) + " at " + createdAt.format(timeFormatter);
-
-        Text createdAtText = new Text(parsedCreatedAt);
-        createdAtText.getStyleClass().add("post-time-created");
-
-        Text contentText = new Text(content);
-        contentText.getStyleClass().add("post-content");
-        contentText.setWrappingWidth(fitWidth);
-        TextFlow contentFlow = new TextFlow(contentText);
-    
-        HBox authorProfile = new HBox(16, avatar, name);
-        authorProfile.getStyleClass().add("post-author-container");
-
-        Text likeCountText = new Text(likeCount + " likes");
-        likeCountText.getStyleClass().add("post-likes");
-        
-        Text replyCountText = new Text(replyCount + " replies");
-        replyCountText.getStyleClass().add("post-replies");
-        
-        Text repostCountText = new Text(repostCount + " reposts");
-        repostCountText.getStyleClass().add("post-reposts");
-
-        Text quoteCountText = new Text(quoteCount + " quotes");
-        quoteCountText.getStyleClass().add("post-quotes");
-
-        HBox metrics = new HBox(8, likeCountText, replyCountText, repostCountText);
         Pane embedContainer = new Pane();
-
         if(embeds != null) {
             for(int i = 0; i < embeds.length(); i += 1) {
                 Object rawEmbed = embeds.get(i);
@@ -198,34 +148,19 @@ public class EmbedRecord extends Embed {
                 EmbedType eType = getEmbedType(embed.getString("$type"));
                 
                 switch(eType) {
-                    case EXTERNAL: embedContainer =  new External(embed, fitWidth).getEmbed(); break;
-                    case IMAGES: embedContainer = new Images(embed, fitWidth).getEmbed(); break;
+                    case EXTERNAL: embedContainer =  new External(embed).getEmbed(); break;
+                    case IMAGES: embedContainer = new Images(embed).getEmbed(); break;
                     case VIDEO: break;
                     case RECORD_WITH_MEDIA: 
-                        if(mediaOnly) embedContainer = new RecordWithMedia(embed, fitWidth, mediaOnly).getEmbed(); 
-                        else embedContainer = new RecordWithMedia(embed, fitWidth).getEmbed();
+                        if(mediaOnly) embedContainer = new RecordWithMedia(embed, mediaOnly).getEmbed(); 
+                        else embedContainer = new RecordWithMedia(embed).getEmbed();
                         break;
                     default: break;
                 }
             }
         }
 
-        card.getChildren().addAll(authorProfile, contentFlow, embedContainer, createdAtText, metrics);
-        card.setOnMouseClicked(e -> {
-            if(e.isPrimaryButtonDown()) {
-                try {
-                    if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(java.awt.Desktop.Action.BROWSE)) {
-                        Desktop.getDesktop().browse(URI.create(url));
-                    }
-                } catch (Exception error) {
-                    System.err.println("[ERROR][Record][viewRecord] Failed to launch in browser! " + error.getMessage());
-                    System.out.println("[INFO][Record][viewRecord] Open the link to browser instead: " + url);
-                    Toast.error.showToast("Failed to launch in browser! Error: " + error.getMessage());
-                }
-            } else e.consume();
-        });
-
-        return card;
+        return BlueskyPostCard.createPostCard(url, null, author, createdAt, content, embedContainer, rawMetrics);
     }
 
     private static String uriToUrl(String rawUri, String handle) {

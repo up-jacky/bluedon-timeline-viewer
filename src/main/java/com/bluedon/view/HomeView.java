@@ -3,10 +3,8 @@ package com.bluedon.view;
 import com.bluedon.interfaces.PageView;
 import com.bluedon.view.ui.images.BluedonLogo;
 
-import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.PasswordField;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.*;
@@ -17,18 +15,24 @@ import javafx.scene.image.ImageView;
 
 public class HomeView implements PageView {
 
-    private BorderPane layout = new BorderPane();
+    private BorderPane layout;
     private Scene scene;
 
     public VBox createSidebar(VBox blueskyComponents, VBox mastodonComponents, Button refreshButton) {
-        VBox sidebar = new VBox(24);
+        if(layout == null) init();
+        VBox sidebar = new VBox();
         sidebar.getStyleClass().add("sidebar");
-        sidebar.setPrefWidth(224);
+        sidebar.setFillWidth(true);
+        sidebar.prefWidthProperty().bind(layout.widthProperty().multiply(0.2));
 
-        ImageView logo = new BluedonLogo().getImage(52, true);
+        ImageView logo = new BluedonLogo().getImage(true);
+        logo.setFitWidth(200);
 
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
+
+        blueskyComponents.setFillWidth(true);
+        mastodonComponents.setFillWidth(true);
 
         sidebar.getChildren().addAll(
             logo,
@@ -39,14 +43,6 @@ public class HomeView implements PageView {
         );
 
         return sidebar;
-    }
-
-    public PasswordField createPasswordField(String prompText) {
-        PasswordField passwordField = new PasswordField();
-        passwordField.setPromptText(prompText);
-        passwordField.getStyleClass().add("email-field");
-
-        return passwordField;
     }
 
     private StackPane getProgressIndicator() {
@@ -61,24 +57,24 @@ public class HomeView implements PageView {
     }
 
     public ScrollPane createPostsArea(VBox posts) {
+        if(layout == null) init();
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setPannable(true);
+        scrollPane.setFitToWidth(true);
         if(posts == null) {
-            scrollPane.setFitToWidth(true);
             scrollPane.setFitToHeight(true);
             StackPane sp = getProgressIndicator();
             sp.setPrefHeight(scrollPane.getHeight());
             scrollPane.setContent(sp);
         } else if(posts.getChildren().isEmpty()) {
-            scrollPane.setFitToWidth(true);
             scrollPane.setFitToHeight(true);
             StackPane sp = getNoContent();
             sp.setPrefHeight(scrollPane.getHeight());
             scrollPane.setContent(sp);
         } else {
-    	    posts.setPadding(new Insets(24));
+            posts.getStylesheets().add("/css/post.css");
+            posts.getStyleClass().add("posts");
             scrollPane.setContent(posts);
-            scrollPane.setPrefWidth(800);
             posts.setOnScroll(e -> {
                 double deltaY = e.getTextDeltaY() * (0.5);
                 scrollPane.setVvalue(scrollPane.getVvalue() - deltaY / scrollPane.getHeight());
@@ -90,15 +86,16 @@ public class HomeView implements PageView {
     
     public void updateLayout(VBox sidebar, ScrollPane scrollPane) {
         if(layout == null) init();
-    	if(sidebar != null) {layout.setLeft(sidebar);}
+    	if(sidebar != null) layout.setLeft(sidebar);
     	if(scrollPane != null) layout.setCenter(scrollPane);
     }
 
     @Override
     public void init() { 
         layout = new BorderPane();
-        scene = new Scene(layout, 1072,603);
-        scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
+        layout.setId("root");
+        scene = new Scene(layout, 1200,600);
+        scene.getStylesheets().add(getClass().getResource("/css/home.css").toExternalForm());
     }
 
     @Override

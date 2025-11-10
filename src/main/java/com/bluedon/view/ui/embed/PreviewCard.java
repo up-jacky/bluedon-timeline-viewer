@@ -10,10 +10,11 @@ import com.bluedon.utils.Toast;
 import com.bluedon.view.ui.images.Thumb;
 
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
@@ -22,10 +23,8 @@ public class PreviewCard {
     private String imageUrl;
     private String title;
     private String description;
-    private double fitWidth;
 
-    public PreviewCard(JSONObject rawJson, double fitWidth) {
-        this.fitWidth = fitWidth;
+    public PreviewCard(JSONObject rawJson) {
         url = rawJson.getString("url");
         try { imageUrl = rawJson.getString("image"); } catch (Exception e) {imageUrl = "";}
         try { title = rawJson.getString("title"); } catch (Exception e) {title = "";}
@@ -33,50 +32,48 @@ public class PreviewCard {
     }
 
     public Pane getCard() {
-        
-        ImageView thumbImage = null;
-        Rectangle placeholder = null;
-        if(imageUrl != null && !imageUrl.isEmpty()) {
-            thumbImage = new Thumb(imageUrl).getImage(fitWidth, true);
-            thumbImage.getStyleClass().add("post-embed-external-thumb");
-        } else {
-            placeholder = new Rectangle(64,64);
-            placeholder.setFill(Color.web("#8645f6"));
-        }
 
         Text titleText = new Text(title);
-        titleText.getStyleClass().add("post-embed-external-title");
+        TextFlow titleFlow = new TextFlow(titleText);
+        titleFlow.getStyleClass().add("title");
         
         Text descriptionText = new Text(description);
-        descriptionText.getStyleClass().add("post-embed-external-description");
         TextFlow descriptionFlow = new TextFlow(descriptionText);
-        
-        if (thumbImage == null) {
-            descriptionText.setWrappingWidth(fitWidth-80);
-            descriptionFlow.setPrefWidth(fitWidth-80);
-        } else {
-            descriptionText.setWrappingWidth(fitWidth);
-            descriptionFlow.setPrefWidth(fitWidth);
-        }
+        descriptionFlow.getStyleClass().add("description");
 
-        VBox info = new VBox(8, titleText, descriptionFlow);
+        VBox info = new VBox(titleFlow, descriptionFlow);
+        info.getStyleClass().add("info");
 
         Pane card;
-        if (thumbImage != null) card = new VBox(16, thumbImage, info);
-        else card = new HBox(16, placeholder, info);
-        card.getStyleClass().add("post-embed-external");
-        card.setPrefWidth(fitWidth);
+        if(imageUrl != null && !imageUrl.trim().isEmpty()) {
 
+            ImageView image = Thumb.getImage(imageUrl, 600);
+            StackPane centeredImage = new StackPane(image);
+            centeredImage.getStyleClass().add("thumb-img");
+            
+            card = new VBox(centeredImage, info);
+            image.fitWidthProperty().bind(card.widthProperty().multiply(0.90));
+
+        } else {
+            Rectangle placeholder = new Rectangle(120, 120);
+            placeholder.getStyleClass().add("placeholder");
+            info.getStyleClass().add("no-img");
+            card = new HBox(placeholder, info);
+            info.prefWidthProperty().bind(card.widthProperty().subtract(120));
+        }
+        card.getStyleClass().add("external");
         card.setOnMouseClicked(e -> {
-            try {
-                if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(java.awt.Desktop.Action.BROWSE)) {
-                    Desktop.getDesktop().browse(URI.create(url));
+            if(e.getButton() == MouseButton.PRIMARY) {
+                try {
+                    if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(java.awt.Desktop.Action.BROWSE)) {
+                        Desktop.getDesktop().browse(URI.create(url));
+                    }
+                } catch (Exception error) {
+                    System.err.println("[ERROR][PreviewCard][getCard] Failed to launch in browser! " + error.getMessage());
+                    System.out.println("[INFO][PreviewCard][getCard] Open the link to browser instead: " + url);
+                    Toast.error.showToast("Failed to launch in browser! Error: " + error.getMessage());
                 }
-            } catch (Exception error) {
-                System.err.println("[ERROR][PreviewCard][getCard] Failed to launch in browser! " + error.getMessage());
-                System.out.println("[INFO][PreviewCard][getCard] Open the link to browser instead: " + url);
-                Toast.error.showToast("Failed to launch in browser! Error: " + error.getMessage());
-            }
+            } else e.consume();
         });
 
         return card;

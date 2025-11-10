@@ -11,18 +11,21 @@ import com.bluedon.view.ui.images.Thumb;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
 
 public class External extends EmbedMedia {
     private String description;
     private String thumb;
     private String title;
     private String uri;
-    private double fitWidth;
 
-    public External(JSONObject rawJson, double fitWidth) {
+    public External(JSONObject rawJson) {
         String subType = getSubType(rawJson.getString("$type"));
-        this.fitWidth = fitWidth;
         switch (subType) {
             case "view":
                 rawJson = rawJson.getJSONObject("external");
@@ -58,35 +61,48 @@ public class External extends EmbedMedia {
     }
 
     @Override
-    public VBox getEmbed() {
-        VBox card = new VBox(16);
-        card.getStyleClass().add("post-embed-external");
-
-        ImageView thumbImage = new Thumb(thumb).getImage(fitWidth, true);
-        thumbImage.getStyleClass().add("post-embed-external-thumb");
-
+    public Pane getEmbed() {
         Text titleText = new Text(title);
-        titleText.getStyleClass().add("post-embed-external-title");
+        TextFlow titleFlow = new TextFlow(titleText);
+        titleFlow.getStyleClass().add("title");
         
         Text descriptionText = new Text(description);
-        descriptionText.getStyleClass().add("post-embed-external-description");
         TextFlow descriptionFlow = new TextFlow(descriptionText);
-        descriptionText.setWrappingWidth(fitWidth);
-        descriptionFlow.setPrefWidth(fitWidth);
+        descriptionFlow.getStyleClass().add("description");
 
-        VBox info = new VBox(8, titleText, descriptionFlow);
+        VBox info = new VBox(titleFlow, descriptionFlow);
+        info.getStyleClass().add("info");
 
-        card.getChildren().addAll(thumbImage, info);
+        Pane card;
+        if(thumb != null && !thumb.trim().isEmpty()) {
+
+            ImageView image = Thumb.getImage(thumb, 600);
+            StackPane centeredImage = new StackPane(image);
+            centeredImage.getStyleClass().add("thumb-img");
+            
+            card = new VBox(centeredImage, info);
+            image.fitWidthProperty().bind(card.widthProperty().multiply(0.90));
+
+        } else {
+            Rectangle placeholder = new Rectangle(120, 120);
+            placeholder.getStyleClass().add("placeholder");
+            info.getStyleClass().add("no-img");
+            card = new HBox(placeholder, info);
+            info.prefWidthProperty().bind(card.widthProperty().subtract(120));
+        }
+        card.getStyleClass().add("external");
         card.setOnMouseClicked(e -> {
-            try {
-                if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(java.awt.Desktop.Action.BROWSE)) {
-                    Desktop.getDesktop().browse(URI.create(uri));
+            if(e.getButton() == MouseButton.PRIMARY) {
+                try {
+                    if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(java.awt.Desktop.Action.BROWSE)) {
+                        Desktop.getDesktop().browse(URI.create(uri));
+                    }
+                } catch (Exception error) {
+                    System.err.println("[ERROR][PreviewCard][getCard] Failed to launch in browser! " + error.getMessage());
+                    System.out.println("[INFO][PreviewCard][getCard] Open the link to browser instead: " + uri);
+                    Toast.error.showToast("Failed to launch in browser! Error: " + error.getMessage());
                 }
-            } catch (Exception error) {
-                System.err.println("[ERROR][External][getEmbed] Failed to launch in browser! " + error.getMessage());
-                System.out.println("[INFO][External][getEmbed] Open the link to browser instead: " + uri);
-                Toast.error.showToast("Failed to launch in browser! Error: " + error.getMessage());
-            }
+            } else e.consume();
         });
 
         return card;

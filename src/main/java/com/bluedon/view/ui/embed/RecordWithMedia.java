@@ -11,25 +11,22 @@ public class RecordWithMedia extends Embed {
     private EmbedMediaType mediaType;
     private EmbedRecord record;
     private boolean isMediaOnly = false;
-    private double cardWidth;
 
-    public RecordWithMedia(JSONObject rawJson, double fitWidth) {
-        cardWidth = fitWidth;
+    public RecordWithMedia(JSONObject rawJson) {
         init(rawJson);
     }
 
-    public RecordWithMedia(JSONObject rawJson, double fitWidth, boolean isMediaOnly) {
-        cardWidth = fitWidth;
+    public RecordWithMedia(JSONObject rawJson, boolean isMediaOnly) {
         this.isMediaOnly = isMediaOnly;
         init(rawJson);
     }
 
     private void init(JSONObject rawJson) {
-        if(!isMediaOnly) record = new EmbedRecord(rawJson.getJSONObject("record"), cardWidth, true);
+        if(!isMediaOnly) record = new EmbedRecord(rawJson.getJSONObject("record"), true);
         mediaType = EmbedMedia.getEmbedMediaType((rawJson.getJSONObject("media")).getString("$type"));
         switch(mediaType) {
-            case EXTERNAL: media = new External(rawJson.getJSONObject("media"), cardWidth); break;
-            case IMAGES: media = new Images(rawJson.getJSONObject("media"), cardWidth); break;
+            case EXTERNAL: media = new External(rawJson.getJSONObject("media")); break;
+            case IMAGES: media = new Images(rawJson.getJSONObject("media")); break;
             default: break;
         }
     }

@@ -9,19 +9,18 @@ import com.bluedon.services.LogoutBluesky;
 import com.bluedon.services.LogoutMastodon;
 import com.bluedon.services.Refresh;
 import com.bluedon.services.ServiceRegistry;
+
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
 
 public class LoginButton {
     public static Button createButton(Social social, Stage stage) {
-
-    	Button button = new Button();
-    	button.getStyleClass().add("login-button");
+    	DefaultButton button = new DefaultButton();
+    	button.getStyleClass().addAll("login", "main");
 
 		switch (social) {
 			case BLUESKY:
 				button.getStyleClass().add("bluesky");
-
 				if (!ServiceRegistry.isBlueskyLoggedIn()) {
 					button.setText("Bluesky Login");
 					button.setOnAction(e -> {
@@ -65,6 +64,8 @@ public class LoginButton {
 			default:
 				return null;
 		}
+		
+		button.playInitAnimation();
 
     	return button;
     }

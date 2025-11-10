@@ -4,6 +4,6 @@ import javafx.scene.image.ImageView;
 
 public interface ImageViewer {
 
-	public ImageView getImage(double fitHeight, boolean ratio);
+	public ImageView getImage(boolean ratio);
 	
 }

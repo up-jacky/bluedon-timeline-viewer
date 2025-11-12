@@ -10,6 +10,7 @@ import com.bluedon.utils.Toast;
 
 import java.util.List;
 
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -102,7 +103,9 @@ public class Home {
 					names = new VBox(4, displayName, handle);
 					avatar = new Avatar(blueskySession.avatarUri).getCircleImage(32);
 					avatar.getStyleClass().addAll("bluesky","avatar");
-					profile = new VBox(16, new HBox(16, avatar, FilterButton.createButton(social)), names);
+					HBox temp = new HBox(16, avatar, FilterButton.createButton(social));
+					temp.setAlignment(Pos.CENTER);
+					profile = new VBox(16, temp, names);
 					return profile;
 				} break;
 			case MASTODON:
@@ -114,7 +117,9 @@ public class Home {
 					names = new VBox(4, displayName, handle);
 					avatar = new Avatar(mastodonSession.avatarUri).getCircleImage(32);
 					avatar.getStyleClass().addAll("mastodon","avatar");
-					profile = new VBox(16, new HBox(16, avatar, FilterButton.createButton(social)), names);
+					HBox temp = new HBox(16, avatar, FilterButton.createButton(social));
+					temp.setAlignment(Pos.CENTER);
+					profile = new VBox(16, temp, names);
 					return profile;
 				} break;
 			default:
@@ -160,6 +165,7 @@ public class Home {
 				Pane postContainer = post.createPostCard();
 				postsContainer.getChildren().add(postContainer);
 				System.out.println("[INFO][Home][refreshPosts] Done adding Post #" + i);
+				Toast.info.showToast("Loaded " + (i + 1) + "/" + posts.size() + " posts.", 1000);
 			}
 			i += 1;
 		}

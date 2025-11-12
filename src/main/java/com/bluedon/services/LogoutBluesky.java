@@ -4,6 +4,7 @@ import com.bluedon.controllers.PageController;
 import com.bluedon.utils.SessionFile;
 import com.bluedon.utils.Toast;
 
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 
 public class LogoutBluesky extends Task<Boolean> {
@@ -32,6 +33,8 @@ public class LogoutBluesky extends Task<Boolean> {
         ServiceRegistry.setBlueskySession(null);
         SessionFile.BlueskySessionFile.deleteSession();
         Toast.success.showToast("Logout to Bluesky successful!");
+        FetchTimeline instance = FetchTimeline.getInstance();
+        if(instance != null && instance.isRunning()) Platform.runLater(() -> instance.cancel());
         PageController.displayHomePage();
     }
 
@@ -42,6 +45,8 @@ public class LogoutBluesky extends Task<Boolean> {
         System.err.println("[ERROR][LogoutBluesky][failed] Error: " + getException().getMessage());
         Toast.error.showToast("Logout to Bluesky failed! Error: " + getException().getMessage());
         getException().printStackTrace();
+        FetchTimeline instance = FetchTimeline.getInstance();
+        if(instance != null && instance.isRunning()) Platform.runLater(() -> instance.cancel());
         PageController.displayHomePage();
     }
 }

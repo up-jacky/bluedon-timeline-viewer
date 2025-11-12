@@ -12,10 +12,12 @@ import com.bluedon.enums.Social;
 import com.bluedon.models.Home;
 import com.bluedon.utils.Toast;
 import com.bluedon.view.HomeView;
+import com.bluedon.view.ui.buttons.RefreshButton;
 import com.bluedon.view.ui.cards.Post;
 
 import javafx.concurrent.Task;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class FetchTimeline extends Task<Boolean> {
@@ -23,6 +25,11 @@ public class FetchTimeline extends Task<Boolean> {
     private HomeView view = PageController.home.getView();
     private Home model = PageController.home.getModel();
     private List<Post> posts = new ArrayList<>();
+    private static FetchTimeline instance;
+
+    public static FetchTimeline getInstance() {
+        return instance;
+    }
 
     public void fetchTimeline() {
         FetchBluesky fetchBluesky = new FetchBluesky();
@@ -104,8 +111,8 @@ public class FetchTimeline extends Task<Boolean> {
 	}
 
     public static void start() {
-        FetchTimeline fetchTimeline = new FetchTimeline();
-        Thread thread = new Thread(fetchTimeline);
+        instance = new FetchTimeline();
+        Thread thread = new Thread(instance);
         thread.setDaemon(true);
         thread.start();
     }
@@ -116,16 +123,29 @@ public class FetchTimeline extends Task<Boolean> {
         fetchTimeline();
         model.setPosts(posts);
         model.refreshPosts();
+        if(isCancelled()) return false;
         return true;
+    }
+
+    @Override
+    public boolean cancel(boolean mayInterruptIfRunning) {
+        System.out.println("[DEBUG][FetchTimeline][cancel] Thread: " + Thread.currentThread());
+        System.out.println("[INFO][FetchTimeline][cancel] Fetch is interrupted.");
+        posts.clear();
+        return super.cancel(mayInterruptIfRunning);
     }
 
     @Override
     protected void succeeded() {
         System.out.println("[DEBUG][FetchTimeline][succeeded] Thread: " + Thread.currentThread());
-        ScrollPane pArea = view.createPostsArea(model.postsContainer);
-        view.updateLayout(null, pArea);
-        view.displayPage(stage);
-        stage.show();
+        if(getValue().booleanValue()) {
+            VBox sidebar = view.createSidebar(model.getUIComponents(Social.BLUESKY), model.getUIComponents(Social.MASTODON), RefreshButton.createRefreshButton());
+            ScrollPane pArea = view.createPostsArea(model.postsContainer);
+            view.updateLayout(sidebar, pArea);
+            view.displayPage(stage);
+            stage.show();
+        } else {
+        }
     }
 
     @Override
@@ -134,6 +154,11 @@ public class FetchTimeline extends Task<Boolean> {
         System.err.println("[ERROR] Failed to fetch timeline: " + getException().getMessage());
         Toast.error.showToast("Failed to fetch timeline! Error: " + getException().getMessage());
         getException().printStackTrace();
+        VBox sidebar = view.createSidebar(model.getUIComponents(Social.BLUESKY), model.getUIComponents(Social.MASTODON), RefreshButton.createRefreshButton());
+        ScrollPane pArea = view.createPostsArea(getException().getMessage());
+        view.updateLayout(sidebar, pArea);
+        view.displayPage(stage);
+        stage.show();
     }
 
     private class FetchMastodon extends Task<List<Post>> {

@@ -103,7 +103,7 @@ public class Refresh {
         protected void succeeded() {
             System.out.println("[DEBUG][Refresh][HomeRefresh][succeeded] Thread: " + Thread.currentThread());
             System.out.println("[INFO][Refresh][HomeRefresh][succeeded] Setting Home page to refresh...");
-            ScrollPane postsArea = view.createPostsArea(null);
+            ScrollPane postsArea = view.createPostsArea();
             view.updateLayout(null, postsArea);
             view.displayPage(stage);
             stage.show();

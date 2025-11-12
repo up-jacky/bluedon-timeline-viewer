@@ -11,8 +11,14 @@ public class FilterButton {
     private static Home model = PageController.home.getModel();
 
     public static Button createButton(Social social) {
-		DefaultButton button = new DefaultButton("Enabled");
-		button.getStyleClass().addAll("active", "filter");
+		DefaultButton button = new DefaultButton();
+		button.getStyleClass().add("filter");
+		if(model.isDisplayed(social)) {
+			button.setText("Enabled");
+			button.getStyleClass().add("active");
+		} else {
+			button.setText("Disabled");
+		}
     	switch(social) {
     		case BLUESKY:
     			button.setOnAction(e -> {

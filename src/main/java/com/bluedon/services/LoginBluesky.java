@@ -8,6 +8,7 @@ import com.bluedon.utils.SessionFile;
 import com.bluedon.utils.Toast;
 import com.bluedon.view.ui.cards.LoginDialog;
 
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 
 public class LoginBluesky extends Task<Boolean> {
@@ -56,6 +57,8 @@ public class LoginBluesky extends Task<Boolean> {
         System.out.println("[INFO][LoginBluesky][succeeded] Login successful!");
         System.out.println("[INFO][LoginBluesky][succeeded] Logged in as: " + session.handle);
         Toast.success.showToast("Welcome " + session.handle + "!");
+        FetchTimeline instance = FetchTimeline.getInstance();
+        if(instance != null && instance.isRunning()) Platform.runLater(() -> instance.cancel());
         PageController.displayHomePage();
     }
 

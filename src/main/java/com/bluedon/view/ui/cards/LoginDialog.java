@@ -21,8 +21,6 @@ import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.scene.effect.DropShadow;
-import javafx.scene.effect.InnerShadow;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.BorderStrokeStyle;
@@ -32,6 +30,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -48,6 +47,8 @@ public class LoginDialog {
         dialogPane.getScene().getRoot().setId("root");
 
         Label blueskyLabel = new Label("bsky.social");
+        blueskyLabel.setFont(new Font("Consolas", 12));
+        blueskyLabel.setTextFill(Color.WHITE);
         TextField handleField = new TextField();
         PasswordField passwordField = new PasswordField();
         handleField.setPromptText("Handle");
@@ -66,7 +67,6 @@ public class LoginDialog {
         dialog.getDialogPane().getButtonTypes().addAll(loginButtonType);
 
         Button loginButton = (Button) dialog.getDialogPane().lookupButton(loginButtonType);
-        loginButton.setEffect(new DropShadow(2,0,2,Color.GRAY));
 
         PathTransition loginTransition = new PathTransition();
         loginTransition.setDuration(Duration.millis(100));
@@ -79,16 +79,12 @@ public class LoginDialog {
         });
 
         loginButton.setOnMouseEntered(e -> {
-            loginButton.setEffect(new DropShadow(2,0,2,Color.GRAY));
             loginTransition.playFromStart();
-            loginTransition.setOnFinished(event -> {loginButton.setEffect(new InnerShadow(4, 0, 2, Color.gray(0, 0.3)));});
         });
 
         loginButton.setOnMouseExited(e -> {
-            loginButton.setEffect(new InnerShadow(4, 0, 2, Color.gray(0, 0.3)));
             loginTransition.setRate(-1);
             loginTransition.play();
-            loginTransition.setOnFinished(event -> {loginButton.setEffect(new DropShadow(2,0,2,Color.GRAY));});
         });
 
         loginButton.getStyleClass().addAll("login", "dialog");

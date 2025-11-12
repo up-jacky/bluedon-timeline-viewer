@@ -8,6 +8,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
@@ -53,7 +55,32 @@ public class HomeView implements PageView {
 
     private StackPane getNoContent() {
         Text text = new Text("No Timeline");
+        text.setFont(new Font("Consolas", 16));
+        text.setFill(Color.WHITE);
         return new StackPane(text);
+    }
+
+    public ScrollPane createPostsArea() {
+        if(layout == null) init();
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
+        StackPane sp = getProgressIndicator();
+        scrollPane.setContent(sp);
+        return scrollPane;
+    }
+
+    public ScrollPane createPostsArea(String errorMessage) {
+        if(layout == null) init();
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
+        Text text = new Text(errorMessage);
+        text.setFont(new Font("Consolas", 16));
+        text.setFill(Color.RED);
+        StackPane sp = new StackPane(text);
+        scrollPane.setContent(sp);
+        return scrollPane;
     }
 
     public ScrollPane createPostsArea(VBox posts) {
@@ -61,12 +88,7 @@ public class HomeView implements PageView {
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setPannable(true);
         scrollPane.setFitToWidth(true);
-        if(posts == null) {
-            scrollPane.setFitToHeight(true);
-            StackPane sp = getProgressIndicator();
-            sp.setPrefHeight(scrollPane.getHeight());
-            scrollPane.setContent(sp);
-        } else if(posts.getChildren().isEmpty()) {
+        if(posts.getChildren().isEmpty()) {
             scrollPane.setFitToHeight(true);
             StackPane sp = getNoContent();
             sp.setPrefHeight(scrollPane.getHeight());

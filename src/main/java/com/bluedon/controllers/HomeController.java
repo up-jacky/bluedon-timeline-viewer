@@ -26,7 +26,7 @@ public class HomeController {
 		
 		VBox sidebar = view.createSidebar(blueskyUIComponents, mastodonUIComponents, RefreshButton.createRefreshButton());
 
-		ScrollPane postsArea = view.createPostsArea(null);
+		ScrollPane postsArea = view.createPostsArea();
 		
 		view.updateLayout(sidebar, postsArea);
 		view.displayPage(stage);

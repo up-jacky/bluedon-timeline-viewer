@@ -40,6 +40,7 @@ public class LoginView implements PageView {
         HBox accountsBox = new HBox(spacing, children);
         if(accountsBox.getChildren().isEmpty()) accountsBox = new HBox(spacing, sp);
         accountsBox.setAlignment(Pos.CENTER);
+        logo.setFitHeight(154);
         layout.getChildren().addAll(logo, accountsBox);
         layout.setAlignment(Pos.CENTER);
         layout.setPadding(new Insets(40));
@@ -49,7 +50,7 @@ public class LoginView implements PageView {
     public void init() {
         layout = new VBox(64);
         layout.setId("root");
-        scene = new Scene(layout, 1072,603);
+        scene = new Scene(layout, 1200,600);
         scene.getStylesheets().add(getClass().getResource("/css/login.css").toExternalForm());
     }
     

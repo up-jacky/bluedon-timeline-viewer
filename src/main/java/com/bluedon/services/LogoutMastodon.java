@@ -4,6 +4,7 @@ import com.bluedon.controllers.PageController;
 import com.bluedon.utils.SessionFile;
 import com.bluedon.utils.Toast;
 
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 
 public class LogoutMastodon extends Task<Boolean> {
@@ -32,6 +33,8 @@ public class LogoutMastodon extends Task<Boolean> {
         ServiceRegistry.setMastodonSession(null);
         SessionFile.MastodonSessionFile.deleteSession();
         Toast.success.showToast("Logout to Mastodon successful!");
+        FetchTimeline instance = FetchTimeline.getInstance();
+        if(instance != null && instance.isRunning()) Platform.runLater(() -> instance.cancel());
         PageController.displayHomePage();
     }
 
@@ -42,6 +45,8 @@ public class LogoutMastodon extends Task<Boolean> {
         System.err.println("[ERROR][LogoutMastodon][failed] Error: " + getException().getMessage());
         Toast.fatal.showToast("Logout to Mastodon failed! Error: " + getException().getMessage());
         getException().printStackTrace();
+        FetchTimeline instance = FetchTimeline.getInstance();
+        if(instance != null && instance.isRunning()) Platform.runLater(() -> instance.cancel());
         PageController.displayHomePage();
     }
 

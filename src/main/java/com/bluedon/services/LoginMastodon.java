@@ -1,9 +1,11 @@
 package com.bluedon.services;
 
 import com.bluedon.controllers.PageController;
+import com.bluedon.enums.Page;
 import com.bluedon.utils.SessionFile;
 import com.bluedon.utils.Toast;
 
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 
 public class LoginMastodon extends Task<Boolean> {
@@ -28,6 +30,8 @@ public class LoginMastodon extends Task<Boolean> {
         System.out.println("[INFO][LoginMastodon][succeeded] Logged in as: " + session.handle);
         Toast.success.showToast("Welcome " + session.handle + "!");
         SessionFile.MastodonSessionFile.saveSession();
+        FetchTimeline instance = FetchTimeline.getInstance();
+        if(instance != null && instance.isRunning()) Platform.runLater(() -> instance.cancel());
         PageController.displayHomePage();
     }
 
@@ -38,6 +42,6 @@ public class LoginMastodon extends Task<Boolean> {
         System.out.println("[ERROR][LoginMastodon][failed] Error: " + getException().getMessage());
         Toast.error.showToast("Login failed! Error " + getException().getMessage());
         getException().printStackTrace();
-        PageController.displayLoginPage();
+        if(PageController.currentPage == Page.LOGIN) PageController.displayLoginPage();
     }
 }

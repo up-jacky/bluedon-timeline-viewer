@@ -1,5 +1,16 @@
 package com.bluedon.enums;
 
+/**
+ * Type of *.social
+ */
 public enum Social {
-	BLUESKY, MASTODON
+	/**
+	 * bluesky.social
+	 */
+	BLUESKY, 
+	
+	/**
+	 * mastodon.social
+	 */
+	MASTODON
 }

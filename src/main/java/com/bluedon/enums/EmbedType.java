@@ -1,5 +1,8 @@
 package com.bluedon.enums;
 
+/**
+ * Enum for the types of embed that are used by the services.
+ */
 public enum EmbedType {
     /**
      * An image display.
@@ -26,5 +29,8 @@ public enum EmbedType {
      */
     VIDEO,
 
+    /**
+     * No embed.
+     */
     NONE,
 }

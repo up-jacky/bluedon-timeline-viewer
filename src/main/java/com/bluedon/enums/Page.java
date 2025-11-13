@@ -1,5 +1,17 @@
 package com.bluedon.enums;
 
+/**
+ * The type of pages that the application has. 
+ */
 public enum Page {
-    HOME, LOGIN
+
+    /**
+     * Home page.
+     */
+    HOME, 
+    
+    /**
+     * Login page.
+     */
+    LOGIN
 }

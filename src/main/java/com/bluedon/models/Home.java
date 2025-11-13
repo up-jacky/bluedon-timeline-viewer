@@ -18,7 +18,9 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
 
-
+/**
+ * The Home model handles the logic and its main buttons of the Home page.
+ */
 public class Home {
     private boolean displayBluesky = true;
     private Button blueskyLoginButton;
@@ -26,17 +28,17 @@ public class Home {
     private boolean displayMastodon = true;
     private Button mastodonLoginButton;
     
+	/**
+	 * Contains the {@code VBox} for the post that is passed on to the view.
+	 */
     public VBox postsContainer;
     private List<Post> posts;
-
-	public boolean getTimeline(Social social) {
-		switch(social) {
-			case BLUESKY: return displayBluesky;
-			case MASTODON: return displayMastodon;
-			default: return false;
-		}
-	}
     
+	/**
+	 * Sets the login button for the type of service provided in the parameter.
+	 * @param social Type of service.
+	 * @param button The button to be set in the model.
+	 */
     public void setButton(Social social, Button button) {
     	switch(social) {
     	case BLUESKY: blueskyLoginButton = button;
@@ -46,6 +48,12 @@ public class Home {
     	}
     }
     
+	/**
+	 * Sets the display to {@code true} or {@code false} for 
+	 * the type of service provided in the {@code social}.
+	 * @param social Type of service.
+	 * @param bool {@code true} if enabled, else {@code false}.
+	 */
     public void setTimeline(Social social, boolean bool) {
     	switch(social) {
     		case BLUESKY: displayBluesky = bool;
@@ -56,10 +64,19 @@ public class Home {
     	}
     }
 
+	/**
+	 * Sets the {@code posts} of the model to the given parameter.
+	 * @param posts Lists of posts that would appear in the timeline.
+	 */
 	public void setPosts(List<Post> posts) {
 		this.posts = posts;
 	}
     
+	/**
+	 * @param social Type of service.
+	 * @return {@code true} If display is allowed for the type of service.
+	 * @return {@code false} If display is disabled for the type of service. 
+	 */
     public boolean isDisplayed(Social social) {
     	switch(social) {
 			case BLUESKY: return displayBluesky;
@@ -68,6 +85,10 @@ public class Home {
     	}
     }
     
+	/**
+	 * @param social Type of service.
+	 * @return Button that is the type provided in the parameter social.
+	 */
     public Button getLoginButton(Social social) {
     	switch(social) {
     		case BLUESKY: return blueskyLoginButton;
@@ -86,6 +107,10 @@ public class Home {
 		return handle;
 	}
 
+	/**
+	 * @param social Type of service.
+	 * @return Container for the User profile.
+	 */
 	public Pane getUserProfile(Social social) {
 		AuthSession blueskySession = ServiceRegistry.getBlueskySession();
 		AuthSession mastodonSession = ServiceRegistry.getMastodonSession();
@@ -128,6 +153,10 @@ public class Home {
 		return null;
 	}
     
+	/**
+	 * @param social Type of service.
+	 * @return VBox container for the main UI components provided in the parameter social.
+	 */
     public VBox getUIComponents(Social social) {
 		switch (social) {
 			case BLUESKY:
@@ -146,6 +175,9 @@ public class Home {
     	
     }
     
+	/**
+	 * Clears the container for the posts and add them back from the {@code posts} variable.
+	 */
     public void refreshPosts() {
 		if(postsContainer == null) postsContainer = new VBox();
     	postsContainer.getChildren().clear();

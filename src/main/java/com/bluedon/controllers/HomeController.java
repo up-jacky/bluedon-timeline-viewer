@@ -31,13 +31,13 @@ public class HomeController {
 	public void start(Stage stage) {
 		view.init();
 		
-		model.setButton(Social.BLUESKY, LoginButton.createButton(Social.BLUESKY, stage));
-		model.setButton(Social.MASTODON, LoginButton.createButton(Social.MASTODON, stage));
+		model.setButton(Social.BLUESKY, LoginButton.createButton(Social.BLUESKY));
+		model.setButton(Social.MASTODON, LoginButton.createButton(Social.MASTODON));
 		
 		VBox blueskyUIComponents = model.getUIComponents(Social.BLUESKY);
 		VBox mastodonUIComponents = model.getUIComponents(Social.MASTODON);
 		
-		VBox sidebar = view.createSidebar(blueskyUIComponents, mastodonUIComponents, RefreshButton.createRefreshButton());
+		VBox sidebar = view.createSidebar(blueskyUIComponents, mastodonUIComponents, RefreshButton.createButton());
 
 		ScrollPane postsArea = view.createPostsArea();
 		

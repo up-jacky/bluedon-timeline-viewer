@@ -8,12 +8,13 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.bluedon.enums.Social;
 import com.bluedon.view.ui.cards.MastodonPostCard;
 import javafx.scene.layout.Pane;
 
+/**
+ * Handles creating a container for a quoted status in a Mastodon post.
+ */
 public class QuotedStatus {
-    public Social social;
     private String url;
     private String displayName;
     private String username;
@@ -26,6 +27,10 @@ public class QuotedStatus {
     private int reblogsCount;
     private int quotesCount;
 
+    /**
+     * Creates a container for a quoted status in a Mastodon post.
+     * @param rawJson Contains necessary information about the quoted post that can also be find in a post.
+     */
     public QuotedStatus(JSONObject rawJson) {
         if(rawJson.getString("content") == null || rawJson.getString("content").trim().isEmpty()) {
             rawJson = rawJson.getJSONObject("reblog");
@@ -54,6 +59,10 @@ public class QuotedStatus {
         quotesCount = rawJson.getInt("quotes_count");
     }
 
+    /**
+     * Creates a quoted status for a Mastodon post.
+     * @return {@code Pane} container for a Mastodon status.
+     */
     public Pane getQuotedStatus() {
 
         String[] rawMetrics = {

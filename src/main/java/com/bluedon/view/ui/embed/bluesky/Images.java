@@ -13,10 +13,17 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
+/**
+ * Handles creating multiple image attachments for a Bluesky post.
+ */
 public class Images extends EmbedMedia {
 
     private List<EmbedImage> images = new ArrayList<>();
 
+    /**
+     * Creates a list of image attachments for a Bluesky post. 
+     * @param rawJson Contains an array of {@code JSONObject} in the key {@code images} to create an image attachment.
+     */
     public Images(JSONObject rawJson) {
         String subType = getSubType(rawJson.getString("$type"));
         JSONArray jsonArray = rawJson.getJSONArray("images");

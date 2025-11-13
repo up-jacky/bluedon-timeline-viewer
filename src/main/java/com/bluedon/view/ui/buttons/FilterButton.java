@@ -7,9 +7,19 @@ import com.bluedon.services.Refresh;
 
 import javafx.scene.control.Button;
 
+/**
+ * The FilterButton class handles creating a filter button 
+ * using the {@link DefaultButton} as its base {@code Node}.
+ */
 public class FilterButton {
     private static Home model = PageController.home.getModel();
 
+
+	/**
+	 * Creates a filter button with transitions and effects for its service type given in the {@code social} parameter.
+	 * @param social Type of service for the button to filter.
+	 * @return Button that filters out content based on its {@code social} parameter.
+	 */
     public static Button createButton(Social social) {
 		DefaultButton button = new DefaultButton();
 		button.getStyleClass().add("filter");

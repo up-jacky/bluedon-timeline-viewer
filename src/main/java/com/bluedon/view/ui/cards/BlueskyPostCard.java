@@ -21,11 +21,25 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 
+/**
+ * Handles creating a post card for Bluesky.
+ */
 public class BlueskyPostCard {
     private static DateTimeFormatter currentYearFormatter = DateTimeFormatter.ofPattern("MMM dd");
     private static DateTimeFormatter generalFormatter = DateTimeFormatter.ofPattern("MMM dd yyyy");
     private static DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm a");
 
+    /**
+     * Creates a post card for Bluesky.
+     * @param url Link to the post.
+     * @param reason {@link JSONObject} that contains who reposted the post.
+     * @param author Author of the post.
+     * @param createdAt Date and time of the creation of the post.
+     * @param content Raw content of the post as string.
+     * @param embedContainer Embed container that may or may not contain an embed of {@link com.bluedon.enums.EmbedType}
+     * @param rawMetrics List of metrics to be put in the container.
+     * @return {@link VBox} styled container for a given post.
+     */
     public static VBox createPostCard(
         String url,
         JSONObject reason,

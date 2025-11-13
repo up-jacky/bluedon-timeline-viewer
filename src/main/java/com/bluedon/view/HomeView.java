@@ -15,11 +15,20 @@ import javafx.stage.Stage;
 
 import javafx.scene.image.ImageView;
 
+/**
+ * Handles the display of the Home page.
+ */
 public class HomeView implements PageView {
 
     private BorderPane layout;
     private Scene scene;
 
+    /**
+     * @param blueskyComponents Components consisting of Avatar, Name, Handle, and FilterButton.
+     * @param mastodonComponents Components consisting of Avatar, Name, Handle, and FilterButton.
+     * @param refreshButton Refresh button generated from {@link com.bluedon.view.ui.buttons.RefreshButton#createButton()}
+     * @return {@code VBox} container consisting of the components in the parameters.
+     */
     public VBox createSidebar(VBox blueskyComponents, VBox mastodonComponents, Button refreshButton) {
         if(layout == null) init();
         VBox sidebar = new VBox();
@@ -27,7 +36,7 @@ public class HomeView implements PageView {
         sidebar.setFillWidth(true);
         sidebar.prefWidthProperty().bind(layout.widthProperty().multiply(0.2));
 
-        ImageView logo = new BluedonLogo().getImage(true);
+        ImageView logo = BluedonLogo.getImage();
         logo.setFitWidth(200);
 
         Region spacer = new Region();
@@ -60,6 +69,9 @@ public class HomeView implements PageView {
         return new StackPane(text);
     }
 
+    /**
+     * @return {@code ScrollPane} that contains a loading screen of no indicator.
+     */
     public ScrollPane createPostsArea() {
         if(layout == null) init();
         ScrollPane scrollPane = new ScrollPane();
@@ -70,6 +82,10 @@ public class HomeView implements PageView {
         return scrollPane;
     }
 
+    /**
+     * @param errorMessage The error message to be displayed in the ScrollPane.
+     * @return {@code ScrollPane} that contains an error message.
+     */
     public ScrollPane createPostsArea(String errorMessage) {
         if(layout == null) init();
         ScrollPane scrollPane = new ScrollPane();
@@ -83,6 +99,10 @@ public class HomeView implements PageView {
         return scrollPane;
     }
 
+    /**
+     * @param posts The posts to be displayed in the ScrollPane.
+     * @return {@code ScrollPane} that contains the timeline.
+     */
     public ScrollPane createPostsArea(VBox posts) {
         if(layout == null) init();
         ScrollPane scrollPane = new ScrollPane();
@@ -106,6 +126,16 @@ public class HomeView implements PageView {
         return scrollPane;
     }
     
+    /**
+     * Updates the current layout of the homepage depending on the given parameter.
+     * 
+     * <p> Sets {@code sidebar} to the left side of the screen, and the {@code scrollPane}
+     * to the center. </p>
+     * 
+     * <p> If a parameter is null, it simply does not update anything in the layout. </p>
+     * @param sidebar The sidebar component of the layout.
+     * @param scrollPane The scroll pane component of the layout.
+     */
     public void updateLayout(VBox sidebar, ScrollPane scrollPane) {
         if(layout == null) init();
     	if(sidebar != null) layout.setLeft(sidebar);

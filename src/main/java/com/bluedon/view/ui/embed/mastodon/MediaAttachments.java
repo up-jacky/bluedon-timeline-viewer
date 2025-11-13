@@ -12,9 +12,16 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
+/**
+ * Handles creating multiple image attachments for a Mastodon post.
+ */
 public class MediaAttachments {
     private List<MediaAttachment> images = new ArrayList<>();
     
+    /**
+     * Creates a list of image attachments for a Mastodon post. 
+     * @param rawJsonArray Contains an array of {@code JSONObject} to create an image attachment.
+     */
     public MediaAttachments(JSONArray rawJsonArray) {
         for(int i = 0; i < rawJsonArray.length(); i += 1) {
             JSONObject rawJson = rawJsonArray.getJSONObject(i);
@@ -35,6 +42,9 @@ public class MediaAttachments {
         return sp;
     }
 
+    /**
+     * @return {@link Pane} container that consists of up to 4 image attachments of a Mastodon post.
+     */
     public Pane getImages() {
         System.out.println("[INFO][MediaAttachments][getImages] Getting images...");
         ImageView img1, img2, img3, img4;

@@ -13,12 +13,18 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.util.Duration;
 
+/**
+ * DefaultButton is an extension of {@link Button} with transition effects.
+ */
 public class DefaultButton extends Button {
     private PathTransition initTransition = new PathTransition();
     private FadeTransition fadeTransition = new FadeTransition();
     private PathTransition transition = new PathTransition();
     private ObjectProperty<Color> color = new SimpleObjectProperty<>(Color.GRAY);
 
+    /**
+     * Plays the transition animations.
+     */
     public void playInitAnimation() {
         Platform.runLater(() -> {
             initTransition.play();
@@ -26,26 +32,47 @@ public class DefaultButton extends Button {
         });
     }
     
+    /**
+     * Creates a button with the specified text as its label and its specified color as its fill.
+     * @param name Label for the button.
+     * @param color Color for the button.
+     */
     public DefaultButton(String name, Color color) {
         super(name);
         this.color.set(color);
         init();
     }
 
+    /**
+     * Creates a button with the specified text as its label.
+     * @param name Label for the button.
+     */
     public DefaultButton(String name) {
         super(name);
         init();
     }
     
+    /**
+     * Creates a button with an empty string as its label and its specified color as its fill.
+     * @param color
+     */
     public DefaultButton(Color color) {
+        super();
         this.color.set(color);
         init();
     }
 
+    /**
+     * Creates a default button.
+     */
     public DefaultButton() {
+        super();
         init();
     }
     
+    /**
+     * Initializes the button to have its own transition and effects.
+     */
     public void init() {
 
         this.setEffect(new DropShadow(2,0,2, color.get().brighter()));

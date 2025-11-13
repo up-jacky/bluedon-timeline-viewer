@@ -15,6 +15,9 @@ import javafx.scene.text.Text;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 
+/**
+ * Handles creating a container for an embedded record in a Bluesky post.
+ */
 public class EmbedRecord extends Embed {
     private Author author;
     private boolean blocked = false;
@@ -30,10 +33,16 @@ public class EmbedRecord extends Embed {
     private int repostCount;
     private boolean mediaOnly = false;
 
+    /**
+     * Creates a container for an embedded record in a Bluesky post.
+     */
     public EmbedRecord(JSONObject rawJson) {
         init(rawJson);
     }
 
+    /**
+     * Creates a container for an embedded record in a Bluesky post but only returns its media.
+     */
     public EmbedRecord(JSONObject rawJson, boolean mediaOnly) {
         init(rawJson);
         this.mediaOnly = mediaOnly;
@@ -75,6 +84,10 @@ public class EmbedRecord extends Embed {
         }
     }
 
+    /**
+     * Creates a container for an embedded record for a Bluesky post.
+     * @return {@code VBox} container containing the usual Bluesky post.
+     */
     public VBox getEmbed() {
         if (blocked) {
             return viewBlockedRecord();

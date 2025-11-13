@@ -11,10 +11,19 @@ import com.bluedon.services.Refresh;
 import com.bluedon.services.ServiceRegistry;
 
 import javafx.scene.control.Button;
-import javafx.stage.Stage;
 
+/**
+ * The LoginButton class handles creating a login button 
+ * using the {@link DefaultButton} as its base {@code Node}.
+ */
 public class LoginButton {
-    public static Button createButton(Social social, Stage stage) {
+
+	/**
+	 * Creates a login button with transitions and effects for its service type given in the {@code social} parameter.
+	 * @param social Type of service for the button to login.
+	 * @return Button that login / logout based on its {@code social} parameter.
+	 */
+    public static Button createButton(Social social) {
     	DefaultButton button = new DefaultButton();
     	button.getStyleClass().addAll("login", "main");
 

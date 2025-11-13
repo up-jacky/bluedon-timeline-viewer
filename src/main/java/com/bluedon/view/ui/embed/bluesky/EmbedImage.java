@@ -17,12 +17,19 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
+/**
+ * Handles creating an image attachment for a Bluesky post.
+ */
 public class EmbedImage {
     private String alt;
     private AspectRatio aspectRatio;
     private String fullsize;
-    private String thumb;
 
+    /**
+     * Creates an embedded image for a Bluesky post.
+     * @param rawJson Contains information about the embedded image.
+     * @param subType Sub type of the image unique to Bluesky.
+     */
     public EmbedImage(JSONObject rawJson, String subType) {
 
         switch(subType) {
@@ -30,7 +37,6 @@ public class EmbedImage {
                 alt = rawJson.getString("alt");
                 aspectRatio = new AspectRatio(rawJson.getJSONObject("aspectRatio"));
                 fullsize = rawJson.getString("fullsize");
-                thumb = rawJson.getString("thumb");
                 break;
             default:
                 alt = rawJson.getString("alt");
@@ -40,24 +46,32 @@ public class EmbedImage {
         }
     }
 
+    /**
+     * @return Alt description of the image.
+     */
     public String getAlt() {
         return alt;
     }
 
+    /**
+     * @return Aspect ratio of the image.
+     */
     public AspectRatio getAspectRatio() {
         return aspectRatio;
     }
 
+    /**
+     * @return Link to the image.
+     */
     public String getFullsize() {
         return fullsize;
     }
 
-    public String getThumb() {
-        return thumb;
-    }
-
+    /**
+     * @return {@link ImageView} that when clicked displays a zoomed version of the image.
+     */
     public ImageView getEmbed() {
-        Image image = new Image(thumb);
+        Image image = new Image(fullsize);
         ImageView imageView = new ImageView(image);
         Tooltip imageAlt = new Tooltip(alt);
         Tooltip.install(imageView, imageAlt);

@@ -18,12 +18,19 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 
+/**
+ * Handles creating a container for external links in a Bluesky post.
+ */
 public class External extends EmbedMedia {
     private String description;
     private String thumb;
     private String title;
     private String uri;
 
+    /**
+     * Creates a container for external links in a Bluesky post.
+     * @param rawJson Contains necessary information for a preview.
+     */
     public External(JSONObject rawJson) {
         String subType = getSubType(rawJson.getString("$type"));
         switch (subType) {
@@ -44,18 +51,34 @@ public class External extends EmbedMedia {
         }
     }
 
+    /**
+     * Description of the external link.
+     * @return Description of the external link.
+     */
     public String getDescription() {
         return description;
     }
     
+    /**
+     * Thumbnail link of the external link.
+     * @return Thumbnail link of the external link.
+     */
     public String getThumb() {
         return thumb;
     }
     
+    /**
+     * Title of the external link.
+     * @return Title of the external link.
+     */
     public String getTitle() {
         return title;
     }
     
+    /**
+     * URI of the external link.
+     * @return URI of the external link.
+     */
     public String getUri() {
         return uri;
     }

@@ -18,12 +18,19 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
+/**
+ * Handles creating a container for external links in a Mastodon post.
+ */
 public class PreviewCard {
     private String url;
     private String imageUrl;
     private String title;
     private String description;
 
+    /**
+     * Creates a container for external links in a Mastodon post.
+     * @param rawJson Contains necessary information for a preview.
+     */
     public PreviewCard(JSONObject rawJson) {
         url = rawJson.getString("url");
         try { imageUrl = rawJson.getString("image"); } catch (Exception e) {imageUrl = "";}
@@ -31,6 +38,11 @@ public class PreviewCard {
         try { description = rawJson.getString("description"); } catch (Exception e) {description = "";}
     }
 
+    /**
+     * Creates a {@code Pane} container for an external link with its thumbnail image.
+     * @return {@code VBox} if the preview contains an external image, else {@code HBox}
+     * is returned with a dummy image.
+     */
     public Pane getCard() {
 
         Text titleText = new Text(title);

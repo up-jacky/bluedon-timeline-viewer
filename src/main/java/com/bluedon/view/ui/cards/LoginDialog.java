@@ -34,10 +34,17 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+/**
+ * Dialog box that appears when the Login button for Bluesky is clicked.
+ */
 public class LoginDialog {
     private static boolean isHandleValid = true;
     private static boolean isPasswordValid = true;
 
+    /**
+     * Displays the login dialog.
+     * @return {@link JSONObject} that contains the {@code handle} and {@code password} of the user.
+     */
     public static JSONObject showLoginDialog() {
         Dialog<JSONObject> dialog = new Dialog<>();
         dialog.setTitle("Bluesky Login");

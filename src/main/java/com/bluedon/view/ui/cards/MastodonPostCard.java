@@ -26,11 +26,29 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 
+/**
+ * Handles creating a post card for Mastodon.
+ */
 public class MastodonPostCard {
     private static DateTimeFormatter currentYearFormatter = DateTimeFormatter.ofPattern("MMM dd");
     private static DateTimeFormatter generalFormatter = DateTimeFormatter.ofPattern("MMM dd yyyy");
     private static DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm a");
-  
+
+    /**
+     * Creates a post card for Mastodon.
+     * @param url Link to the post.
+     * @param boostedBy Name of the person who boosted the post.
+     * @param avatarUrl Link to the avatar of the author.
+     * @param displayName Name of the author.
+     * @param username Username of the author.
+     * @param createdAt Date and time of the creation of the post.
+     * @param content Raw content of the post as string.
+     * @param quotedStatus {@link JSONObject} that may or may not contain another post information.
+     * @param mediaAttachments {@link JSONArray} that may or may not contain attachments.
+     * @param previewCard {@link JSONObject} that may or may not contain external links.
+     * @param rawMetrics List of metrics to be put in the container.
+     * @return {@link VBox} styled container for a given post.
+     */
     public static VBox createPostCard(
         String url,
         String boostedBy,

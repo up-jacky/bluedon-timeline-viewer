@@ -17,15 +17,25 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
+/**
+ * Handles creating an image attachment for a Mastodon post.
+ */
 public class MediaAttachment {
     private String alt;
     private String url;
 
+    /**
+     * Creates an image attachment for a Mastodon post.
+     * @param rawJson Contains an {@code alt} key and {@code url} key.
+     */
     public MediaAttachment(JSONObject rawJson) {
         try{alt = rawJson.getString("description");} catch (Exception e) {alt = "";}
         url = rawJson.getString("url");
     }
-    
+     
+    /**
+     * @return {@link ImageView} that when clicked displays a zoomed version of the image.
+     */
     public ImageView getImage() {
         Image image = new Image(url);
         ImageView imageView = new ImageView(image);

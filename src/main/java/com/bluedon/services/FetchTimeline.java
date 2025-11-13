@@ -155,7 +155,7 @@ public class FetchTimeline extends Task<Boolean> {
     protected void succeeded() {
         System.out.println("[DEBUG][FetchTimeline][succeeded] Thread: " + Thread.currentThread());
         if(getValue().booleanValue()) {
-            VBox sidebar = view.createSidebar(model.getUIComponents(Social.BLUESKY), model.getUIComponents(Social.MASTODON), RefreshButton.createRefreshButton());
+            VBox sidebar = view.createSidebar(model.getUIComponents(Social.BLUESKY), model.getUIComponents(Social.MASTODON), RefreshButton.createButton());
             ScrollPane pArea = view.createPostsArea(model.postsContainer);
             view.updateLayout(sidebar, pArea);
             view.displayPage(stage);
@@ -170,7 +170,7 @@ public class FetchTimeline extends Task<Boolean> {
         System.err.println("[ERROR] Failed to fetch timeline: " + getException().getMessage());
         Toast.error.showToast("Failed to fetch timeline! Error: " + getException().getMessage());
         getException().printStackTrace();
-        VBox sidebar = view.createSidebar(model.getUIComponents(Social.BLUESKY), model.getUIComponents(Social.MASTODON), RefreshButton.createRefreshButton());
+        VBox sidebar = view.createSidebar(model.getUIComponents(Social.BLUESKY), model.getUIComponents(Social.MASTODON), RefreshButton.createButton());
         ScrollPane pArea = view.createPostsArea(getException().getMessage());
         view.updateLayout(sidebar, pArea);
         view.displayPage(stage);

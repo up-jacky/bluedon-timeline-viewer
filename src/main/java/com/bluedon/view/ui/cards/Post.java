@@ -52,9 +52,9 @@ public class Post {
     private int quotesCount;
 
     /**
-     * Post settings for Mastodon
+     * Initializes the information of the posts needed to create a post for Mastodon.
      * @param social The service of the post.
-     * @param post
+     * @param post Information about the post in {@link JSONObject} format.
     */
     public Post(Social social, JSONObject post) {
         this.social = social;
@@ -99,10 +99,10 @@ public class Post {
     }
 
     /**
-     * Post settings for Bluesky.
-     * @param social
-     * @param post
-     * @param reason
+     * Initializes the information of the posts needed to create a post for Bluesky.
+     * @param social The service of the post.
+     * @param post Information about the post in {@link JSONObject} format.
+     * @param reason Information about the author that reposted the {@code post}.
      */
     public Post(Social social, JSONObject post, JSONObject reason) {
         this.social = social;
@@ -124,6 +124,10 @@ public class Post {
         this.reason = reason;
     }
 
+    /**
+     * Creates a post card if there is no initial post that has been created.
+     * @return {@link Pane} that contains the post.
+     */
     public Pane createPostCard() {
         if (cachedPost != null) return cachedPost;
         switch (social) {
@@ -134,11 +138,14 @@ public class Post {
         return cachedPost;
     }
 
+    /**
+     * @return Time created of the post.
+     */
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public VBox createBlueskyPostCard() {
+    private VBox createBlueskyPostCard() {
 
         Author authorProfile = new Author(author);
 
@@ -162,10 +169,7 @@ public class Post {
         return BlueskyPostCard.createPostCard(url, reason, authorProfile, createdAt, content, embedContainer, rawMetrics);
     }
     
-    /**
-     * Generate a Node of the Post to have it in display.
-     */
-    public VBox createMastodonPostCard() {
+    private VBox createMastodonPostCard() {
 
         String[] rawMetrics = {
             reblogsCount + " boosts",

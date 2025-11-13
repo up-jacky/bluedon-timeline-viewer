@@ -22,15 +22,15 @@ public class FilterButton {
     	switch(social) {
     		case BLUESKY:
     			button.setOnAction(e -> {
-    				model.setTimeline(Social.BLUESKY, !model.getTimeline(Social.BLUESKY));
-    				updateFilterButtonStyle(button, model.getTimeline(Social.BLUESKY));
+    				model.setTimeline(Social.BLUESKY, !model.isDisplayed(Social.BLUESKY));
+    				updateFilterButtonStyle(button, model.isDisplayed(Social.BLUESKY));
 					Refresh.refreshPosts();
     			});
 				break;
     		case MASTODON:
     			button.setOnAction(e -> {
-    				model.setTimeline(Social.MASTODON, !model.getTimeline(Social.MASTODON));
-    				updateFilterButtonStyle(button, model.getTimeline(Social.MASTODON));
+    				model.setTimeline(Social.MASTODON, !model.isDisplayed(Social.MASTODON));
+    				updateFilterButtonStyle(button, model.isDisplayed(Social.MASTODON));
 					Refresh.refreshPosts();
     			});
 				break;

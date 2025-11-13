@@ -36,6 +36,8 @@ java {
 
 javadoc {
     destinationDir = file("${buildDir}/docs/javadoc")
+    exclude("com/bluedon/Launcher.java")
+    exclude("com/bluedon/Main.java")
 }
 
 jar {

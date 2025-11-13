@@ -54,7 +54,7 @@ public class DefaultButton extends Button {
     
     /**
      * Creates a button with an empty string as its label and its specified color as its fill.
-     * @param color
+     * @param color Color for the button.
      */
     public DefaultButton(Color color) {
         super();

@@ -26,7 +26,24 @@ public class EmbedMedia extends Embed {
      * </ul>
      */
     public enum EmbedMediaType {
-        EXTERNAL, IMAGES, VIDEO, NONE
+        /**
+         * An image display.
+         */
+        IMAGES,
+        
+        /**
+         * A link to an external source with a thumb image attached.
+         */
+        EXTERNAL,
+        /**
+         * A video embed.
+         */
+        VIDEO, 
+        
+        /**
+         * No embed.
+         */
+        NONE,
     }
 
     /**

@@ -27,7 +27,7 @@ public class ServiceRegistry {
 
     /**
      * Sets the session of the Bluesky to the provided parameter session.
-     * @param session
+     * @param session Bluesky session.
      */
     public static void setBlueskySession(AuthSession session) {
         blueskySession = session;
@@ -63,7 +63,7 @@ public class ServiceRegistry {
     
     /**
      * Sets the session of the Mastodon to the provided parameter session.
-     * @param session
+     * @param session Mastodon session.
      */
     public static void setMastodonSession(AuthSession session) {
         mastodonSession = session;

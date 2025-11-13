@@ -74,8 +74,7 @@ public class Home {
     
 	/**
 	 * @param social Type of service.
-	 * @return {@code true} If display is allowed for the type of service.
-	 * @return {@code false} If display is disabled for the type of service. 
+	 * @return {@code true} If display is allowed for the type of service, else {@code false} if display is disabled for the type of service. 
 	 */
     public boolean isDisplayed(Social social) {
     	switch(social) {

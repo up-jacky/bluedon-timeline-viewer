@@ -8,7 +8,7 @@ import javafx.application.Platform;
 import javafx.concurrent.Task;
 
 /**
- * LogoutBluesky is a Task<Boolean> that logs in the user in Bluesky in a separate thread.
+ * LogoutBluesky is a Task that logs in the user in Bluesky in a separate thread.
  */
 public class LogoutBluesky extends Task<Boolean> {
     private BlueskyClient blueskyClient = ServiceRegistry.getBlueskyClient();

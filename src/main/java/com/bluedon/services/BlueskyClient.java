@@ -185,8 +185,10 @@ public class BlueskyClient {
      * Get the timeline of the user in the following feed.
      * @param session Current session of the Bluesky. Must not be {@code null}
      * @param pdsOrigin PDS Origin of the Bluesky to access. (i.e. "https://bsky.social")
+     * @param limit Number of posts to be fetched in the Bluesky timeline.
      * @throws IllegalStateException {@code session.accessJwt} is null or empty.
      * @throws Exception Error in response.
+     * @return Timeline feed in {@code JSONObject}. 
      */
     public JSONObject getTimeline(AuthSession session, String pdsOrigin, int limit) throws Exception {
         if (session.accessJwt == null || session.accessJwt.isBlank()) {

@@ -25,7 +25,7 @@ public class Author {
 
     /**
      * Creates an Author information.
-     * @param rawJson Information about the author, consisting of {@code displayName}, {@code handle}, and {@avatar}
+     * @param rawJson Information about the author, consisting of {@code displayName}, {@code handle}, and {@code avatar}
      */
     public Author(JSONObject rawJson) {
         displayName = rawJson.getString("displayName");

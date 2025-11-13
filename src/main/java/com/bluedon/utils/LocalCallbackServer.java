@@ -12,6 +12,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+/**
+ * Handles creating the HTTP server for callback.
+ */
 public class LocalCallbackServer {
 
     private HttpServer server;
@@ -19,6 +22,7 @@ public class LocalCallbackServer {
 
     /**
      * Starts the HTTP server on 127.0.0.1:8080 and listens for /callback requests.
+     * @throws IOException Method is not allowed.
      */
     public void start() throws IOException {
         server = HttpServer.create(new InetSocketAddress("127.0.0.1", 8080), 0);
@@ -194,20 +198,35 @@ public class LocalCallbackServer {
         private final String state;
         private final String iss;
 
+        /**
+         * Create a result of the callback.
+         * @param code Code of the callback parameter.
+         * @param state State of the callback parameter.
+         * @param iss ISS of the callbar parameter.
+         */
         public CallbackResult(String code, String state, String iss) {
             this.code = code;
             this.state = state;
             this.iss = iss;
         }
 
+        /**
+         * @return the code of the call back result.
+         */
         public String code() {
             return code;
         }
 
+        /**
+         * @return the state of the call back result.
+         */
         public String state() {
             return state;
         }
 
+        /**
+         * @return the iss of the call back result.
+         */
         public String iss() {
             return iss;
         }

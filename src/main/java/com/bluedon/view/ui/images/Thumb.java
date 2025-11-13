@@ -50,7 +50,7 @@ public class Thumb {
     /**
      * Creates an image from the input parameter {@code thumb}.
      * @param thumb The link to the image.
-     * @param ratio Preserve image ratio?
+     * @param preserveRatio Preserve image ratio?
      * @return {@link ImageView} of the image.
      */
     public static ImageView getImage(String thumb, boolean preserveRatio) {

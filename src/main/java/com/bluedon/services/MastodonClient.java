@@ -254,8 +254,10 @@ public class MastodonClient {
     /**
      * Get user timeline.
      * @param session Current session of the Mastodon. Must not be {@code null}.
+     * @param limit Number of posts to be fetched in Mastodon timeline.
      * @throws IllegalStateException {@code session.accessToken} is null or {@code session.instanceUrl} is null.
      * @throws Exception Error in response.
+     * @return Timeline feed in {@code JSONObject}. 
      */
     public JSONObject getTimeline(AuthSession session, int limit) throws Exception {
         if (session.accessToken == null || session.instanceUrl == null) {

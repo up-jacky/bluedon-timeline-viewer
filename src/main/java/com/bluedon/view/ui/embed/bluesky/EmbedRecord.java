@@ -35,6 +35,7 @@ public class EmbedRecord extends Embed {
 
     /**
      * Creates a container for an embedded record in a Bluesky post.
+     * @param rawJson Contains necessary information about the Bluesky post.
      */
     public EmbedRecord(JSONObject rawJson) {
         init(rawJson);
@@ -42,6 +43,8 @@ public class EmbedRecord extends Embed {
 
     /**
      * Creates a container for an embedded record in a Bluesky post but only returns its media.
+     * @param rawJson Contains necessary information about the Bluesky post.
+     * @param mediaOnly If it should only return the media.
      */
     public EmbedRecord(JSONObject rawJson, boolean mediaOnly) {
         init(rawJson);

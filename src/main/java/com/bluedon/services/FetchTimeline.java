@@ -21,7 +21,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 /**
- * FetchTimeline is a Task<Boolean> that fetch the timeline asynchronously in a separate thread.
+ * FetchTimeline is a Task that fetch the timeline asynchronously in a separate thread.
  * 
  * <p> FetchTimeline should only be called in static way using its method {@code start}
  * to start fetching the timeline.

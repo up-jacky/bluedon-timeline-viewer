@@ -21,9 +21,15 @@ import com.bluedon.view.ui.embed.bluesky.RecordWithMedia;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 
+/**
+ * Handles creating a post card for both the Bluesky and Mastodon post.
+ */
 public class Post {
     private Pane cachedPost;
 
+    /**
+     * Type of service.
+     */
     public final Social social;
     private String url;
     private String displayName;

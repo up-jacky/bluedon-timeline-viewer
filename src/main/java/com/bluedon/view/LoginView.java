@@ -13,6 +13,9 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.ProgressIndicator;
 
+/**
+ * Handles display of the Login page.
+ */
 public class LoginView implements PageView {
 
     private static VBox layout;

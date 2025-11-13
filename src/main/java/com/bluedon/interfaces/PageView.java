@@ -9,7 +9,7 @@ public interface PageView {
 	
 	/**
 	 * Displays the stage to the application.
-	 * @param primaryStage
+	 * @param primaryStage The stage for the main window.
 	 */
 	public void displayPage(Stage primaryStage);
 

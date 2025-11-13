@@ -12,7 +12,7 @@ import javafx.application.Platform;
 import javafx.concurrent.Task;
 
 /**
- * LoginBluesky is a Task<Boolean> that logs in the user in Bluesky in a separate thread.
+ * LoginBluesky is a Task that logs in the user in Bluesky in a separate thread.
  */
 public class LoginBluesky extends Task<Boolean> {
     private BlueskyClient blueskyClient = ServiceRegistry.getBlueskyClient();

@@ -105,6 +105,9 @@ public class SessionFile {
         }
     }
     
+    /**
+     * Handles reading, saving, and deleting mastodon-session.json
+     */
     public class MastodonSessionFile {
         private static String fileName = "mastodon-session.json";
         

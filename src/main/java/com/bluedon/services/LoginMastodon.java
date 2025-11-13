@@ -8,6 +8,9 @@ import com.bluedon.utils.Toast;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 
+/**
+ * LoginMastodon is a Task<Boolean> that logs in the user in Mastodon in a separate thread.
+ */
 public class LoginMastodon extends Task<Boolean> {
     private MastodonClient mastodonClient = ServiceRegistry.getMastodonClient();
 

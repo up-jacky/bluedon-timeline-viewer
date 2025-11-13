@@ -1,5 +1,8 @@
 package com.bluedon.services;
 
+/**
+ * Contains information about the current session of a service.
+ */
 public class AuthSession {
     public String handle;
     public String displayName;

@@ -17,6 +17,9 @@ import java.util.Map;
 import java.util.UUID;
 import org.json.JSONObject;
 
+/**
+ * Handles service related to the Mastodon social.
+ */
 public class MastodonClient {
     private static final ObjectMapper MAPPER = new ObjectMapper();
     
@@ -36,7 +39,7 @@ public class MastodonClient {
         }
     }
 
-    public InstanceCredentials registerApp(String instanceUrl) throws Exception {
+    private InstanceCredentials registerApp(String instanceUrl) throws Exception {
         String appsEndpoint = instanceUrl + "/api/v1/apps";
 
         Map<String, String> appParams = Map.of(
@@ -184,6 +187,12 @@ public class MastodonClient {
         }
     }
 
+    /**
+     * Revokes current session.
+     * @param session Current session of the Mastodon. Must not be {@code null}.
+     * @throws IllegalStateException {@code session.accessToken} is null or {@code session.instanceUrl} is null.
+     * @throws Exception Error in response.
+     */
     public void revokeAuth(AuthSession session) throws Exception {
         if (session.accessToken == null || session.instanceUrl == null) {
             throw new IllegalStateException("Session is not authenticated or missing instance URL.");
@@ -201,13 +210,19 @@ public class MastodonClient {
         var response = Http.postFormWithResponse(postEndpoint, headers, body);
 
         if (response.statusCode() != 200) {
-            throw new IOException("Revoke token failed with status: " + response.statusCode() + ", body: " + response.body());
+            throw new Exception("Revoke token failed with status: " + response.statusCode() + ", body: " + response.body());
         } else {
             System.out.println("[INFO][MastodonClient][revokeAuth] Succesfully revoked the current session.");
             Toast.success.showToast("Successfully revoked Mastodon session.");
         }
     }
 
+    /**
+     * Get user profile.
+     * @param session Current session of the Mastodon. Must not be {@code null}.
+     * @throws IllegalStateException {@code session.accessToken} is null or {@code session.instanceUrl} is null.
+     * @throws Exception Error in response.
+     */
     public void getUserInfo(AuthSession session) throws Exception {
         if (session.accessToken == null || session.instanceUrl == null) {
             throw new IllegalStateException("Session is not authenticated or missing instance URL.");
@@ -223,7 +238,7 @@ public class MastodonClient {
         
 
         if (response.statusCode() != 200) {
-            throw new IOException("Get user info failed with status: " + response.statusCode() + ", body: " + response.body());
+            throw new Exception("Get user info failed with status: " + response.statusCode() + ", body: " + response.body());
         } else {
             System.out.println("[INFO][MastodonClient][getUserInfo] Succesfully get user info.");
             Toast.success.showToast("Successful getting user info.");
@@ -236,6 +251,12 @@ public class MastodonClient {
 
     }
 
+    /**
+     * Get user timeline.
+     * @param session Current session of the Mastodon. Must not be {@code null}.
+     * @throws IllegalStateException {@code session.accessToken} is null or {@code session.instanceUrl} is null.
+     * @throws Exception Error in response.
+     */
     public JSONObject getTimeline(AuthSession session, int limit) throws Exception {
         if (session.accessToken == null || session.instanceUrl == null) {
             throw new IllegalStateException("Session is not authenticated or missing instance URL.");
@@ -251,7 +272,7 @@ public class MastodonClient {
         JSONObject json = new JSONObject("{\"feed\": " + response.body() + "}");
 
         if (response.statusCode() != 200) {
-            throw new IOException("Fetch timeline failed with status: " + response.statusCode() + ", body: " + response.body());
+            throw new Exception("Fetch timeline failed with status: " + response.statusCode() + ", body: " + response.body());
         }
 
         return json;

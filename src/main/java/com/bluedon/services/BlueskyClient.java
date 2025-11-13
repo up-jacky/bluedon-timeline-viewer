@@ -12,10 +12,21 @@ import java.util.Map;
 
 import org.json.JSONObject;
 
-
+/**
+ * Handles service related to the Bluesky social.
+ */
 public class BlueskyClient {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
+    /**
+     * Create an authentication session.
+     * @param session Current session of the Bluesky. Must not be {@code null}.
+     * @param pdsOrigin PDS Origin of the Bluesky to access. (i.e. "https://bsky.social")
+     * @param password Account password or app password (recommended) of the user.
+     * @param handle Username / handle of the account to create an authentication.
+     * @throws IOException {@code handle} is null or empty, or {@code password} is null or empty.
+     * @throws Exception Error in response.
+     */
     public void createSession(AuthSession session, String pdsOrigin, String password, String handle) throws Exception {
         if (handle == null || handle.isBlank() || password == null || password.isBlank()) {
             throw new IOException("Missing Credentials: Handle or Password is missing.");
@@ -50,6 +61,13 @@ public class BlueskyClient {
         }
     }
 
+    /**
+     * Refresh the current session.
+     * @param session Current session of the Bluesky. Must not be {@code null}
+     * @param pdsOrigin PDS Origin of the Bluesky to access. (i.e. "https://bsky.social")
+     * @throws IllegalStateException {@code session.refreshJwt} is null or empty.
+     * @throws Exception Error in response.
+     */
     public void refreshSession(AuthSession session, String pdsOrigin) throws Exception {
         if (session.refreshJwt == null || session.refreshJwt.isBlank()) {
             throw new IllegalStateException("Unauthorized Session: Session has no 'refreshJwt' or 'refreshJwt' is empty.");
@@ -85,6 +103,13 @@ public class BlueskyClient {
         }
     }
 
+    /**
+     * Delete the current session.
+     * @param session Current session of the Bluesky. Must not be {@code null}
+     * @param pdsOrigin PDS Origin of the Bluesky to access. (i.e. "https://bsky.social")
+     * @throws IllegalStateException {@code session.refreshJwt} is null or empty.
+     * @throws Exception Error in response.
+     */
     public void deleteSession(AuthSession session, String pdsOrigin) throws Exception {
         if (session.refreshJwt == null || session.refreshJwt.isBlank()) {
             throw new IllegalStateException("Unauthorized Session: Session has no 'refreshJwt' or 'refreshJwt' is empty.");
@@ -111,6 +136,13 @@ public class BlueskyClient {
         }
     }
 
+    /**
+     * Get user profile.
+     * @param session Current session of the Bluesky. Must not be {@code null}
+     * @param pdsOrigin PDS Origin of the Bluesky to access. (i.e. "https://bsky.social")
+     * @throws IllegalStateException {@code session.did} is null or empty.
+     * @throws Exception Error in response.
+     */
     public void getProfile(AuthSession session, String pdsOrigin) throws Exception {
         if (session.did == null || session.did.isBlank()) {
             throw new IllegalStateException("Unauthorized Session: Session has no 'did' or 'did' is empty.");
@@ -149,6 +181,13 @@ public class BlueskyClient {
         }
     }
 
+    /**
+     * Get the timeline of the user in the following feed.
+     * @param session Current session of the Bluesky. Must not be {@code null}
+     * @param pdsOrigin PDS Origin of the Bluesky to access. (i.e. "https://bsky.social")
+     * @throws IllegalStateException {@code session.accessJwt} is null or empty.
+     * @throws Exception Error in response.
+     */
     public JSONObject getTimeline(AuthSession session, String pdsOrigin, int limit) throws Exception {
         if (session.accessJwt == null || session.accessJwt.isBlank()) {
             throw new IllegalStateException("Unauthorized Session: Session has no 'accessJwt' or 'accessJwt' is empty.");

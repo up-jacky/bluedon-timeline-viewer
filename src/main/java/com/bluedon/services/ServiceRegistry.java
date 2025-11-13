@@ -1,5 +1,8 @@
 package com.bluedon.services;
 
+/**
+ * The ServiceRegistry contains the current session of both the Bluesky and Mastodon.
+ */
 public class ServiceRegistry {
     private static BlueskyClient blueskyClient = new BlueskyClient();
     private static AuthSession blueskySession;
@@ -8,43 +11,67 @@ public class ServiceRegistry {
     private static MastodonClient mastodonClient = new MastodonClient();
     private static AuthSession mastodonSession;
 
-    // Bluesky Client
+    /**
+     * @return {@link BlueskyClient}
+     */
     public static BlueskyClient getBlueskyClient() {
         return blueskyClient;
     }
 
-    // Bluesky Session
+    /**
+     * @return Current {@link AuthSession} of Bluesky
+     */
     public static AuthSession getBlueskySession() {
         return blueskySession;
     }
 
+    /**
+     * Sets the session of the Bluesky to the provided parameter session.
+     * @param session
+     */
     public static void setBlueskySession(AuthSession session) {
         blueskySession = session;
     }
 
-    // Bluesky PDS Origin
+    /**
+     * @return {@code "https://bsky.social}" in {@code String}
+     */
     public static String getBlueskyPdsOrigin() {
         return blueskyPdsOrigin;
     }
     
+    /**
+     * @return {@code true} If there is a current Bluesky session and its accessJwt is not empty.
+     */
     public static boolean isBlueskyLoggedIn() {
         return (blueskySession != null && blueskySession.accessJwt != null);
     }
 
-    // Mastodon Client
+    /**
+     * @return {@link BlueskyClient}
+     */
     public static MastodonClient getMastodonClient() {
         return mastodonClient;
     }
 
-    // Mastodon Session
+    /**
+     * @return Current {@link AuthSession} of Mastodon
+     */
     public static AuthSession getMastodonSession() {
         return mastodonSession;
     }
     
+    /**
+     * Sets the session of the Mastodon to the provided parameter session.
+     * @param session
+     */
     public static void setMastodonSession(AuthSession session) {
         mastodonSession = session;
     }
 
+    /**
+     * @return {@code true} If there is a current Mastodon session.
+     */
     public static boolean isMastodonLoggedIn() {
         return (mastodonSession != null);
     }

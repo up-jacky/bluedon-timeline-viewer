@@ -10,8 +10,14 @@ import javafx.concurrent.Task;
 import javafx.scene.control.ScrollPane;
 import javafx.stage.Stage;
 
+/**
+ * Handles setting the page to its refresh states.
+ */
 public class Refresh {
 
+    /**
+     * Sets the Home page to its refresh state.
+     */
     public static void refreshHome() {
         HomeRefresh refresh = new HomeRefresh();
         Thread thread = new Thread(refresh);
@@ -19,6 +25,9 @@ public class Refresh {
         thread.start();
     }
 
+    /**
+     * Sets the Login page to its refresh state.
+     */
     public static void refreshLogin() {
         LoginRefresh refresh = new LoginRefresh();
         Thread thread = new Thread(refresh);
@@ -26,6 +35,11 @@ public class Refresh {
         thread.start();
     }
 
+    /**
+     * Sets the Home page to its refresh state before refreshing the posts.
+     * 
+     * <p> Mainly used by the filter buttons </p>
+     */
     public static void refreshPosts() {
         HomeRefresh refreshHome = new HomeRefresh();
         Thread threadA = new Thread(refreshHome);

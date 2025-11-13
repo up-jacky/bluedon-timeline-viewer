@@ -20,6 +20,13 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+/**
+ * FetchTimeline is a Task<Boolean> that fetch the timeline asynchronously in a separate thread.
+ * 
+ * <p> FetchTimeline should only be called in static way using its method {@code start}
+ * to start fetching the timeline.
+ * </p>
+ */
 public class FetchTimeline extends Task<Boolean> {
     private Stage stage = PageController.getStage();
     private HomeView view = PageController.home.getView();
@@ -27,10 +34,16 @@ public class FetchTimeline extends Task<Boolean> {
     private List<Post> posts = new ArrayList<>();
     private static FetchTimeline instance;
 
+    /**
+     * @return {@code FetchTimeline} the current instance of the FetchTimeline.
+     */
     public static FetchTimeline getInstance() {
         return instance;
     }
 
+    /**
+     * The main method for fetching the current timeline of the user.
+     */
     public void fetchTimeline() {
         FetchBluesky fetchBluesky = new FetchBluesky();
         FetchMastodon fetchMastodon = new FetchMastodon();
@@ -110,6 +123,9 @@ public class FetchTimeline extends Task<Boolean> {
 		}
 	}
 
+    /**
+     * Method to start fetching the timeline.
+     */
     public static void start() {
         instance = new FetchTimeline();
         Thread thread = new Thread(instance);

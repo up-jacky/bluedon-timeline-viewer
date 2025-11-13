@@ -35,8 +35,39 @@ public class LocalCallbackServer {
 
                 if (error != null) {
 
-                    // TODO: Format response with style
-                    String response = "<html><body><h1>Login failed!</h1><h2>Error: " + error + "</h2><p>" + errorDescription + "</p></body></html>";
+                    String response = """
+<html>
+    <head>
+        <style>
+            * {
+                padding: 0;
+                margin: 0;
+                background-color: #181634;
+                font-family: 'Courier New';
+                align-content: center;
+                text-align: center;
+            }
+            h1 {
+                color: rgba(237, 34, 34, 1);
+                font-size: x-large;
+            }
+            h2 {
+                color: rgba(209, 114, 114, 1);
+                font-size: large;
+            }
+            p {
+                color: white;
+                font-size: medium;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Login failed!</h1>
+        <h2> Error: %s </h2>
+        <p>%s</p>
+    </body>
+</html>
+                            """.formatted(error, errorDescription);
                     byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
 
                     // Send the response
@@ -55,8 +86,35 @@ public class LocalCallbackServer {
                     callbackFuture.complete(new CallbackResult(code, state, iss));
 
                     // Prepare the HTML response
-                    // TODO: Format response with style
-                    String response = "<html><body><h1>Login successful!</h1><p>You can close this window.</p></body></html>";
+                    String response = """
+<html>
+    <head>
+        <style>
+            * {
+                padding: 0;
+                margin: 0;
+                background-color: #181634;
+                font-family: 'Courier New';
+                align-content: center;
+                text-align: center;
+            }
+            h1 {
+                color: rgb(107, 239, 107);
+                font-size: x-large;
+            }
+            p {
+                color: white;
+                font-size: medium;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Login successful!</h1>
+        <p>You can close this window.</p>
+    </body>
+</html>
+                            
+                            """;
                     byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
 
                     // Send the response

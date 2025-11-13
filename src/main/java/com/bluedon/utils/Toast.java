@@ -25,24 +25,109 @@ import javafx.stage.StageStyle;
 import javafx.stage.Window;
 import javafx.util.Duration;
 
+/**
+ * Displays a toast message to the user in a stage over the current stage.
+ * 
+ * <p> Its color depends on the type of toast it was set to. </p>
+ * 
+ * @see Toast#info
+ * @see Toast#warn
+ * @see Toast#error
+ * @see Toast#debug
+ * @see Toast#fatal
+ * @see Toast#success
+ */
 public class Toast {
+    /**
+     * An output stream of type info ready to send a message.
+     * 
+     * @see ToastStream#showToast(String)
+     * @see ToastStream#showToast(String, int)
+     * @see ToastStream#showToast(Window, String)
+     * @see ToastStream#showToast(Window, String, int)
+     */
     public static ToastStream info = new ToastStream(ToastType.INFO);
+    
+    /**
+     * An output stream of type warning ready to send a message.
+     * 
+     * @see ToastStream#showToast(String)
+     * @see ToastStream#showToast(String, int)
+     * @see ToastStream#showToast(Window, String)
+     * @see ToastStream#showToast(Window, String, int)
+     */
     public static ToastStream warn = new ToastStream(ToastType.WARNING);
+    
+    /**
+     * An output stream of type error ready to send a message.
+     * 
+     * @see ToastStream#showToast(String)
+     * @see ToastStream#showToast(String, int)
+     * @see ToastStream#showToast(Window, String)
+     * @see ToastStream#showToast(Window, String, int)
+     */
     public static ToastStream error = new ToastStream(ToastType.ERROR);
+    
+    /**
+     * An output stream of type debug ready to send a message.
+     * 
+     * @see ToastStream#showToast(String)
+     * @see ToastStream#showToast(String, int)
+     * @see ToastStream#showToast(Window, String)
+     * @see ToastStream#showToast(Window, String, int)
+     */
     public static ToastStream debug = new ToastStream(ToastType.DEBUG);
+    
+    /**
+     * An output stream of type fatal ready to send a message.
+     * 
+     * @see ToastStream#showToast(String)
+     * @see ToastStream#showToast(String, int)
+     * @see ToastStream#showToast(Window, String)
+     * @see ToastStream#showToast(Window, String, int)
+     */
     public static ToastStream fatal = new ToastStream(ToastType.FATAL);
+    
+    /**
+     * An output stream of type success ready to send a message.
+     * 
+     * @see ToastStream#showToast(String)
+     * @see ToastStream#showToast(String, int)
+     * @see ToastStream#showToast(Window, String)
+     * @see ToastStream#showToast(Window, String, int)
+     */
     public static ToastStream success = new ToastStream(ToastType.SUCCESS);
 
     private static ObservableList<String> toasts = FXCollections.observableArrayList();
     private static final Lock lock = new ReentrantLock();
 
+    /**
+     * An output stream for toast.
+     */
     public static class ToastStream {
         private ToastType type;
 
+        /**
+         * Creates a ToastStream of the type given in the paramater type.
+         * @param type Type of the Toast in {@link ToastType}.
+         * 
+         * @see ToastType#INFO
+         * @see ToastType#WARNING
+         * @see ToastType#ERROR
+         * @see ToastType#DEBUG
+         * @see ToastType#SUCCESS
+         * @see ToastType#FATAL
+         */
         public ToastStream(ToastType type) {
             this.type = type;
         }
 
+        /**
+         * Shows the toast message at the bottom right corner of the screen.
+         * @param owner Parent window to anchor to. To be able to set its message at the bottom right corner of the window.
+         * @param message The toast message.
+         * @param durationInMillis The duration in ms before the toast message disappears.
+         */
         public void showToast(Window owner, String message, int durationInMillis) {
             Platform.runLater(() -> {
                 if(toasts.indexOf(message) != -1) return;
@@ -155,14 +240,28 @@ public class Toast {
             });
         }
 
+        /**
+         * Shows the toast message at the bottom right corner of the default window in {@link PageController#getStage()}.
+         * @param message The toast message.
+         * @param durationInMillis The duration in ms before the toast message disappears.
+         */
         public void showToast(String message, int durationInMillis) {
             showToast(PageController.getStage(), message, durationInMillis);
         }
 
+        /**
+         * Shows the toast message at the bottom right corner of the default window in {@link PageController#getStage()} for 3s.
+         * @param message The toast message.
+         */
         public void showToast(String message) {
             showToast(PageController.getStage(), message, 3000);
         }
         
+        /**
+         * Shows the toast message at the bottom right corner of the screen for 3s.
+         * @param owner Parent window to anchor to. To be able to set its message at the bottom right corner of the window.
+         * @param message The toast message.
+         */
         public void showToast(Window owner, String message) {
             showToast(owner, message, 3000);
         }

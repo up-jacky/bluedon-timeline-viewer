@@ -13,14 +13,30 @@ import com.bluedon.services.BlueskyClient;
 import com.bluedon.services.MastodonClient;
 import com.bluedon.services.ServiceRegistry;
 
+/**
+ * Handles reading, saving, and deleting *-session.json files.
+ */
 public class SessionFile {
+    /**
+     * Reads session for both Bluesky and Mastodon.
+     */
     public static void readSession() {
         BlueskySessionFile.readSession();
         MastodonSessionFile.readSession();
     }
 
+    /**
+     * Handles reading, saving, and deleting bluesky-session.json
+     */
     public class BlueskySessionFile {
         private static String fileName = "bluesky-session.json";
+
+        /**
+         * If {@code bluesky-session.json} does not exist, it creates and saves the current session 
+         * from the {@link ServiceRegistry#getBlueskySession()} and save its {@code did},
+         * {@code accessJwt}, and {@code refreshJwt}. Else, it overwrite the contents of the
+         * {@code bluesky-session.json}.
+         */
         public static void saveSession() {
             AuthSession session = ServiceRegistry.getBlueskySession();
             try (FileWriter writer = new FileWriter(fileName)) {
@@ -44,6 +60,10 @@ public class SessionFile {
             }
         }
 
+        /**
+         * If {@code bluesky-session.json} exists, it reads its content
+         * and save it as a current session in {@link ServiceRegistry#setBlueskySession(AuthSession)}.
+         */
         public static void readSession() {
             try {
                 String pathString = System.getProperty("user.dir") + "\\" + fileName;
@@ -70,6 +90,9 @@ public class SessionFile {
             }
         }
 
+        /**
+         * Deletes the {@code bluesky-session.json} file.
+         */
         public static void deleteSession() {
             File fileSession = new File(fileName);
             if (fileSession.delete()) {
@@ -84,6 +107,12 @@ public class SessionFile {
     
     public class MastodonSessionFile {
         private static String fileName = "mastodon-session.json";
+        
+        /**
+         * If {@code mastodon-session.json}, it creates and saves the current session 
+         * from the {@link ServiceRegistry#getMastodonSession()} and save its {@code accessToken},
+         * {@code refreshToken}, {@code clientId}, and {@code clientSecret}.
+         */
         public static void saveSession() {
             AuthSession session = ServiceRegistry.getMastodonSession();
             try (FileWriter writer = new FileWriter(fileName)) {
@@ -109,6 +138,10 @@ public class SessionFile {
             }
         }
 
+        /**
+         * If {@code mastodon-session.json} exists, it reads its content
+         * and save it as a current session in {@link ServiceRegistry#setMastodonSession(AuthSession)}.
+         */
         public static void readSession() {
             try {
                 String pathString = System.getProperty("user.dir") + "\\" + fileName;
@@ -144,6 +177,9 @@ public class SessionFile {
             }
         }
 
+        /**
+         * Deletes the {@code mastodon-session.json} file.
+         */
         public static void deleteSession() {
             File fileSession = new File(fileName);
             if (fileSession.delete()) {

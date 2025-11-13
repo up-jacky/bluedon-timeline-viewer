@@ -6,22 +6,52 @@ import com.bluedon.utils.SessionFile;
 
 import javafx.stage.Stage;
 
+/**
+ * PageController is the main controller of the application
+ * that handles switching between the two pages, Home and Login.
+ * 
+ * <p> It also holds the static value for the controllers
+ * of both pages.
+ * </p>
+ */
 public class PageController {
 
     private static Stage stage;
+
+    /**
+     * Static variable for the Login page.
+     * 
+     * <p> It is used to access models and view of the LoginController
+     * </p>
+     */
     public static LoginController login = new LoginController();
+
+    /**
+     * Static variable for the Home page.
+     * 
+     * <p> It is used to access models and view of the HomeController
+     * </p>
+     */
     public static HomeController home = new HomeController();
+
+    /**
+     * Type of the current page.
+     */
     public static Page currentPage = Page.LOGIN;
 
     /**
-     * Sets the value of the stage of this main page controller
+     * Sets the value of the stage of this main page controller.
      * 
-     * @param mainStage the stage that will be switched often
+     * @param mainStage The main stage of the application.
      */
     public static void setStage(Stage mainStage) {
         stage = mainStage;
     }
 
+    /**
+     * Returns the primaryStage of the application.
+     * @return {@link Stage}
+     */
     public static Stage getStage() {
         return stage;
     }

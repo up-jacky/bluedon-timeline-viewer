@@ -1,13 +1,10 @@
 package com.bluedon.view.ui.images;
 
-import com.bluedon.view.ui.interfaces.ImageViewer;
-
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
-public class BluedonLogo implements ImageViewer {
+public class BluedonLogo {
 	
-    @Override
     public ImageView getImage(boolean ratio) {
         Image logo = new Image(getClass().getResource("/images/bluedon.png").toExternalForm());
         ImageView logoView = new ImageView(logo);

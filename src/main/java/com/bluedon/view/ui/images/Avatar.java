@@ -1,14 +1,12 @@
 package com.bluedon.view.ui.images;
 
-import com.bluedon.view.ui.interfaces.ImageViewer;
-
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
 
-public class Avatar implements ImageViewer {
+public class Avatar {
 
     private String avatarUri;
 
@@ -16,7 +14,6 @@ public class Avatar implements ImageViewer {
         avatarUri = uri;
     }
 
-    @Override
     public ImageView getImage(boolean ratio) {
         Image avatar = new Image(avatarUri);
         ImageView avatarView = new ImageView(avatar);

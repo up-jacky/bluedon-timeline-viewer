@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter;
 import org.json.JSONObject;
 
 import com.bluedon.utils.Toast;
-import com.bluedon.view.ui.embed.Author;
+import com.bluedon.view.ui.embed.bluesky.Author;
 
 import javafx.animation.PathTransition;
 import javafx.scene.Cursor;

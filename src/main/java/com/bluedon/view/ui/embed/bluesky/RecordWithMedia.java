@@ -1,7 +1,8 @@
-package com.bluedon.view.ui.embed;
+package com.bluedon.view.ui.embed.bluesky;
 
 import org.json.JSONObject;
-import com.bluedon.view.ui.embed.EmbedMedia.EmbedMediaType;
+
+import com.bluedon.view.ui.embed.bluesky.EmbedMedia.EmbedMediaType;
 
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;

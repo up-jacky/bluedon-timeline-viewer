@@ -1,4 +1,4 @@
-package com.bluedon.view.ui.embed;
+package com.bluedon.view.ui.embed.mastodon;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

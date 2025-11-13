@@ -1,4 +1,4 @@
-package com.bluedon.view.ui.embed;
+package com.bluedon.view.ui.embed.mastodon;
 
 import org.json.JSONObject;
 
@@ -17,47 +17,17 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-public class EmbedImage {
+public class MediaAttachment {
     private String alt;
-    private AspectRatio aspectRatio;
-    private String fullsize;
-    private String thumb;
+    private String url;
 
-    public EmbedImage(JSONObject rawJson, String subType) {
-
-        switch(subType) {
-            case "view":
-                alt = rawJson.getString("alt");
-                aspectRatio = new AspectRatio(rawJson.getJSONObject("aspectRatio"));
-                fullsize = rawJson.getString("fullsize");
-                thumb = rawJson.getString("thumb");
-                break;
-            default:
-                alt = rawJson.getString("alt");
-                aspectRatio = new AspectRatio(rawJson.getJSONObject("aspectRatio"));
-                fullsize = rawJson.getString("fullsize");
-                break;
-        }
+    public MediaAttachment(JSONObject rawJson) {
+        try{alt = rawJson.getString("description");} catch (Exception e) {alt = "";}
+        url = rawJson.getString("url");
     }
-
-    public String getAlt() {
-        return alt;
-    }
-
-    public AspectRatio getAspectRatio() {
-        return aspectRatio;
-    }
-
-    public String getFullsize() {
-        return fullsize;
-    }
-
-    public String getThumb() {
-        return thumb;
-    }
-
-    public ImageView getEmbed() {
-        Image image = new Image(thumb);
+    
+    public ImageView getImage() {
+        Image image = new Image(url);
         ImageView imageView = new ImageView(image);
         Tooltip imageAlt = new Tooltip(alt);
         Tooltip.install(imageView, imageAlt);
@@ -84,7 +54,7 @@ public class EmbedImage {
             ImageView imageView = new ImageView(image);
             StackPane root = new StackPane(imageView);
             imageView.setPreserveRatio(true);
-            imageView.fitHeightProperty().bind(root.heightProperty().multiply(0.95));
+            imageView.fitWidthProperty().bind(root.widthProperty().multiply(0.75));
 
             root.setBackground(new Background(
                 new BackgroundFill(

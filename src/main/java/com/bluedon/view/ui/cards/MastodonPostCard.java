@@ -9,9 +9,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.bluedon.utils.Toast;
-import com.bluedon.view.ui.embed.MediaAttachments;
-import com.bluedon.view.ui.embed.PreviewCard;
-import com.bluedon.view.ui.embed.QuotedStatus;
+import com.bluedon.view.ui.embed.mastodon.MediaAttachments;
+import com.bluedon.view.ui.embed.mastodon.PreviewCard;
+import com.bluedon.view.ui.embed.mastodon.QuotedStatus;
 import com.bluedon.view.ui.images.Avatar;
 
 import javafx.animation.PathTransition;

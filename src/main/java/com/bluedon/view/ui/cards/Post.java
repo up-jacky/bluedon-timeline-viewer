@@ -11,12 +11,12 @@ import org.json.JSONObject;
 
 import com.bluedon.enums.EmbedType;
 import com.bluedon.enums.Social;
-import com.bluedon.view.ui.embed.Author;
-import com.bluedon.view.ui.embed.Embed;
-import com.bluedon.view.ui.embed.EmbedRecord;
-import com.bluedon.view.ui.embed.External;
-import com.bluedon.view.ui.embed.Images;
-import com.bluedon.view.ui.embed.RecordWithMedia;
+import com.bluedon.view.ui.embed.bluesky.Author;
+import com.bluedon.view.ui.embed.bluesky.Embed;
+import com.bluedon.view.ui.embed.bluesky.EmbedRecord;
+import com.bluedon.view.ui.embed.bluesky.External;
+import com.bluedon.view.ui.embed.bluesky.Images;
+import com.bluedon.view.ui.embed.bluesky.RecordWithMedia;
 
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;

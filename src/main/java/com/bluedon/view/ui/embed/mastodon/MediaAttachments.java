@@ -1,4 +1,4 @@
-package com.bluedon.view.ui.embed;
+package com.bluedon.view.ui.embed.mastodon;
 
 import java.util.ArrayList;
 import java.util.List;

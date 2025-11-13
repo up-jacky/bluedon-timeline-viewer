@@ -1,6 +1,7 @@
-package com.bluedon.view.ui.embed;
+package com.bluedon.view.ui.embed.mastodon;
 
 import java.awt.Desktop;
+import javafx.scene.shape.Rectangle;
 import java.net.URI;
 
 import org.json.JSONObject;
@@ -8,60 +9,30 @@ import org.json.JSONObject;
 import com.bluedon.utils.Toast;
 import com.bluedon.view.ui.images.Thumb;
 
-import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 
-public class External extends EmbedMedia {
-    private String description;
-    private String thumb;
+public class PreviewCard {
+    private String url;
+    private String imageUrl;
     private String title;
-    private String uri;
+    private String description;
 
-    public External(JSONObject rawJson) {
-        String subType = getSubType(rawJson.getString("$type"));
-        switch (subType) {
-            case "view":
-                rawJson = rawJson.getJSONObject("external");
-                description = rawJson.getString("description");
-                thumb = rawJson.getString("thumb");
-                title = rawJson.getString("title");
-                uri = rawJson.getString("uri");
-                break;
-            default:
-                rawJson = rawJson.getJSONObject("external");
-                description = rawJson.getString("description");
-                thumb = null;
-                title = rawJson.getString("title");
-                uri = rawJson.getString("uri");
-                break;
-        }
+    public PreviewCard(JSONObject rawJson) {
+        url = rawJson.getString("url");
+        try { imageUrl = rawJson.getString("image"); } catch (Exception e) {imageUrl = "";}
+        try { title = rawJson.getString("title"); } catch (Exception e) {title = "";}
+        try { description = rawJson.getString("description"); } catch (Exception e) {description = "";}
     }
 
-    public String getDescription() {
-        return description;
-    }
-    
-    public String getThumb() {
-        return thumb;
-    }
-    
-    public String getTitle() {
-        return title;
-    }
-    
-    public String getUri() {
-        return uri;
-    }
+    public Pane getCard() {
 
-    @Override
-    public Pane getEmbed() {
         Text titleText = new Text(title);
         TextFlow titleFlow = new TextFlow(titleText);
         titleFlow.getStyleClass().add("title");
@@ -74,9 +45,9 @@ public class External extends EmbedMedia {
         info.getStyleClass().add("info");
 
         Pane card;
-        if(thumb != null && !thumb.trim().isEmpty()) {
+        if(imageUrl != null && !imageUrl.trim().isEmpty()) {
 
-            ImageView image = Thumb.getImage(thumb, 600);
+            ImageView image = Thumb.getImage(imageUrl, 600);
             StackPane centeredImage = new StackPane(image);
             centeredImage.getStyleClass().add("thumb-img");
             
@@ -95,11 +66,11 @@ public class External extends EmbedMedia {
             if(e.getButton() == MouseButton.PRIMARY) {
                 try {
                     if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(java.awt.Desktop.Action.BROWSE)) {
-                        Desktop.getDesktop().browse(URI.create(uri));
+                        Desktop.getDesktop().browse(URI.create(url));
                     }
                 } catch (Exception error) {
                     System.err.println("[ERROR][PreviewCard][getCard] Failed to launch in browser! " + error.getMessage());
-                    System.out.println("[INFO][PreviewCard][getCard] Open the link to browser instead: " + uri);
+                    System.out.println("[INFO][PreviewCard][getCard] Open the link to browser instead: " + url);
                     Toast.error.showToast("Failed to launch in browser! Error: " + error.getMessage());
                 }
             } else e.consume();

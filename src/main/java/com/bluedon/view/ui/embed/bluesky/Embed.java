@@ -1,4 +1,4 @@
-package com.bluedon.view.ui.embed;
+package com.bluedon.view.ui.embed.bluesky;
 
 import com.bluedon.enums.EmbedType;
 
